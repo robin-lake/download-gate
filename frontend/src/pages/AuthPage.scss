@@ -1,0 +1,124 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border-radius: 12px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+
+  h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.75rem;
+  }
+
+  .auth-subtitle {
+    color: var(--muted, #888);
+    margin: 0 0 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    .optional {
+      font-weight: 400;
+      color: var(--muted, #888);
+    }
+  }
+
+  input {
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--input-border, rgba(255, 255, 255, 0.2));
+    background: var(--input-bg, rgba(0, 0, 0, 0.2));
+    color: inherit;
+    font-size: 1rem;
+
+    &::placeholder {
+      color: var(--muted, #666);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent, #646cff);
+      box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.25);
+    }
+  }
+
+  .auth-error {
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    margin-top: 0.25rem;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-primary {
+    background: var(--accent, #646cff);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: var(--accent-hover, #535bf2);
+    }
+  }
+}
+
+.auth-footer {
+  margin: 1.5rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
+  text-align: center;
+  color: var(--muted, #888);
+  font-size: 0.9rem;
+
+  a {
+    color: var(--accent, #646cff);
+    font-weight: 500;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .auth-card {
+    --card-bg: #fff;
+    --card-border: rgba(0, 0, 0, 0.08);
+  }
+
+  .auth-form input {
+    --input-border: rgba(0, 0, 0, 0.15);
+    --input-bg: #f9f9f9;
+  }
+}
