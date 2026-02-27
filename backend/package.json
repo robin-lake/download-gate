@@ -4,18 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "db:create": "tsx src/scripts/createTables.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --import tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
-    "express": "^5.2.1"
+    "@aws-sdk/lib-dynamodb": "^3.999.0",
+    "express": "^5.2.1",
+    "tsx": "^4.21.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.2",
+    "nodemon": "^3.1.14",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }
