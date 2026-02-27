@@ -162,7 +162,7 @@ class UserModel {
     return {
       items: (response.Items as User[]) ?? [],
       nextToken,
-      count: response.Count,
+      ...(response.Count !== undefined && { count: response.Count }),
     };
   }
 }
