@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useAuth } from '@clerk/clerk-react';
 
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -35,6 +36,7 @@ export function useRequest<T = unknown>(
   options: UseRequestOptions<T> = {}
 ): UseRequestResult<T> {
   const { typeGuard, enabled = true } = options;
+  const { getToken } = useAuth();
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<RequestStatus>('idle');
@@ -53,7 +55,10 @@ export function useRequest<T = unknown>(
     setError(null);
 
     try {
-      const response = await fetch(currentUrl, init);
+      const token = getToken ? await getToken() : null;
+      const headers = new Headers(init.headers as HeadersInit);
+      if (token) headers.set('Authorization', `Bearer ${token}`);
+      const response = await fetch(currentUrl, { ...init, headers });
       const raw: unknown = await response.json().catch(() => ({}));
 
       if (!response.ok) {
@@ -88,7 +93,7 @@ export function useRequest<T = unknown>(
       setStatus('error');
       setData(null);
     }
-  }, [typeGuard]);
+  }, [typeGuard, getToken]);
 
   const refetch = useCallback(() => {
     run();

@@ -1,6 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import request from 'supertest';
-import app from './app.js';
+import type { Express } from 'express';
+
+vi.mock('@clerk/express', () => ({
+  clerkMiddleware: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  getAuth: () => ({ isAuthenticated: false, userId: null }),
+}));
+
+let app: Express;
+beforeAll(async () => {
+  const m = await import('./app.js');
+  app = m.default;
+});
 
 describe('app', () => {
   describe('GET /health', () => {

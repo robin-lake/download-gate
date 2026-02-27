@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useRequest, defineTypeGuard } from './request.js';
 
+const mockGetToken = vi.fn(() => Promise.resolve(null));
+vi.mock('@clerk/clerk-react', () => ({
+  useAuth: () => ({ getToken: mockGetToken }),
+}));
+
 describe('defineTypeGuard', () => {
   it('returns a function that narrows type when guard returns true', () => {
     const isString = defineTypeGuard((x: unknown): x is string => typeof x === 'string');

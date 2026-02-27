@@ -1,4 +1,9 @@
 import { Link } from 'react-router-dom';
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/clerk-react';
 import './Header.scss';
 
 export default function Header() {
@@ -9,15 +14,20 @@ export default function Header() {
           download gate
         </Link>
         <div className="header-links">
-          <Link to="/login" className="header-btn header-btn--secondary">
-            Log in
-          </Link>
-          <Link to="/signup" className="header-btn header-btn--primary">
-            Sign up
-          </Link>
-          <Link to="/users" className="header-btn header-btn--primary">
-            Users
-          </Link>
+          <SignedOut>
+            <Link to="/login">
+              <button className="header-btn header-btn--secondary">Log in</button>
+            </Link>
+            <Link to="/signup">
+              <button className="header-btn header-btn--primary">Sign up</button>
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <Link to="/users" className="header-btn header-btn--secondary">
+              Users
+            </Link>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
         </div>
       </nav>
     </header>

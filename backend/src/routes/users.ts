@@ -1,7 +1,21 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
+import { getAuth } from '@clerk/express';
 import UserModel from '../models/user.js';
 
 const router = Router();
+
+/** Require Clerk auth; call next() or send 401. */
+function requireAuth(req: Request, res: Response, next: NextFunction): void {
+  const { isAuthenticated } = getAuth(req);
+  if (!isAuthenticated) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+  next();
+}
+
+// All /api/users routes require authentication
+router.use(requireAuth);
 
 interface CreateUserBody {
   name?: string;
