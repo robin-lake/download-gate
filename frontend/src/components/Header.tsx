@@ -15,6 +15,9 @@ export default function Header() {
           <Link to="/signup" className="header-btn header-btn--primary">
             Sign up
           </Link>
+          <Link to="/users" className="header-btn header-btn--primary">
+            Users
+          </Link>
         </div>
       </nav>
     </header>
