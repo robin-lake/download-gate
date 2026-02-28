@@ -26,8 +26,8 @@ export default function Header() {
             <Link to="/users" className="header-btn header-btn--secondary">
               Users
             </Link>
-            <Link to="/user-page" className="header-btn header-btn--secondary">
-              My Account 
+            <Link to="/me" className="header-btn header-btn--secondary">
+              Me
             <UserButton afterSignOutUrl="/" />
             </Link>
           </SignedIn>
