@@ -1,12 +1,15 @@
+import 'dotenv/config';
 import {
   DynamoDBClient,
   CreateTableCommand,
   DescribeTableCommand,
+  ListTablesCommand,
 } from '@aws-sdk/client-dynamodb';
 
 const TABLE_NAME = process.env['USERS_TABLE'] ?? 'Users';
-const REGION = process.env['AWS_REGION'] ?? 'us-east-1';
-// Default to DynamoDB Local so "npm run db:create" works after Docker restart without extra env
+// const REGION = process.env['AWS_REGION'] ?? 'us-east-1';
+const REGION = process.env['AWS_REGION'] ?? 'local-env';
+// Use same env as app; default to DynamoDB Local so "npm run db:create" works after Docker restart
 const ENDPOINT =
   process.env['DYNAMODB_ENDPOINT'] ?? 'http://localhost:8000';
 
@@ -23,6 +26,7 @@ const client = new DynamoDBClient({
 
 async function tableExists(tableName: string): Promise<boolean> {
   try {
+    // console.log('client: ', client)
     await client.send(new DescribeTableCommand({ TableName: tableName }));
     return true;
   } catch {
@@ -31,6 +35,7 @@ async function tableExists(tableName: string): Promise<boolean> {
 }
 
 async function createUsersTable(): Promise<void> {
+  console.log(`DynamoDB endpoint: ${ENDPOINT}`);
   if (await tableExists(TABLE_NAME)) {
     console.log(`Table "${TABLE_NAME}" already exists, skipping creation.`);
     return;
@@ -80,3 +85,15 @@ createUsersTable().catch((err) => {
   console.error('Failed to create tables:', err);
   process.exit(1);
 });
+
+async function listTables(){
+  try{
+    const command = new ListTablesCommand({});
+    const data = await client.send(command)
+    console.log('Current tables: ', data.TableNames)
+  } catch(err) {
+    console.error("Error listing tables: ", err)
+  }
+}
+
+listTables()

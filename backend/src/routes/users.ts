@@ -101,6 +101,7 @@ router.get('/:id', async (req: Request<{ id: string }>, res: Response, next: Nex
 
 // GET /api/users - List users with pagination
 router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res: Response, next: NextFunction): Promise<void> => {
+  console.log('get users request')
   try {
     const { limit, cursor } = req.query;
     const limitNum = limit ? parseInt(limit, 10) : 20;
@@ -108,6 +109,7 @@ router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res
       limit: Number.isNaN(limitNum) ? 20 : limitNum,
       lastKey: cursor ?? null,
     });
+    console.log('result: ', result)
 
     res.json(result);
   } catch (err) {

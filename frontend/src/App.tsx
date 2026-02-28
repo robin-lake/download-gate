@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Users from './pages/Users';
+import Me from './pages/Me';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
 import './App.scss'
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<div className="app-page"><SignIn /></div>} />
           <Route path="/signup" element={<div className="app-page"><SignUp /></div>} />
           <Route path="/users" element={<div className="app-page"><Users /></div>} />
+          <Route path="/me" element={<div className="app-page"><Me /></div>} />
         </Routes>
       </main>
     </BrowserRouter>

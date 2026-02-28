@@ -1,7 +1,7 @@
-import { useRequest } from './request';
+import { useRequest } from '../request';
 import { useState, useCallback, useEffect } from 'react';
-import type { User } from './getUsers';
-import { isUser } from './getUsers';
+import type { User } from './types.ts';
+import { isUser } from './types.ts';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 

@@ -1,10 +1,11 @@
-import {useGetUsers} from '../network/users/getUsers';
+// import {useGetUsers} from '../network/users/getUsers';
+import {useGetCurrentUser} from '../network/users/getCurrentUser';
 
-export default function Users() {
+export default function Me() {
 
 
 //   const { data, loading, error } = useGetUsers()
-const { data, isLoading, error, refetch } = useGetUsers();
+const { data, isLoading, error, refetch } = useGetCurrentUser();
 
 //   if (loading) return <p>Loading...</p>;
 //   if (error) return <p>{error.message}</p>;
