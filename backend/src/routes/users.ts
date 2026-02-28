@@ -33,24 +33,57 @@ interface UpdateUserBody {
   status?: string;
 }
 
-// POST /api/users - Create a new user
-router.post('/', async (req: Request<object, object, CreateUserBody>, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { name, email } = req.body;
+/** Get Clerk user ID from request; only defined when authenticated (e.g. after requireAuth). */
+function getClerkUserId(req: Request): string | null {
+  const auth = getAuth(req);
+  if (!auth.isAuthenticated) return null;
+  return (auth as { userId: string }).userId ?? null;
+}
 
-    if (!name || !email) {
-      res.status(400).json({ error: 'Name and email are required' });
+// GET /api/users/me - Current user (DynamoDB record for the authenticated Clerk user)
+router.get('/me', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = getClerkUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
-    const user = await UserModel.create({ name, email });
-    res.status(201).json(user);
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User record not found. Call POST /api/users to create one.' });
+      return;
+    }
+
+    res.json(user);
   } catch (err) {
     next(err);
   }
 });
 
-// GET /api/users/:id - Get a user by ID
+// POST /api/users - Get-or-create current user (sync DynamoDB with Clerk identity)
+router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = getClerkUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const { name, email } = req.body as CreateUserBody;
+    if (!name || !email) {
+      res.status(400).json({ error: 'Name and email are required' });
+      return;
+    }
+
+    const { user, created } = await UserModel.findOrCreateFromClerk(userId, { name, email });
+    res.status(created ? 201 : 200).json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/users/:id - Get a user by ID (declare after /me so "me" is not treated as id)
 router.get('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = await UserModel.findById(req.params.id);
@@ -82,9 +115,15 @@ router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res
   }
 });
 
-// PATCH /api/users/:id - Update a user
+// PATCH /api/users/:id - Update a user (caller may only update their own record unless you add admin checks)
 router.patch('/:id', async (req: Request<{ id: string }, object, UpdateUserBody>, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const authUserId = getClerkUserId(req);
+    if (authUserId && authUserId !== req.params.id) {
+      res.status(403).json({ error: 'Forbidden: you can only update your own user' });
+      return;
+    }
+
     const allowedFields = ['name', 'email', 'status'] as const;
     const updates: Record<string, unknown> = {};
 
@@ -107,9 +146,15 @@ router.patch('/:id', async (req: Request<{ id: string }, object, UpdateUserBody>
   }
 });
 
-// DELETE /api/users/:id - Delete a user
+// DELETE /api/users/:id - Delete a user (caller may only delete their own record)
 router.delete('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const authUserId = getClerkUserId(req);
+    if (authUserId && authUserId !== req.params.id) {
+      res.status(403).json({ error: 'Forbidden: you can only delete your own user' });
+      return;
+    }
+
     const deleted = await UserModel.delete(req.params.id);
 
     if (!deleted) {

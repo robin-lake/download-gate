@@ -12,6 +12,7 @@ import { docClient } from '../config/dynamodb.js';
 const TABLE_NAME = process.env['USERS_TABLE'] ?? 'Users';
 
 export interface User {
+  /** Primary key; when using Clerk, this is the Clerk user ID (e.g. user_xxx). */
   user_id: string;
   name: string;
   email: string;
@@ -23,6 +24,8 @@ export interface User {
 export interface CreateUserInput {
   name: string;
   email: string;
+  /** When provided (e.g. Clerk user ID), used as user_id instead of generating a UUID. */
+  user_id?: string;
 }
 
 export interface UpdateUserInput {
@@ -41,11 +44,12 @@ export interface ListResult {
 }
 
 class UserModel {
-  /** Create a new user */
-  static async create({ name, email }: CreateUserInput): Promise<User> {
+  /** Create a new user. Pass user_id (e.g. Clerk user ID) to link the record to an external identity. */
+  static async create({ name, email, user_id: providedUserId }: CreateUserInput): Promise<User> {
     const now = new Date().toISOString();
+    const userId = providedUserId ?? uuidv4();
     const userRecord: User = {
-      user_id: uuidv4(),
+      user_id: userId,
       name,
       email,
       status: 'active',
@@ -61,6 +65,24 @@ class UserModel {
     }));
 
     return userRecord;
+  }
+
+  /**
+   * Get existing user by ID or create one using the Clerk user ID as primary key.
+   * Use this on first API call after sign-in so DynamoDB stays in sync with Clerk.
+   */
+  static async findOrCreateFromClerk(
+    clerkUserId: string,
+    profile: { name: string; email: string }
+  ): Promise<{ user: User; created: boolean }> {
+    const existing = await this.findById(clerkUserId);
+    if (existing) return { user: existing, created: false };
+    const user = await this.create({
+      user_id: clerkUserId,
+      name: profile.name,
+      email: profile.email,
+    });
+    return { user, created: true };
   }
 
   /** Get a single user by ID */

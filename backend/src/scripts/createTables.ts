@@ -6,12 +6,14 @@ import {
 
 const TABLE_NAME = process.env['USERS_TABLE'] ?? 'Users';
 const REGION = process.env['AWS_REGION'] ?? 'us-east-1';
-const ENDPOINT = process.env['DYNAMODB_ENDPOINT'];
+// Default to DynamoDB Local so "npm run db:create" works after Docker restart without extra env
+const ENDPOINT =
+  process.env['DYNAMODB_ENDPOINT'] ?? 'http://localhost:8000';
 
 const client = new DynamoDBClient({
   region: REGION,
-  ...(ENDPOINT && {
-    endpoint: ENDPOINT,
+  endpoint: ENDPOINT,
+  ...(ENDPOINT.includes('localhost') && {
     credentials: {
       accessKeyId: 'local',
       secretAccessKey: 'local',
@@ -34,7 +36,7 @@ async function createUsersTable(): Promise<void> {
     return;
   }
 
-  const useOnDemand = Boolean(ENDPOINT);
+  const useOnDemand = ENDPOINT.includes('localhost');
 
   await client.send(
     new CreateTableCommand({
