@@ -14,6 +14,29 @@ function requireAuth(req: Request, res: Response, next: NextFunction): void {
   next();
 }
 
+// Clerk webhook: create user in DB when someone signs up (must be before requireAuth)
+router.post('/webhooks/clerk', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const event = req.body as { type: string; data?: { id?: string; first_name?: string; last_name?: string; email_addresses?: { email_address: string }[] } };
+    if (event.type !== 'user.created' || !event.data?.id) {
+      res.status(200).send('ok');
+      return;
+    }
+    const clerkUser = event.data;
+    const clerkUserId = clerkUser.id;
+    const email = clerkUser.email_addresses?.[0]?.email_address ?? '';
+    const name = [clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(' ').trim() || 'User';
+    await UserModel.create({
+      user_id: clerkUserId as string,
+      name,
+      email: email || `no-email-${clerkUser.id}@placeholder.local`,
+    });
+    res.status(200).send('ok');
+  } catch (err) {
+    next(err);
+  }
+});
+
 // All /api/users routes require authentication
 router.use(requireAuth);
 
