@@ -5,7 +5,7 @@ export default function Me() {
 
 
 //   const { data, loading, error } = useGetUsers()
-const { data, isLoading, error, refetch } = useGetCurrentUser();
+const { data, isLoading, error } = useGetCurrentUser();
 
 //   if (loading) return <p>Loading...</p>;
 //   if (error) return <p>{error.message}</p>;

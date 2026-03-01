@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Header from './Header.js';
 
 vi.mock('@clerk/clerk-react', () => ({
-  SignedIn: ({ children }: { children: React.ReactNode }) => null,
+  SignedIn: ({ children: _children }: { children: React.ReactNode }) => null,
   SignedOut: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   UserButton: () => null,
 }));
