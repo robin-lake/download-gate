@@ -8,7 +8,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "start": "node --import tsx src/index.ts",
-    "dev": "tsx watch src/index.ts"
+    "start:prod": "node --import tsx --env-file=.env.production src/index.ts",
+    "dev": "tsx --watch --env-file=.env.development src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,7 @@
   "dependencies": {
     "@aws-sdk/lib-dynamodb": "^3.999.0",
     "@clerk/express": "^1.7.76",
+    "@codegenie/serverless-express": "^4.17.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
