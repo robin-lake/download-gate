@@ -9,9 +9,11 @@ const app = express();
 // Parse JSON request bodies
 app.use(express.json());
 
-if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
-}
+// CORS: required in Lambda too so API responses include Access-Control-* headers
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true,
+}));
 
 // Clerk auth: attaches auth state to request for getAuth(req) in routes
 app.use(clerkMiddleware());
