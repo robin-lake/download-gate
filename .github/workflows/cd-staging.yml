@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     # Use staging environment for staging branch or when manually dispatching to staging
     # environment: ${{ (github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging') && 'staging' || 'production' }}
-    environment: staging
+    # environment: staging
     permissions:
       id-token: write
       contents: read
@@ -49,6 +49,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+            cdk/package-lock.json
 
       - name: Install backend deps
         working-directory: backend
