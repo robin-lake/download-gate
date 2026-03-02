@@ -28,6 +28,7 @@ new BackendStack(app, backendStackId, {
   domainName: process.env.DOMAIN_NAME as string,
   siteSubDomain: process.env.SITE_SUBDOMAIN as string,
   apiSubDomain: process.env.API_SUBDOMAIN as string,
+  stage,
   clerkSecretKey: process.env.CLERK_SECRET_KEY as string,
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY as string,
   env,

@@ -18,6 +18,8 @@ interface BackendStackProps extends cdk.StackProps {
   domainName: string;
   siteSubDomain: string;
   apiSubDomain: string;
+  /** Stage (e.g. 'staging' | 'production') - used for resource namespacing */
+  stage: string;
   /** Clerk secret key (e.g. from env). Prefer SSM/Secrets Manager in production. */
   clerkSecretKey: string;
   /** Clerk publishable key (e.g. from env). */
@@ -34,6 +36,7 @@ export class BackendStack extends cdk.Stack {
       domainName,
       siteSubDomain,
       apiSubDomain,
+      stage,
       clerkSecretKey,
       clerkPublishableKey,
     } = props;
@@ -53,8 +56,9 @@ export class BackendStack extends cdk.Stack {
     });
 
     // Users table: matches schema from backend createTables (user_id PK, status GSI)
+    // Table name must be unique per account/region, so namespace by stage
     const usersTable = new dynamodb.Table(this, 'UsersTable', {
-      tableName: 'Users',
+      tableName: stage === 'staging' ? 'Users-staging' : 'Users',
       partitionKey: { name: 'user_id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
