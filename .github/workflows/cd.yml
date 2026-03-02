@@ -69,8 +69,8 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
-        env:
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+        # env:
+        #   VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
         run: npm run ${{ steps.stage.outputs.stage == 'staging' && 'build:staging' || 'build' }}
 
       - name: CDK synth
