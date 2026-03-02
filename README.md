@@ -36,4 +36,10 @@ npm install
 npx cdk deploy DownloadGateCiIamStack
 ```
 
+You will see an output in the terminal that looks like this:
+```
+DownloadGateCiIamStack.GithubActionsRoleArn = arn:aws:iam::{your-aws-account}:role/DownloadGateCiIamStack-GithubActionsRole{some-string}
+```
+Copy it to your Github secrets. Go to Github --> Settings --> Secrets and variabls --> Actions. Create a secret named ```AWS_GITHUB_ROLE_ARN``` and copy the calue from above.
+
 After your IAM role is configured, subsequent pushes to main will deploy the full CDK build via Github Actions
