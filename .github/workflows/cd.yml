@@ -36,6 +36,57 @@ jobs:
             echo "stage=production" >> $GITHUB_OUTPUT
           fi
 
+      # --- OIDC debugging: remove after fixing assume-role ---
+      - name: Debug 1 – GitHub context and environment
+        run: |
+          echo "=== GitHub context ==="
+          echo "github.repository: ${{ github.repository }}"
+          echo "github.ref: ${{ github.ref }}"
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.actor: ${{ github.actor }}"
+          echo "Deployment stage (from workflow): ${{ steps.stage.outputs.stage }}"
+          echo ""
+          echo "IAM trust policy must allow:"
+          echo "  StringLike  token.actions.githubusercontent.com:sub  =  repo:${{ github.repository }}:ref:refs/heads/*"
+          echo "  (for this run the actual sub will be: repo:${{ github.repository }}:ref:${{ github.ref }})"
+          echo "  StringEquals  token.actions.githubusercontent.com:aud  =  sts.amazonaws.com"
+
+      - name: Debug 2 – AWS_GITHUB_ROLE_ARN secret
+        run: |
+          if [ -z "${{ secrets.AWS_GITHUB_ROLE_ARN }}" ]; then
+            echo "AWS_GITHUB_ROLE_ARN: NOT SET in this environment"
+            echo "Add the role ARN to this job's environment secrets (Settings → Environments → <env> → Environment secrets)."
+          else
+            echo "AWS_GITHUB_ROLE_ARN: set (value hidden)"
+          fi
+
+      - name: Debug 3 – OIDC token claims (sub, aud)
+        run: |
+          set -e
+          echo "Requesting OIDC token with audience=sts.amazonaws.com..."
+          if [[ "$ACTIONS_ID_TOKEN_REQUEST_URL" == *"?"* ]]; then
+            TOKEN_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com"
+          else
+            TOKEN_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}?audience=sts.amazonaws.com"
+          fi
+          RESPONSE=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$TOKEN_URL")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.value')
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to get OIDC token."
+            echo "Response keys: $(echo "$RESPONSE" | jq -r 'keys')"
+            exit 0
+          fi
+          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2)
+          echo "=== OIDC token claims (payload only, no signature) ==="
+          echo "$PAYLOAD" | python3 -c "
+          import base64, json, sys
+          s = sys.stdin.read().strip()
+          s += '=='[(len(s) % 4):]
+          d = json.loads(base64.urlsafe_b64decode(s))
+          for k in ['sub', 'aud', 'iss', 'ref', 'repository']:
+              if k in d: print(f'  {k}: {d[k]}')
+          "
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
