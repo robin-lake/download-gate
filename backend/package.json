@@ -7,8 +7,8 @@
     "db:create": "tsx src/scripts/createTables.ts",
     "test": "vitest",
     "test:run": "vitest run",
-    "build": "node --import tsx src/index.ts",
-    "build:prod": "node --import tsx --env-file=.env.production src/index.ts",
+    "build": "node --import tsx --env-file=.env.production src/index.ts",
+    "build:dev": "node --import tsx --env-file=.env.development src/index.ts",
     "dev": "tsx --watch --env-file=.env.development src/index.ts"
   },
   "keywords": [],
