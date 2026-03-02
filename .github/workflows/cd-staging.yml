@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        # description: 'Environment to deploy'
-        # required: true
-        # default: 'production'
-        # type: choice
-        # options:
-        #   - production
-        #   - staging
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 jobs:
   deploy:
