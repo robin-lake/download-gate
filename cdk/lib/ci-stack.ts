@@ -20,12 +20,13 @@ export class CiIamStack extends cdk.Stack {
     // const repoOwner = 'your-github-username-or-org';
     // const repoName = 'download-gate';
 
-    // Matches GitHub OIDC sub for both branch-based and environment-based tokens:
-    // - repo:owner/repo:ref:refs/heads/main
-    // - repo:owner/repo:environment:production
+    // Single wildcard allows main and staging (and any branch); avoids IAM array condition issues
     const githubPrincipal = new iam.WebIdentityPrincipal(provider.openIdConnectProviderArn, {
       StringLike: {
-        'token.actions.githubusercontent.com:sub': `repo:${repoOwner}/${repoName}:*`,
+        // 'token.actions.githubusercontent.com:sub': `repo:${repoOwner}/${repoName}:ref:refs/heads/*`,
+        'token.actions.githubusercontent.com:sub': [
+            `repo:${repoOwner}/${repoName}:*`,
+            `repo:${repoOwner}/${repoName}:environment:*`,],
       },
       StringEquals: {
         'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
