@@ -75,10 +75,24 @@ jobs:
         working-directory: cdk
         env:
           STAGE: ${{ steps.stage.outputs.stage }}
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          SITE_SUBDOMAIN: ${{ vars.SITE_SUBDOMAIN }}
+          API_SUBDOMAIN: ${{ vars.API_SUBDOMAIN }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          REPO_NAME: ${{ vars.REPO_NAME }}
+          REPO_OWNER: ${{ vars.REPO_OWNER }}
         run: npx cdk synth
 
       - name: CDK deploy
         working-directory: cdk
         env:
           STAGE: ${{ steps.stage.outputs.stage }}
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          SITE_SUBDOMAIN: ${{ vars.SITE_SUBDOMAIN }}
+          API_SUBDOMAIN: ${{ vars.API_SUBDOMAIN }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          REPO_NAME: ${{ vars.REPO_NAME }}
+          REPO_OWNER: ${{ vars.REPO_OWNER }}
         run: npx cdk deploy --all --require-approval never
