@@ -42,4 +42,7 @@ DownloadGateCiIamStack.GithubActionsRoleArn = arn:aws:iam::{your-aws-account}:ro
 ```
 Copy it to your Github secrets. Go to Github --> Settings --> Secrets and variabls --> Actions. Create a secret named ```AWS_GITHUB_ROLE_ARN``` and copy the calue from above.
 
-After your IAM role is configured, subsequent pushes to main will deploy the full CDK build via Github Actions
+After your IAM role is configured, subsequent pushes to main will deploy the full CDK build via Github Actions.
+
+### Staging deployments
+Pushes to the `staging` branch deploy a separate staging environment. Configure a **staging** environment in GitHub (Settings → Environments) with the same `AWS_GITHUB_ROLE_ARN` secret and staging-specific variables: `DOMAIN_NAME`, `SITE_SUBDOMAIN`, `API_SUBDOMAIN`, `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`. The CI IAM role trusts both `main` and `staging`; re-deploy `DownloadGateCiIamStack` once from main after enabling staging so the updated trust policy is applied.

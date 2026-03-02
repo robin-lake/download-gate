@@ -8,6 +8,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "build": "node --import tsx --env-file=.env.production src/index.ts",
+    "build:staging": "node --import tsx --env-file=.env.staging src/index.ts",
     "build:dev": "node --import tsx --env-file=.env.development src/index.ts",
     "dev": "tsx --watch --env-file=.env.development src/index.ts"
   },

@@ -2,13 +2,23 @@ name: CD
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: {}
+    branches: [ main, staging ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    # Use staging environment for staging branch or when manually dispatching to staging
+    environment: ${{ (github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging') && 'staging' || 'production' }}
     permissions:
       id-token: write
       contents: read
@@ -16,6 +26,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set deployment stage
+        id: stage
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/staging" ] || [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "stage=staging" >> $GITHUB_OUTPUT
+          else
+            echo "stage=production" >> $GITHUB_OUTPUT
+          fi
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -33,14 +52,26 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
       - name: Install CDK deps
         working-directory: cdk
         run: npm ci
 
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run ${{ steps.stage.outputs.stage == 'staging' && 'build:staging' || 'build' }}
+
       - name: CDK synth
         working-directory: cdk
+        env:
+          STAGE: ${{ steps.stage.outputs.stage }}
         run: npx cdk synth
 
       - name: CDK deploy
         working-directory: cdk
+        env:
+          STAGE: ${{ steps.stage.outputs.stage }}
         run: npx cdk deploy --all --require-approval never
