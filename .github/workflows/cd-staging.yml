@@ -6,20 +6,20 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
+        # description: 'Environment to deploy'
+        # required: true
+        # default: 'production'
+        # type: choice
+        # options:
+        #   - production
+        #   - staging
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     # Use staging environment for staging branch or when manually dispatching to staging
     # environment: ${{ (github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging') && 'staging' || 'production' }}
-    environment: staging
+    # environment: staging
     permissions:
       id-token: write
       contents: read

@@ -4,21 +4,21 @@ on:
   push:
     branches: [ main]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
+    # inputs:
+    #   environment:
+    #     description: 'Environment to deploy'
+    #     required: true
+    #     default: 'production'
+    #     type: choice
+    #     options:
+    #       - production
+    #       - staging
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     # Use staging environment for staging branch or when manually dispatching to staging
-    environment: ${{ (github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging') && 'staging' || 'production' }}
+    # environment: ${{ (github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging') && 'staging' || 'production' }}
     permissions:
       id-token: write
       contents: read
@@ -27,14 +27,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set deployment stage
-        id: stage
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/staging" ] || [ "${{ github.event.inputs.environment }}" = "staging" ]; then
-            echo "stage=staging" >> $GITHUB_OUTPUT
-          else
-            echo "stage=production" >> $GITHUB_OUTPUT
-          fi
+      # - name: Set deployment stage
+      #   id: stage
+      #   run: |
+      #     if [ "${{ github.ref }}" = "refs/heads/staging" ] || [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+      #       echo "stage=staging" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "stage=production" >> $GITHUB_OUTPUT
+      #     fi
 
       # --- OIDC debugging: remove after fixing assume-role ---
       - name: Debug 1 – GitHub context and environment
