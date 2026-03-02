@@ -24,6 +24,8 @@ export class CiIamStack extends cdk.Stack {
     const githubPrincipal = new iam.WebIdentityPrincipal(provider.openIdConnectProviderArn, {
       StringLike: {
         'token.actions.githubusercontent.com:sub': `repo:${repoOwner}/${repoName}:ref:refs/heads/*`,
+      },
+      StringEquals: {
         'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
       },
     });
