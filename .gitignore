@@ -13,7 +13,9 @@ dist
 dist-ssr
 *.local
 frontend/.env.production
+frontend/.env.staging
 backend/.env.production
+backend/.env.staging
 backend/.env.development
 
 # Local env files with secrets (copy from .env.example and fill in)
