@@ -1,0 +1,46 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci && npm run build --if-present
+
+      - name: Install CDK deps
+        working-directory: cdk
+        run: npm ci
+
+      - name: CDK synth
+        working-directory: cdk
+        run: npx cdk synth
+
+      - name: CDK deploy
+        working-directory: cdk
+        run: npx cdk deploy --all --require-approval never

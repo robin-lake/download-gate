@@ -3,6 +3,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import 'dotenv/config'
 import { FrontendStack } from '../lib/frontend-stack';
 import { BackendStack } from '../lib/backend-stack';
+import { CiIamStack } from '../lib/ci-stack';
 
 const app = new cdk.App();
 new FrontendStack(app, 'DownloadGateFrontendStack', {
@@ -31,3 +32,8 @@ new BackendStack(app, 'DownloadGateBackendStack', {
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY as string,
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
 });
+
+new CiIamStack(app, 'DownloadGateCiIamStack', {
+  repoName: process.env.REPO_NAME as string,
+  repoOwner: process.env.REPO_OWNER as string,
+})
