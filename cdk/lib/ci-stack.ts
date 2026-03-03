@@ -18,6 +18,7 @@ export class CiIamStack extends cdk.Stack {
       thumbprints: [
         '1c58a3a8518e8759bf075b76b750d4f2df264fcd',
         '6938fd4d98bab03faadb97b34396831e3780aea1',
+        '7560d6f40fa55195f740ee2b1b7c0b4836cbe103',
       ],
     });
 
