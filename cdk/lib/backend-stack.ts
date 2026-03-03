@@ -55,6 +55,11 @@ export class BackendStack extends cdk.Stack {
       grafanaCloudOtlp,
     } = props;
     const frontendOrigin = `https://${siteSubDomain}.${domainName}`;
+    const apexOrigin = `https://${domainName}`;
+    // Allow both subdomain (e.g. www) and apex so CORS works from either
+    const corsOrigins = [frontendOrigin, apexOrigin].filter(
+      (o, i, a) => a.indexOf(o) === i
+    );
     const apiDomain = `${apiSubDomain}.${domainName}`;
 
     const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName });
@@ -91,7 +96,7 @@ export class BackendStack extends cdk.Stack {
         forceDockerBundling: false,
       },
       environment: {
-        CORS_ORIGIN: frontendOrigin,
+        CORS_ORIGINS: corsOrigins.join(','),
         CLERK_SECRET_KEY: clerkSecretKey,
         CLERK_PUBLISHABLE_KEY: clerkPublishableKey,
         USERS_TABLE: usersTable.tableName,
@@ -177,7 +182,7 @@ export class BackendStack extends cdk.Stack {
     const api = new HttpApi(this, 'DownloadGateApi', {
       defaultIntegration: integration,
       corsPreflight: {
-        allowOrigins: [frontendOrigin],
+        allowOrigins: corsOrigins,
         allowMethods: [
           CorsHttpMethod.GET,
           CorsHttpMethod.POST,

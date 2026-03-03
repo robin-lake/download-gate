@@ -10,8 +10,14 @@ const app = express();
 app.use(express.json());
 
 // CORS: required in Lambda too so API responses include Access-Control-* headers
+// CORS_ORIGINS = comma-separated list (from CDK); CORS_ORIGIN = single origin (legacy/local)
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
+  : process.env.CORS_ORIGIN
+    ? [process.env.CORS_ORIGIN]
+    : ['*'];
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins,
   credentials: true,
 }));
 
