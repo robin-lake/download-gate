@@ -111,6 +111,10 @@ export class BackendStack extends cdk.Stack {
     });
     backendFn.addEnvironment('AWS_LAMBDA_EXEC_WRAPPER', '/opt/otel-instrument');
     backendFn.addEnvironment('OTEL_SERVICE_NAME', 'download-gate-api');
+    backendFn.addEnvironment(  
+      'OTEL_RESOURCE_ATTRIBUTES',  
+      'service.namespace=download-gate,deployment.environment=production'  
+    );  
     backendFn.role?.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         'CloudWatchLambdaApplicationSignalsExecutionRolePolicy'
@@ -124,30 +128,52 @@ export class BackendStack extends cdk.Stack {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
       });
-      const collectorConfig = `# ADOT collector: X-Ray + Grafana Cloud OTLP (env vars substituted at runtime)
-                                receivers:
-                                  otlp:
-                                    protocols:
-                                      grpc:
-                                        endpoint: localhost:4317
-                                      http:
-                                        endpoint: localhost:4318
-                                exporters:
-                                  awsxray:
-                                    region: ${this.region}
-                                  otlphttp/grafana:
-                                    endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}
-                                    headers:
-                                      Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}
-                                service:
-                                  pipelines:
-                                    traces:
-                                      receivers: [otlp]
-                                      exporters: [awsxray, otlphttp/grafana]
-                                  telemetry:
-                                    metrics:
-                                      address: localhost:8888
-                                `;
+      // const collectorConfig = `\
+      // # ADOT collector: X-Ray + Grafana Cloud OTLP (env vars substituted at runtime)
+      //                           receivers:
+      //                             otlp:
+      //                               protocols:
+      //                                 grpc:
+      //                                   endpoint: localhost:4317
+      //                                 http:
+      //                                   endpoint: localhost:4318
+      //                           exporters:
+      //                             awsxray:
+      //                               region: ${this.region}
+      //                             otlphttp/grafana:
+      //                               endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}
+      //                               headers:
+      //                                 Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}
+      //                           service:
+      //                             pipelines:
+      //                               traces:
+      //                                 receivers: [otlp]
+      //                                 exporters: [awsxray, otlphttp/grafana]
+      //                             telemetry:
+      //                               metrics:
+      //                                 address: localhost:8888
+      //                           `;
+      const collectorConfig = `\  
+      receivers:  
+        otlp:  
+          protocols:  
+            grpc:  
+              endpoint: localhost:4317  
+            http:  
+              endpoint: localhost:4318  
+      exporters:  
+        awsxray:  
+          region: ${this.region}  
+        otlphttp/grafana:  
+          endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}  
+          headers:  
+            Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}  
+      service:  
+        pipelines:  
+          traces:  
+            receivers: [otlp]  
+            exporters: [awsxray, otlphttp/grafana]  
+      `;  
       new s3deploy.BucketDeployment(this, 'OtelConfigDeployment', {
         destinationBucket: otelConfigBucket,
         sources: [s3deploy.Source.data('collector.yaml', collectorConfig)],
