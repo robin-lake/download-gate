@@ -38,28 +38,7 @@ jobs:
           fi
 
 
-      # OIDC auth can fail intermittently (e.g. parallel runs, GitHub cert rotation). Retry up to 3 times.
-      - name: Configure AWS credentials (OIDC) – attempt 1
-        id: aws-oidc-1
-        continue-on-error: true
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
-          aws-region: us-east-1
-          audience: sts.amazonaws.com
-
-      - name: Configure AWS credentials (OIDC) – attempt 2
-        if: steps.aws-oidc-1.outcome == 'failure'
-        id: aws-oidc-2
-        continue-on-error: true
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
-          aws-region: us-east-1
-          audience: sts.amazonaws.com
-
-      - name: Configure AWS credentials (OIDC) – attempt 3
-        if: steps.aws-oidc-2.outcome == 'failure'
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
