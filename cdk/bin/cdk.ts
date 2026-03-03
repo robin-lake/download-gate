@@ -18,6 +18,11 @@ const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_
 const frontendStackId = stage === 'staging' ? 'DownloadGateStagingFrontendStack' : 'DownloadGateFrontendStack';
 const backendStackId = stage === 'staging' ? 'DownloadGateStagingBackendStack' : 'DownloadGateBackendStack';
 
+new CiIamStack(app, 'DownloadGateCiIamStack', {
+  repoName: process.env.REPO_NAME as string,
+  repoOwner: process.env.REPO_OWNER as string,
+});
+
 new FrontendStack(app, frontendStackId, {
   domainName: process.env.DOMAIN_NAME as string,
   siteSubDomain: process.env.SITE_SUBDOMAIN as string,
@@ -42,10 +47,10 @@ new BackendStack(app, backendStackId, {
       : undefined,
 });
 
-// Only create CI IAM stack for production (trust policy allows both main and staging)
-if (stage === 'production') {
-  new CiIamStack(app, 'DownloadGateCiIamStack', {
-    repoName: process.env.REPO_NAME as string,
-    repoOwner: process.env.REPO_OWNER as string,
-  });
-}
+// // Only create CI IAM stack for production (trust policy allows both main and staging)
+// if (stage === 'production') {
+//   new CiIamStack(app, 'DownloadGateCiIamStack', {
+//     repoName: process.env.REPO_NAME as string,
+//     repoOwner: process.env.REPO_OWNER as string,
+//   });
+// }

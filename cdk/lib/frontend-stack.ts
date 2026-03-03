@@ -48,6 +48,12 @@ export class FrontendStack extends cdk.Stack {
       defaultRootObject: 'index.html',
       sslSupportMethod: cloudfront.SSLMethod.SNI,
       errorResponses: [
+        // S3 returns 403 (not 404) for missing paths when using OAC; both must fall back to index.html for SPA routing
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
