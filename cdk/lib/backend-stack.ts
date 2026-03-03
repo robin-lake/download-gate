@@ -121,53 +121,53 @@ export class BackendStack extends cdk.Stack {
       )
     );
 
-    // Optional: send traces to Grafana Cloud OTLP in addition to X-Ray (custom collector config)
-    if (grafanaCloudOtlp) {
-      const otelConfigBucket = new s3.Bucket(this, 'OtelConfigBucket', {
-        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
-      });
-      // # ADOT collector: X-Ray + Grafana Cloud OTLP (env vars substituted at runtime)
-      const collectorConfig = `\  
-      receivers:  
-        otlp:  
-          protocols:  
-            grpc:  
-              endpoint: localhost:4317  
-            http:  
-              endpoint: localhost:4318  
-      exporters:  
-        awsxray:  
-          region: ${this.region}  
-        otlphttp/grafana:  
-          endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}  
-          headers:  
-            Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}  
-      service:  
-        pipelines:  
-          traces:  
-            receivers: [otlp]  
-            exporters: [awsxray, otlphttp/grafana]  
-      `;  
-      new s3deploy.BucketDeployment(this, 'OtelConfigDeployment', {
-        destinationBucket: otelConfigBucket,
-        sources: [s3deploy.Source.data('collector.yaml', collectorConfig)],
-      });
-      otelConfigBucket.grantRead(backendFn);
-      backendFn.addEnvironment(
-        'OPENTELEMETRY_COLLECTOR_CONFIG_URI',
-        `s3://${otelConfigBucket.bucketName}/collector.yaml`
-      );
-      backendFn.addEnvironment(
-        'GRAFANA_CLOUD_OTLP_ENDPOINT',
-        grafanaCloudOtlp.endpoint
-      );
-      backendFn.addEnvironment(
-        'GRAFANA_CLOUD_OTLP_AUTH',
-        grafanaCloudOtlp.auth
-      );
-    }
+    // // Optional: send traces to Grafana Cloud OTLP in addition to X-Ray (custom collector config)
+    // if (grafanaCloudOtlp) {
+    //   const otelConfigBucket = new s3.Bucket(this, 'OtelConfigBucket', {
+    //     blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    //     removalPolicy: cdk.RemovalPolicy.DESTROY,
+    //     autoDeleteObjects: true,
+    //   });
+    //   // # ADOT collector: X-Ray + Grafana Cloud OTLP (env vars substituted at runtime)
+    //   const collectorConfig = `\  
+    //   receivers:  
+    //     otlp:  
+    //       protocols:  
+    //         grpc:  
+    //           endpoint: localhost:4317  
+    //         http:  
+    //           endpoint: localhost:4318  
+    //   exporters:  
+    //     awsxray:  
+    //       region: ${this.region}  
+    //     otlphttp/grafana:  
+    //       endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}  
+    //       headers:  
+    //         Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}  
+    //   service:  
+    //     pipelines:  
+    //       traces:  
+    //         receivers: [otlp]  
+    //         exporters: [awsxray, otlphttp/grafana]  
+    //   `;  
+    //   new s3deploy.BucketDeployment(this, 'OtelConfigDeployment', {
+    //     destinationBucket: otelConfigBucket,
+    //     sources: [s3deploy.Source.data('collector.yaml', collectorConfig)],
+    //   });
+    //   otelConfigBucket.grantRead(backendFn);
+    //   backendFn.addEnvironment(
+    //     'OPENTELEMETRY_COLLECTOR_CONFIG_URI',
+    //     `s3://${otelConfigBucket.bucketName}/collector.yaml`
+    //   );
+    //   backendFn.addEnvironment(
+    //     'GRAFANA_CLOUD_OTLP_ENDPOINT',
+    //     grafanaCloudOtlp.endpoint
+    //   );
+    //   backendFn.addEnvironment(
+    //     'GRAFANA_CLOUD_OTLP_AUTH',
+    //     grafanaCloudOtlp.auth
+    //   );
+    // }
 
     usersTable.grantReadWriteData(backendFn);
 
