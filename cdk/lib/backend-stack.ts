@@ -128,31 +128,8 @@ export class BackendStack extends cdk.Stack {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
       });
-      // const collectorConfig = `\
+
       // # ADOT collector: X-Ray + Grafana Cloud OTLP (env vars substituted at runtime)
-      //                           receivers:
-      //                             otlp:
-      //                               protocols:
-      //                                 grpc:
-      //                                   endpoint: localhost:4317
-      //                                 http:
-      //                                   endpoint: localhost:4318
-      //                           exporters:
-      //                             awsxray:
-      //                               region: ${this.region}
-      //                             otlphttp/grafana:
-      //                               endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}
-      //                               headers:
-      //                                 Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}
-      //                           service:
-      //                             pipelines:
-      //                               traces:
-      //                                 receivers: [otlp]
-      //                                 exporters: [awsxray, otlphttp/grafana]
-      //                             telemetry:
-      //                               metrics:
-      //                                 address: localhost:8888
-      //                           `;
       const collectorConfig = `\  
       receivers:  
         otlp:  
