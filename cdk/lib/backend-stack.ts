@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
 import * as route53 from 'aws-cdk-lib/aws-route53';
@@ -81,8 +82,26 @@ export class BackendStack extends cdk.Stack {
         CLERK_SECRET_KEY: clerkSecretKey,
         CLERK_PUBLISHABLE_KEY: clerkPublishableKey,
         USERS_TABLE: usersTable.tableName,
+        OTEL_METRICS_EXPORTER: "awsemf",
+        OTEL_TRACES_SAMPLER:"traceidratio",
+        OTEL_TRACES_SAMPLER_ARG:"0.3",
       },
+      tracing: lambda.Tracing.ACTIVE,
+      layers: [
+        lambda.LayerVersion.fromLayerVersionArn(
+          this,
+          'AwsOtelLayer',
+          `arn:aws:lambda:${this.region}:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1`
+        ),
+      ],
     });
+    backendFn.addEnvironment('AWS_LAMBDA_EXEC_WRAPPER', '/opt/otel-instrument');
+    backendFn.addEnvironment('OTEL_SERVICE_NAME', 'download-gate-api');
+    backendFn.role?.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        'CloudWatchLambdaApplicationSignalsExecutionRolePolicy'
+      )
+    );
     usersTable.grantReadWriteData(backendFn);
 
     const integration = new HttpLambdaIntegration('LambdaIntegration', backendFn);
