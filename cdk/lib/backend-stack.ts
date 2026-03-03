@@ -84,7 +84,8 @@ export class BackendStack extends cdk.Stack {
         USERS_TABLE: usersTable.tableName,
         OTEL_METRICS_EXPORTER: "awsemf",
         OTEL_TRACES_SAMPLER:"traceidratio",
-        OTEL_TRACES_SAMPLER_ARG:"0.3",
+        // OTEL_TRACES_SAMPLER_ARG:"0.3",
+        OTEL_TRACES_SAMPLER_ARG:"1.0",
       },
       tracing: lambda.Tracing.ACTIVE,
       layers: [
