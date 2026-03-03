@@ -1,6 +1,8 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { getAuth } from '@clerk/express';
+import { trace } from '@opentelemetry/api';
 import UserModel from '../models/user.js';
+import { tracer, withSpan } from '../tracing.js';
 
 const router = Router();
 
@@ -19,6 +21,7 @@ router.post('/webhooks/clerk', async (req: Request, res: Response, next: NextFun
   try {
     const event = req.body as { type: string; data?: { id?: string; first_name?: string; last_name?: string; email_addresses?: { email_address: string }[] } };
     if (event.type !== 'user.created' || !event.data?.id) {
+      trace.getActiveSpan()?.setAttribute('clerkwebhook.added_user', event?.data?.id ?? 'skipped');
       res.status(200).send('ok');
       return;
     }
@@ -74,6 +77,7 @@ router.get('/me', async (req: Request, res: Response, next: NextFunction): Promi
 
     const user = await UserModel.findById(userId);
     if (!user) {
+      trace.getActiveSpan()?.setAttribute('user.id.notfound', userId);
       res.status(404).json({ error: 'User record not found. Call POST /api/users to create one.' });
       return;
     }
@@ -122,23 +126,52 @@ router.get('/:id', async (req: Request<{ id: string }>, res: Response, next: Nex
   }
 });
 
+// // GET /api/users - List users with pagination
+// router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res: Response, next: NextFunction): Promise<void> => {
+//   console.log('get users request')
+//   try {
+//     const { limit, cursor } = req.query;
+//     const limitNum = limit ? parseInt(limit, 10) : 20;
+//     const result = await UserModel.list({
+//       limit: Number.isNaN(limitNum) ? 20 : limitNum,
+//       lastKey: cursor ?? null,
+//     });
+//     console.log('result: ', result)
+
+//     res.json(result);
+//   } catch (err) {
+//     next(err);
+//   }
+// });
+
+
 // GET /api/users - List users with pagination
 router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res: Response, next: NextFunction): Promise<void> => {
-  console.log('get users request')
-  try {
-    const { limit, cursor } = req.query;
-    const limitNum = limit ? parseInt(limit, 10) : 20;
-    const result = await UserModel.list({
-      limit: Number.isNaN(limitNum) ? 20 : limitNum,
-      lastKey: cursor ?? null,
-    });
-    console.log('result: ', result)
+  const { limit, cursor } = req.query;
+  const limitNum = limit ? parseInt(limit, 10) : 20;
+  const effectiveLimit = Number.isNaN(limitNum) ? 20 : limitNum;
 
+  try {
+    const result = await withSpan(
+      'users.list',
+      async (span) => {
+        span.setAttribute('users.list.limit', effectiveLimit);
+        span.setAttribute('users.list.has_cursor', !!cursor);
+        return UserModel.list({
+          limit: effectiveLimit,
+          lastKey: cursor ?? null,
+        });
+      },
+      { 'users.list.limit': effectiveLimit }
+    );
     res.json(result);
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    trace.getActiveSpan()?.setAttribute('users.list.error', message);
     next(err);
   }
 });
+
 
 // PATCH /api/users/:id - Update a user (caller may only update their own record unless you add admin checks)
 router.patch('/:id', async (req: Request<{ id: string }, object, UpdateUserBody>, res: Response, next: NextFunction): Promise<void> => {
