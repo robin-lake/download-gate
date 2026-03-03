@@ -85,6 +85,8 @@ jobs:
           CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
           REPO_NAME: ${{ vars.REPO_NAME }}
           REPO_OWNER: ${{ vars.REPO_OWNER }}
+          GRAFANA_CLOUD_OTLP_ENDPOINT: ${{ vars.GRAFANA_CLOUD_OTLP_ENDPOINT }}
+          GRAFANA_CLOUD_OTLP_AUTH: ${{ secrets.GRAFANA_CLOUD_OTLP_AUTH }}
         run: npx cdk synth
 
       - name: CDK deploy
@@ -98,4 +100,6 @@ jobs:
           CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
           REPO_NAME: ${{ vars.REPO_NAME }}
           REPO_OWNER: ${{ vars.REPO_OWNER }}
+          GRAFANA_CLOUD_OTLP_ENDPOINT: ${{ vars.GRAFANA_CLOUD_OTLP_ENDPOINT }}
+          GRAFANA_CLOUD_OTLP_AUTH: ${{ secrets.GRAFANA_CLOUD_OTLP_AUTH }}
         run: npx cdk deploy --all --require-approval never

@@ -44,9 +44,42 @@ DownloadGateCiIamStack.GithubActionsRoleArn = arn:aws:iam::{your-aws-account}:ro
 Copy it to your Github secrets. Go to Github --> Settings --> Secrets and variabls --> Actions. Create a secret named ```AWS_GITHUB_ROLE_ARN``` and copy the calue from above.
 
 After your IAM role is configured, subsequent pushes to main will deploy the full CDK build via Github Actions.
+### Using Github Environment Variables For CI/CD ###
+To keep secrets secure, and still avoid paying for AWS Secrets Manager, try using Github environments. The following can be added as environment variables:
+```
+API_SUBDOMAIN
+DOMAIN_NAME
+GRAFANA_CLOUD_OTLP_ENDPOINT
+SITE_SUBDOMAIN
+```
+Additionally, add the following as secrets:
+```
+AWS_GITHUB_ROLE_ARN
+CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY
+GRAFANA_CLOUD_OTLP_AUTH
+```
+The `cd.yml` script within `.github/workflows` will now use them when CD builds for deployment
 
-### Staging Deployments
+### Staging Deployments ###
 Pushes to the `staging` branch deploy a separate staging environment. Configure a **staging** environment in GitHub (Settings → Environments) with the same `AWS_GITHUB_ROLE_ARN` secret and staging-specific variables: `DOMAIN_NAME`, `SITE_SUBDOMAIN`, `API_SUBDOMAIN`, `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`. The CI IAM role trusts both `main` and `staging`; re-deploy `DownloadGateCiIamStack` once from main after enabling staging so the updated trust policy is applied.
+
+
+### Adding Grafana Cloud integration ###
+Optionally, you can add Grafana Cloud to the stack. This is a free alternative to using AWS's managed Grafana service, which is $9/user/month. To do so, add the following to your github environment secrets:
+```
+GRAFANA_CLOUD_OTLP_AUTH={your-grafana-auth}
+```
+You can get the GRAFANA_CLOUD_OTLP_AUTH value after making a new opentelemetry connection in Grafana Cloud, then entering the following in your command line:
+```
+export GRAFANA_CLOUD_BASIC_AUTH_HEADER="Basic $(echo -n {your-grafana-auth-header-value} | base64 -w0)"
+```
+and copying the result.
+
+Then, add the following to your github environment variables:
+```
+GRAFANA_CLOUD_OTLP_ENDPOINT={your-grafana-endpoint}
+```
 
 ### Adding Music Provider Integrations ###
 

@@ -3,6 +3,8 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
 import * as route53 from 'aws-cdk-lib/aws-route53';
@@ -15,6 +17,14 @@ import {
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 
+/** Optional Grafana Cloud OTLP destination (traces sent in addition to X-Ray). */
+export interface GrafanaCloudOtlpConfig {
+  /** Grafana Cloud OTLP endpoint, e.g. https://otlp-gateway-XXX.grafana.net/otlp */
+  endpoint: string;
+  /** Authorization header value, e.g. "Basic <base64(instanceId:apiKey)>". Prefer SSM/Secrets Manager. */
+  auth: string;
+}
+
 interface BackendStackProps extends cdk.StackProps {
   domainName: string;
   siteSubDomain: string;
@@ -25,6 +35,8 @@ interface BackendStackProps extends cdk.StackProps {
   clerkSecretKey: string;
   /** Clerk publishable key (e.g. from env). */
   clerkPublishableKey: string;
+  /** Optional: send OTLP traces to Grafana Cloud (in addition to X-Ray and CloudWatch). */
+  grafanaCloudOtlp?: GrafanaCloudOtlpConfig;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -40,6 +52,7 @@ export class BackendStack extends cdk.Stack {
       stage,
       clerkSecretKey,
       clerkPublishableKey,
+      grafanaCloudOtlp,
     } = props;
     const frontendOrigin = `https://${siteSubDomain}.${domainName}`;
     const apiDomain = `${apiSubDomain}.${domainName}`;
@@ -103,6 +116,57 @@ export class BackendStack extends cdk.Stack {
         'CloudWatchLambdaApplicationSignalsExecutionRolePolicy'
       )
     );
+
+    // Optional: send traces to Grafana Cloud OTLP in addition to X-Ray (custom collector config)
+    if (grafanaCloudOtlp) {
+      const otelConfigBucket = new s3.Bucket(this, 'OtelConfigBucket', {
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      });
+      const collectorConfig = `# ADOT collector: X-Ray + Grafana Cloud OTLP (env vars substituted at runtime)
+                                receivers:
+                                  otlp:
+                                    protocols:
+                                      grpc:
+                                        endpoint: localhost:4317
+                                      http:
+                                        endpoint: localhost:4318
+                                exporters:
+                                  awsxray:
+                                    region: ${this.region}
+                                  otlphttp/grafana:
+                                    endpoint: \${env:GRAFANA_CLOUD_OTLP_ENDPOINT}
+                                    headers:
+                                      Authorization: \${env:GRAFANA_CLOUD_OTLP_AUTH}
+                                service:
+                                  pipelines:
+                                    traces:
+                                      receivers: [otlp]
+                                      exporters: [awsxray, otlphttp/grafana]
+                                  telemetry:
+                                    metrics:
+                                      address: localhost:8888
+                                `;
+      new s3deploy.BucketDeployment(this, 'OtelConfigDeployment', {
+        destinationBucket: otelConfigBucket,
+        sources: [s3deploy.Source.data('collector.yaml', collectorConfig)],
+      });
+      otelConfigBucket.grantRead(backendFn);
+      backendFn.addEnvironment(
+        'OPENTELEMETRY_COLLECTOR_CONFIG_URI',
+        `s3://${otelConfigBucket.bucketName}/collector.yaml`
+      );
+      backendFn.addEnvironment(
+        'GRAFANA_CLOUD_OTLP_ENDPOINT',
+        grafanaCloudOtlp.endpoint
+      );
+      backendFn.addEnvironment(
+        'GRAFANA_CLOUD_OTLP_AUTH',
+        grafanaCloudOtlp.auth
+      );
+    }
+
     usersTable.grantReadWriteData(backendFn);
 
     const integration = new HttpLambdaIntegration('LambdaIntegration', backendFn);
