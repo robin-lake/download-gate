@@ -17,6 +17,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # arbitrary comment
     # Use staging environment for staging branch or when manually dispatching to staging
     environment: ${{ (github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging') && 'staging' || 'production' }}
     # environment: production
