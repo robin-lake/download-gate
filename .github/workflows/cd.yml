@@ -71,6 +71,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          VITE_API_URL: https://${{ vars.API_SUBDOMAIN }}.${{ vars.DOMAIN_NAME }}
         run: npm run ${{ steps.stage.outputs.stage == 'staging' && 'build:staging' || 'build' }}
 
       - name: CDK synth
