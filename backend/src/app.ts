@@ -19,6 +19,13 @@ const corsOrigins = process.env.CORS_ORIGINS
 app.use(cors({
   origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins,
   credentials: true,
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'traceparent',
+    'tracestate',
+    'baggage',
+  ],
 }));
 
 // Clerk auth: attaches auth state to request for getAuth(req) in routes

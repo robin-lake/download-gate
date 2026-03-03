@@ -12,7 +12,6 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import {
   HttpApi,
-  CorsHttpMethod,
   DomainName,
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
@@ -181,25 +180,8 @@ export class BackendStack extends cdk.Stack {
 
     const api = new HttpApi(this, 'DownloadGateApi', {
       defaultIntegration: integration,
-      corsPreflight: {
-        allowOrigins: corsOrigins,
-        allowMethods: [
-          CorsHttpMethod.GET,
-          CorsHttpMethod.POST,
-          CorsHttpMethod.PUT,
-          CorsHttpMethod.PATCH,
-          CorsHttpMethod.DELETE,
-          CorsHttpMethod.OPTIONS,
-        ],
-        allowHeaders: [
-          'Content-Type',
-          'Authorization',
-          // OpenTelemetry W3C trace context (required when OTEL/ADOT propagates trace headers from browser)
-          'traceparent',
-          'tracestate',
-          'baggage',
-        ],
-      },
+      // Do NOT set corsPreflight: API Gateway would override Lambda's CORS headers and only
+      // supports a single origin. Let Lambda/Express handle CORS so it can reflect the request origin.
       defaultDomainMapping: {
         domainName: apiDomainName,
       },
