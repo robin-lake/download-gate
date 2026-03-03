@@ -21,8 +21,6 @@ export class FrontendStack extends cdk.Stack {
     const {domainName, siteSubDomain} = props;
     const siteDomain = `${siteSubDomain}.${domainName}`;
 
-    // The code that defines your stack goes here
-
     const bucket = new s3.Bucket(this, 'DownloadGateFrontendBucket', {
       bucketName: siteDomain,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
