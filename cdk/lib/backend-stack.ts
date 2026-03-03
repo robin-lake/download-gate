@@ -183,7 +183,14 @@ export class BackendStack extends cdk.Stack {
           CorsHttpMethod.DELETE,
           CorsHttpMethod.OPTIONS,
         ],
-        allowHeaders: ['Content-Type', 'Authorization'],
+        allowHeaders: [
+          'Content-Type',
+          'Authorization',
+          // OpenTelemetry W3C trace context (required when OTEL/ADOT propagates trace headers from browser)
+          'traceparent',
+          'tracestate',
+          'baggage',
+        ],
       },
       defaultDomainMapping: {
         domainName: apiDomainName,
