@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './components/Header/Header';
 import Dashboard from './pages/Dashboard/Dashboard';
 import NewDownloadGate from './pages/NewDownloadGate/NewDownloadGate';
 import Users from './pages/Users';

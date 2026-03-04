@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import {Link } from 'react-router-dom';
+
 import './Dashboard.scss';
 // import SmartLinkCard from './SmartLinkCard/SmartLinkCard';
 import DownloadGateCard from './DownloadGateCard/DownloadGateCard';
@@ -207,7 +209,9 @@ export default function Dashboard() {
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  New Download Gate
+                  <Link to="/new-download-gate">
+                    New Download Gate
+                  </Link>
                 </button>
               )}
             </div>
