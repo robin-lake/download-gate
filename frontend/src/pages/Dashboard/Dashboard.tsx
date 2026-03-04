@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import './Dashboard.scss';
-import SmartLinkCard from './SmartLinkCard/SmartLinkCard';
+// import SmartLinkCard from './SmartLinkCard/SmartLinkCard';
+import DownloadGateCard from './DownloadGateCard/DownloadGateCard';
+import type { DownloadGate } from './DownloadGateCard/DownloadGateCard';
 
+// type TabId = 'smart-links' | 'download-gates';
 type TabId = 'smart-links' | 'download-gates';
 
 const MOCK_STATS = {
@@ -61,6 +64,35 @@ const MOCK_SMART_LINKS = [
   },
 ];
 
+const MOCK_DOWNLOAD_GATES: DownloadGate[] = [
+  {
+    id: '1',
+    title: 'Lilotus',
+    subtitle: 'Saxy Sax',
+    thumbnailUrl: 'https://picsum.photos/seed/lilotus/80/80',
+    visits: 33,
+    downloads: 0,
+    emailsCaptured: 0,
+  },
+  {
+    id: '2',
+    title: 'Lotus Grrl',
+    subtitle: 'In My Mind',
+    thumbnailUrl: 'https://picsum.photos/seed/lotus/80/80',
+    visits: 12,
+    downloads: 4,
+    emailsCaptured: 2,
+  },
+  {
+    id: '3',
+    title: 'New Release',
+    subtitle: 'Single - Out Now',
+    visits: 8,
+    downloads: 1,
+    emailsCaptured: 0,
+  },
+];
+
 function StatCard({
   title,
   value,
@@ -106,7 +138,8 @@ function StatCard({
 
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<TabId>('smart-links');
+  const [activeTab, setActiveTab] = useState<TabId>('download-gates');
+  const [downloadGates, setDownloadGates] = useState<DownloadGate[]>(MOCK_DOWNLOAD_GATES);
 
   return (
     <div className="dashboard">
@@ -134,13 +167,13 @@ export default function Dashboard() {
 
         <div className="dashboard__panel">
           <div className="dashboard__tabs">
-            <button
+            {/* <button
               type="button"
               onClick={() => setActiveTab('smart-links')}
               className={`dashboard__tab ${activeTab === 'smart-links' ? 'dashboard__tab--active' : ''}`}
             >
               Smart Links
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={() => setActiveTab('download-gates')}
@@ -178,7 +211,7 @@ export default function Dashboard() {
                 </button>
               )}
             </div>
-
+{/* 
             {activeTab === 'smart-links' && (
               <div className="dashboard__list">
                 {MOCK_SMART_LINKS.map((entry) => (
@@ -186,8 +219,14 @@ export default function Dashboard() {
                   <SmartLinkCard key={entry.id} entry={entry} />
                 ))}
               </div>
-            )}
-            {activeTab === 'download-gates' && (
+            )} */}
+            {activeTab === 'download-gates' && downloadGates.length ? (
+              <div className="download-gates">
+                {downloadGates.map((gate) => (
+                  <DownloadGateCard key={gate.id} downloadGate={gate} />
+                ))}
+              </div>
+            ) : (
               <div className="dashboard__empty">
                 <p>No download gates yet.</p>
                 <p>Create one with the button above.</p>

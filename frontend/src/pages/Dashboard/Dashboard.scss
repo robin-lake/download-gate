@@ -216,6 +216,12 @@
   gap: 1rem;
 }
 
+.download-gates {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .dashboard__empty {
   padding: 3rem 1rem;
   text-align: center;
