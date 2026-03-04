@@ -2,7 +2,47 @@ import {useState} from 'react';
 
 import type { DownloadGate } from './DownloadGateCard/DownloadGateCard';
 import type { SmartLink } from './SmartLinkCard/SmartLinkCard';
+import type { DashboardCardStat } from './StatCard';
 type TabId = 'smart-links' | 'download-gates';
+export type DashboardStats = Record<'smart-links' | 'download-gates', DashboardCardStat[]> 
+
+const MOCK_STATS:DashboardStats = {
+  'smart-links':[
+   {
+    title: 'Visits',
+    value: 10402,
+    subtitle: '+0 in last 7 Days',
+  },
+   {
+    title: 'Clicks',
+    value: 3000,
+    subtitle: '+0 in last 7 Days',
+    showInfo: true,
+  },
+   {
+    title: 'Fans',
+    value: 10,
+    subtitle: '+0 in last 7 Days',
+  },
+  ],
+  'download-gates': [
+  {
+    title: 'Visits',
+    value: 999,
+    subtitle: '+0 in last 7 Days',
+  },
+  {
+    title: 'Downloads',
+    value: 999,
+    subtitle: '+0 in last 7 Days',
+  },
+  {
+    title: 'New Followers',
+    value: 999,
+    subtitle: '+0 in last 7 Days',
+  },
+  ]
+};
 
 const MOCK_DOWNLOAD_GATES: DownloadGate[] = [
   {
@@ -89,6 +129,7 @@ export function useGetDashboardState(){
   const [activeTab, setActiveTab] = useState<TabId>('download-gates');
   const [downloadGates, setDownloadGates] = useState<DownloadGate[]>(MOCK_DOWNLOAD_GATES);
   const [smartLinks, setSmartLinks] = useState<SmartLink[]>(MOCK_SMART_LINKS);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats>(MOCK_STATS);
 
   return {
     activeTab,
@@ -96,6 +137,8 @@ export function useGetDashboardState(){
     downloadGates,
     setDownloadGates,
     smartLinks,
-    setSmartLinks
+    setSmartLinks,
+    dashboardStats,
+    setDashboardStats
   }
 }

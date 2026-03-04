@@ -1,16 +1,18 @@
-export default function StatCard({
-  title,
-  value,
-  subtitle,
-  locked,
-  showInfo,
-}: {
-  title: string;
-  value: string;
-  subtitle?: string;
-  locked?: boolean;
-  showInfo?: boolean;
-}) {
+export interface DashboardCardStat {
+    title: string;
+    value: number;
+    subtitle?: string;
+    showInfo?: boolean;
+}
+
+export interface DashboardCardStats {
+    
+}
+
+export default function StatCard(
+    props: DashboardCardStat 
+) {
+    const {title, value, subtitle, showInfo} = props;
   return (
     <div className="dashboard__stat-card">
       <div className="dashboard__stat-header">
@@ -24,16 +26,7 @@ export default function StatCard({
         )}
       </div>
       <p className="dashboard__stat-value">{value}</p>
-      {locked ? (
-        <div className="dashboard__stat-locked">
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm2-2a2 2 0 014 0v2H7V7z" clipRule="evenodd" />
-          </svg>
-          <span>Unlock To Grow</span>
-        </div>
-      ) : (
-        subtitle && <p className="dashboard__stat-subtitle">{subtitle}</p>
-      )}
+        {subtitle && <p className="dashboard__stat-subtitle">{subtitle}</p>}
     </div>
   );
 }

@@ -6,24 +6,14 @@ import DownloadGateCard from './DownloadGateCard/DownloadGateCard';
 import StatCard from './StatCard';
 import { useGetDashboardState } from './dashboardState';
 
-const MOCK_STATS = {
-  visits: { value: '10,402', change: '+0 in last 7 Days' },
-  clicks: { value: '3,344', change: '+0 in last 7 Days' },
-  lifetimeFans: { value: '0', locked: true },
-};
-
-
-
-
 
 export default function Dashboard() {
   const {
     activeTab, 
     setActiveTab, 
     downloadGates, 
-    setDownloadGates,
     smartLinks,
-    setSmartLinks
+    dashboardStats
   } = useGetDashboardState();
 
   return (
@@ -32,22 +22,33 @@ export default function Dashboard() {
         <h1 className="dashboard__title">Dashboard</h1>
 
         <div className="dashboard__stats">
-          <StatCard
-            title="Visits"
-            value={MOCK_STATS.visits.value}
-            subtitle={MOCK_STATS.visits.change}
-          />
-          <StatCard
-            title="Clicks"
-            value={MOCK_STATS.clicks.value}
-            subtitle={MOCK_STATS.clicks.change}
-          />
-          <StatCard
-            title="Lifetime Fans"
-            value={MOCK_STATS.lifetimeFans.value}
-            locked={MOCK_STATS.lifetimeFans.locked}
-            showInfo
-          />
+          {activeTab === "smart-links" && (
+            <>
+              {dashboardStats['smart-links'].map((card, index) => (
+                <StatCard
+                  key={index}
+                  title={card.title}
+                  value={card.value}
+                  subtitle={card.subtitle}
+                  showInfo={card.showInfo}
+                />
+              ))}
+            </>
+          )}
+          {activeTab === "download-gates" && (
+            <>
+              {dashboardStats['download-gates'].map((card, index) => (
+                <StatCard
+                  key={index}
+                  title={card.title}
+                  value={card.value}
+                  subtitle={card.subtitle}
+                  showInfo={card.showInfo}
+                />
+              ))}
+            </>
+          )}
+
         </div>
 
         <div className="dashboard__panel">
