@@ -7,7 +7,7 @@ function ActionIcon({ label }: { label: string }) {
     </button>
   );
 }
-export interface SmartLinkEntry {
+export interface SmartLink {
   id: string;
   title: string;
   subtitle: string;
@@ -21,7 +21,7 @@ export interface SmartLinkEntry {
 }
 
 interface SmartLinkCardProps {
-  entry: SmartLinkEntry;
+  entry: SmartLink;
 }
 
 export default function SmartLinkCard({ entry }: SmartLinkCardProps) {
