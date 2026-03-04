@@ -1,6 +1,6 @@
-#Download Gate#
+# Download Gate #
 
-###Deploying via AWS CDK###
+### Deploying via AWS CDK ###
 To configue the app for deployment via the AWS CDK, first add the following lines to your environment variables file in `cdk/.env`:
 ```
 DOMAIN_NAME=your-domain
@@ -21,7 +21,7 @@ cd cdk
 npx cdk deploy DownloadGateBackendStack
 ```
 
-###Setting Up CI/CD###
+### Setting Up CI/CD ###
 In order to set up CI/CD, add these lines to your variables file in `cdk/.env`:
 
 ```

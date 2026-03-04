@@ -32,8 +32,9 @@ The system stores **users** (auth/identity), **download gates** (gate a download
 | Attribute        | Type   | Constraints | Notes                          |
 |-----------------|--------|-------------|--------------------------------|
 | `id`            | string | PK, required| Unique gate id                 |
-| `title`         | string | required    | Display title                  |
-| `subtitle`      | string | optional    |                                |
+| `user_id`       | string | FK, required| From user table                |
+| `artist_name`   | string | required    | Artist name                    |
+| `title`         | string | required    | Song title                     |
 | `thumbnail_url` | string | optional    | URL                            |
 | `visits`        | number | required    | Count                          |
 | `downloads`     | number | required    | Count                          |
@@ -50,6 +51,7 @@ The system stores **users** (auth/identity), **download gates** (gate a download
 | Attribute        | Type   | Constraints | Notes                          |
 |-----------------|--------|-------------|--------------------------------|
 | `id`            | string | PK, required| Unique link id                 |
+| `user_id`       | string | FK, required| From user table                |
 | `title`         | string | required    |                                |
 | `subtitle`      | string | optional    |                                |
 | `engagement`    | string | optional    | Summary text                   |
