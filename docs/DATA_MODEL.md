@@ -8,7 +8,7 @@ Backend entities, attributes, keys, and relationships. Keep this in sync with Dy
 
 ## Overview
 
-The system stores **users** (auth/identity), **download gates** (gate a download behind fan actions), **gate steps** (per-gate requirements: follow/save on Spotify, SoundCloud, Instagram, etc., or email capture), and **smart links** (multi-platform links with visits/clicks). Download gates and smart links are owned by users. Each download gate has an ordered list of **gate steps**; each step is one service type (e.g. Spotify, Email capture) with its own configurable options and targets (URLs, profiles, etc.).
+The system stores **users** (auth/identity), **download gates** (gate a download behind fan actions), **gate steps** (per-gate requirements: follow/save on Spotify, SoundCloud, Instagram, etc., or email capture), and **smart links** (multi-platform links with visits/clicks). Download gates and smart links are owned by users. Each download gate has an ordered list of **gate steps**; each step is one service type (e.g. Spotify, Email capture) with its own configurable options and targets (URLs, profiles, etc.). Each smart link has many **smart link destinations** (one per platform link shown on the page); each destination has a URL and a per-link click count.
 
 ---
 
@@ -81,23 +81,42 @@ Use a single flexible `config` object (e.g. JSON/document) so new service types 
 
 ### SmartLink
 
-| Attribute        | Type   | Constraints | Notes                          |
-|-----------------|--------|-------------|--------------------------------|
-| `id`            | string | PK, required| Unique link id                 |
-| `user_id`       | string | FK, required| From user table                |
-| `title`         | string | required    |                                |
-| `subtitle`      | string | optional    |                                |
-| `engagement`    | string | optional    | Summary text                   |
-| `total_visits`  | number | required    |                                |
-| `clicks`        | number | required    |                                |
-| `emails_captured` | number | required  |                                |
-| `platforms`     | array  | optional    |                                |
-| `url`           | string | required    | Short link URL                 |
-| `copy_label`    | string | optional    | UI label                       |
+A multi-platform landing page: fans visit the smart link URL and can click through to external platforms (Spotify, Bandcamp, etc.). Visits and per-destination clicks are recorded; email capture is not used for smart links.
+
+| Attribute       | Type   | Constraints | Notes |
+|-----------------|--------|-------------|--------|
+| `id`            | string | PK, required | Unique smart link id. |
+| `user_id`       | string | FK, required | Owner (artist). |
+| `title`         | string | required    | e.g. song title. |
+| `subtitle`      | string | optional    | e.g. artist name or subtitle. |
+| `cover_image_url` | string | optional  | Thumbnail/art for the page. |
+| `short_url`     | string | required    | Public URL for the smart link (e.g. downloadgate.com/xyz). |
+| `total_visits`  | number | required    | Number of times the smart link page was visited. |
+| `total_clicks`  | number | required    | Total clicks across all destinations (can be derived from **SmartLinkDestination** click counts). |
+| `copy_label`    | string | optional    | UI label (e.g. "COPY LINK"). |
 
 - **Storage**: Not yet implemented (frontend mocks in `dashboardState.ts` and `SmartLinkCard.tsx`).
 - **Keys**: TBD (e.g. `user_id` (PK) + `link_id` (SK)).
-- **Relationships**: Will belong to one User (owner).
+- **Relationships**: Belongs to one User (owner). Has many **SmartLinkDestinations** (one row per platform link shown on the page).
+
+---
+
+### SmartLinkDestination
+
+A single platform link listed on a smart link page (e.g. “Play on Spotify”, “Buy on Bandcamp”). Each row stores the destination URL and the number of clicks on that link.
+
+| Attribute        | Type   | Constraints | Notes |
+|------------------|--------|-------------|--------|
+| `id`             | string | PK, required | Unique destination id. |
+| `smart_link_id`  | string | FK, required | Parent SmartLink. |
+| `platform_name`  | string | required    | Display name (e.g. `Spotify`, `Bandcamp`, `Apple Music`). |
+| `url`            | string | required    | Destination URL for this platform. |
+| `click_count`    | number | required    | Number of clicks on this link (non-negative integer). |
+| `action_label`   | string | optional    | Button label (e.g. `Play`, `Buy`); can be derived from platform in business logic. |
+
+- **Storage**: TBD (e.g. DynamoDB: partition key `smart_link_id`, sort key `id`; or separate table with `smart_link_id` as partition key).
+- **Keys**: Must support “all destinations for a smart link” (e.g. query by `smart_link_id`).
+- **Relationships**: Belongs to one SmartLink. No direct link to User; access via smart link.
 
 ---
 
@@ -105,7 +124,7 @@ Use a single flexible `config` object (e.g. JSON/document) so new service types 
 
 | In the database (persisted) | In business logic (code) |
 |-----------------------------|---------------------------|
-| Entity definitions and relationships (User, DownloadGate, GateStep, SmartLink). | Validation rules (e.g. “if `follow_enabled` then `target_urls` must be non-empty”). |
+| Entity definitions and relationships (User, DownloadGate, GateStep, SmartLink, SmartLinkDestination). | Validation rules (e.g. “if `follow_enabled` then `target_urls` must be non-empty”). |
 | Per-step config: `service_type`, `step_order`, `is_skippable`, and the `config` object (all options and target URLs/IDs the user chose). |
 | Resolved provider IDs if you choose to store them (e.g. Spotify playlist ID derived from URL). | API integrations: calling Spotify, SoundCloud, Instagram, etc. to verify follows, saves, pre-saves; OAuth and API keys. |
 | | URL parsing and resolution (user pastes URL → backend resolves to provider entity ID). |
@@ -120,7 +139,8 @@ Each provider (Spotify, SoundCloud, Instagram, Email capture, etc.) should have 
 - Every DownloadGate and SmartLink must have an owning user (to be enforced when tables exist).
 - Every GateStep must reference a valid DownloadGate (`gate_id`).
 - `step_order` is unique per gate (no duplicate order for the same `gate_id`).
-- Counts (`visits`, `downloads`, `emails_captured`, `clicks`) are non-negative integers.
+- Counts (`visits`, `downloads`, `emails_captured` on DownloadGate, `total_visits`, `total_clicks` on SmartLink, `click_count` on SmartLinkDestination) are non-negative integers.
+- Every SmartLinkDestination must reference a valid SmartLink (`smart_link_id`).
 - `user_id` values must match the auth provider’s user id (e.g. Clerk).
 - For each GateStep, `config` must conform to the shape for its `service_type` (enforced in business logic).
 
@@ -128,5 +148,6 @@ Each provider (Spotify, SoundCloud, Instagram, Email capture, etc.) should have 
 
 ## Changelog
 
+- **2025-03-04**: Added SmartLinkDestination entity (url, click_count, smart_link_id, platform_name); updated SmartLink (removed emails_captured and platforms array, added short_url, total_clicks, cover_image_url; no email capture for smart links).
 - **2025-03-04**: Added GateStep entity and service-type config (email_capture, spotify, soundcloud, instagram, bandcamp, apple_music, deezer); added “Database vs business logic” section; linked DownloadGate to GateSteps.
 - **2025-03-04**: Initial doc; User table from `createTables.ts`; DownloadGate and SmartLink from frontend types (not yet in DB).
