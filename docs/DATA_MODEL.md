@@ -29,20 +29,22 @@ The system stores **users** (auth/identity), **download gates** (gate a download
 
 ### DownloadGate
 
-| Attribute        | Type   | Constraints | Notes                          |
-|-----------------|--------|-------------|--------------------------------|
-| `id`            | string | PK, required| Unique gate id                 |
-| `user_id`       | string | FK, required| From user table                |
-| `artist_name`   | string | required    | Artist name                    |
-| `title`         | string | required    | Song title                     |
-| `thumbnail_url` | string | optional    | URL                            |
-| `visits`        | number | required    | Count                          |
-| `downloads`     | number | required    | Count                          |
-| `emails_captured` | number | required  | Count                          |
+| Attribute         | Type   | Constraints | Notes |
+|------------------|--------|-------------|--------|
+| `id`             | string | PK, required | Unique gate id. |
+| `user_id`        | string | FK, required | From user table. |
+| `artist_name`    | string | required    | Artist name. |
+| `title`          | string | required    | Song title. |
+| `thumbnail_url`  | string | optional    | URL. |
+| `audio_file_url` | string | required    | **Reference only.** The actual audio file is stored in object storage (e.g. S3); this field holds the download URL (or S3 key if you issue signed URLs server-side). Max file size 100 MB (enforced at upload in business logic). |
+| `visits`         | number | required    | Count. |
+| `downloads`     | number | required    | Count. |
+| `emails_captured` | number | required   | Count. |
 
 - **Storage**: Not yet implemented (frontend uses mocks; see `frontend/src/pages/Dashboard/dashboardState.ts` and `DownloadGateCard.tsx`).
 - **Keys**: TBD (e.g. `user_id` (PK) + `gate_id` (SK), or single-table design).
 - **Relationships**: Belongs to one User (owner). Has many **GateSteps** (ordered); each step is one service type with its own config.
+- **Audio file**: Store the file in S3 (or similar); store only the URL or object key in `audio_file_url`. Do not store the binary in the database.
 
 ---
 
@@ -127,6 +129,7 @@ A single platform link listed on a smart link page (e.g. “Play on Spotify”, 
 | Entity definitions and relationships (User, DownloadGate, GateStep, SmartLink, SmartLinkDestination). | Validation rules (e.g. “if `follow_enabled` then `target_urls` must be non-empty”). |
 | Per-step config: `service_type`, `step_order`, `is_skippable`, and the `config` object (all options and target URLs/IDs the user chose). |
 | Resolved provider IDs if you choose to store them (e.g. Spotify playlist ID derived from URL). | API integrations: calling Spotify, SoundCloud, Instagram, etc. to verify follows, saves, pre-saves; OAuth and API keys. |
+| References to binary assets only (e.g. `audio_file_url` for DownloadGate). Actual files (audio, images) live in object storage (e.g. S3). | Upload flow: validate file type/size (e.g. audio max 100 MB), upload to S3, store resulting URL or key in DB. Download: issue redirect or signed URL from stored reference. |
 | | URL parsing and resolution (user pastes URL → backend resolves to provider entity ID). |
 | | Orchestration: presenting steps to the fan, checking completion, granting download. |
 
@@ -143,11 +146,13 @@ Each provider (Spotify, SoundCloud, Instagram, Email capture, etc.) should have 
 - Every SmartLinkDestination must reference a valid SmartLink (`smart_link_id`).
 - `user_id` values must match the auth provider’s user id (e.g. Clerk).
 - For each GateStep, `config` must conform to the shape for its `service_type` (enforced in business logic).
+- DownloadGate audio file: max 100 MB; file stored in object storage (e.g. S3), not in the database; only URL or key stored in `audio_file_url`.
 
 ---
 
 ## Changelog
 
+- **2025-03-04**: DownloadGate: added `audio_file_url` (reference only; file in S3, max 100 MB); documented “binary assets in object storage, not DB” in Database vs business logic.
 - **2025-03-04**: Added SmartLinkDestination entity (url, click_count, smart_link_id, platform_name); updated SmartLink (removed emails_captured and platforms array, added short_url, total_clicks, cover_image_url; no email capture for smart links).
 - **2025-03-04**: Added GateStep entity and service-type config (email_capture, spotify, soundcloud, instagram, bandcamp, apple_music, deezer); added “Database vs business logic” section; linked DownloadGate to GateSteps.
 - **2025-03-04**: Initial doc; User table from `createTables.ts`; DownloadGate and SmartLink from frontend types (not yet in DB).
