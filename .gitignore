@@ -17,6 +17,8 @@ frontend/.env.staging
 backend/.env.production
 backend/.env.staging
 backend/.env.development
+cdk/.env.staging
+cdk/.env
 
 # Local env files with secrets (copy from .env.example and fill in)
 .env

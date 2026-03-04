@@ -9,7 +9,7 @@ const stage = process.env.STAGE || 'production';
 if (stage === 'staging') {
   dotenv.config({ path: '.env.staging' });
 } else {
-  dotenv.config();
+  dotenv.config(); // .env (production)
 }
 
 const app = new cdk.App();
@@ -38,13 +38,13 @@ new BackendStack(app, backendStackId, {
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY as string,
   env,
   // Optional: set GRAFANA_CLOUD_OTLP_ENDPOINT and GRAFANA_CLOUD_OTLP_AUTH to send traces to Grafana Cloud
-  grafanaCloudOtlp:
-    process.env.GRAFANA_CLOUD_OTLP_ENDPOINT && process.env.GRAFANA_CLOUD_OTLP_AUTH
-      ? {
-          endpoint: process.env.GRAFANA_CLOUD_OTLP_ENDPOINT,
-          auth: process.env.GRAFANA_CLOUD_OTLP_AUTH,
-        }
-      : undefined,
+  // grafanaCloudOtlp:
+  //   process.env.GRAFANA_CLOUD_OTLP_ENDPOINT && process.env.GRAFANA_CLOUD_OTLP_AUTH
+  //     ? {
+  //         endpoint: process.env.GRAFANA_CLOUD_OTLP_ENDPOINT,
+  //         auth: process.env.GRAFANA_CLOUD_OTLP_AUTH,
+  //       }
+  //     : undefined,
 });
 
 // // Only create CI IAM stack for production (trust policy allows both main and staging)
