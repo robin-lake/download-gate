@@ -9,7 +9,7 @@ const stage = process.env.STAGE || 'production';
 if (stage === 'staging') {
   dotenv.config({ path: '.env.staging' });
 } else {
-  dotenv.config();
+  dotenv.config(); // .env (production)
 }
 
 const app = new cdk.App();
