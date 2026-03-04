@@ -1,0 +1,15 @@
+---
+description: Use the documented data model when implementing backend types, APIs, or DB access
+globs: backend/**/*.ts, docs/DATA_MODEL.md, frontend/src/**/dashboardState.ts
+alwaysApply: false
+---
+
+# Data model as source of truth
+
+When implementing or changing backend entities, API shapes, or database access:
+
+1. **Consult** `docs/DATA_MODEL.md` for the canonical list of entities, attributes, keys, and relationships.
+2. **Keep names aligned** with the data model: use the same entity and attribute names in TypeScript types, API request/response bodies, and DB keys (e.g. DynamoDB attribute names).
+3. **After adding or changing entities**, update `docs/DATA_MODEL.md` (attributes, keys, relationships, changelog) so the doc stays the single source of truth.
+
+Methodology for working with the data model (including how to iterate with AI) is in `docs/DATA_MODEL_METHODOLOGY.md`.
