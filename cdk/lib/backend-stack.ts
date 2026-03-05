@@ -1,12 +1,13 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as path from 'path';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
@@ -73,19 +74,51 @@ export class BackendStack extends cdk.Stack {
       certificate: apiCertificate,
     });
 
-    // Users table: matches schema from backend createTables (user_id PK, status GSI)
-    // Table name must be unique per account/region, so namespace by stage
-    const usersTable = new dynamodb.Table(this, 'UsersTable', {
-      tableName: stage === 'staging' ? 'Users-staging' : 'Users',
-      partitionKey: { name: 'user_id', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-    usersTable.addGlobalSecondaryIndex({
-      indexName: 'status-index',
-      partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
-    });
+    // Table schemas: single source of truth in backend/src/db/tableDefinitions.json
+    // (also used by backend scripts/createTables.ts for local DynamoDB)
+    const tableDefsPath = path.join(__dirname, '../../backend/src/db/tableDefinitions.json');
+    const tableDefs = JSON.parse(fs.readFileSync(tableDefsPath, 'utf-8')) as Array<{
+      tableName: string;
+      envKey?: string;
+      partitionKey: { name: string; type: string };
+      sortKey?: { name: string; type: string };
+      gsis?: Array<{
+        indexName: string;
+        partitionKey: { name: string; type: string };
+        sortKey?: { name: string; type: string };
+      }>;
+    }>;
+
+    const tables: Record<string, dynamodb.Table> = {};
+    for (const def of tableDefs) {
+      const tableName = stage === 'staging' ? `${def.tableName}-staging` : def.tableName;
+      const table = new dynamodb.Table(this, `${def.tableName.replace(/-/g, '')}Table`, {
+        tableName,
+        partitionKey: { name: def.partitionKey.name, type: dynamodb.AttributeType.STRING },
+        sortKey: def.sortKey
+          ? { name: def.sortKey.name, type: dynamodb.AttributeType.STRING }
+          : undefined,
+        billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      });
+      def.gsis?.forEach((gsi) => {
+        table.addGlobalSecondaryIndex({
+          indexName: gsi.indexName,
+          partitionKey: { name: gsi.partitionKey.name, type: dynamodb.AttributeType.STRING },
+          sortKey: gsi.sortKey
+            ? { name: gsi.sortKey.name, type: dynamodb.AttributeType.STRING }
+            : undefined,
+          projectionType: dynamodb.ProjectionType.ALL,
+        });
+      });
+      tables[def.tableName] = table;
+    }
+
+    const tableEnv: Record<string, string> = {};
+    for (const def of tableDefs) {
+      const envKey = def.envKey;
+      if (envKey) tableEnv[envKey] = tables[def.tableName].tableName;
+    }
 
     const backendFn = new NodejsFunction(this, 'BackendFn', {
       entry: path.join(__dirname, '../../backend/src/lambda.ts'),
@@ -98,7 +131,7 @@ export class BackendStack extends cdk.Stack {
         CORS_ORIGINS: corsOrigins.join(','),
         CLERK_SECRET_KEY: clerkSecretKey,
         CLERK_PUBLISHABLE_KEY: clerkPublishableKey,
-        USERS_TABLE: usersTable.tableName,
+        ...tableEnv,
       },
       tracing: lambda.Tracing.ACTIVE,
       // ADOT layer + AWS_LAMBDA_EXEC_WRAPPER removed: caused init/runtime issues (e.g. /opt/otel-instrument
@@ -153,7 +186,9 @@ export class BackendStack extends cdk.Stack {
     //   );
     // }
 
-    usersTable.grantReadWriteData(backendFn);
+    for (const def of tableDefs) {
+      tables[def.tableName].grantReadWriteData(backendFn);
+    }
 
     const integration = new HttpLambdaIntegration('LambdaIntegration', backendFn);
 

@@ -26,6 +26,6 @@ How tables and data access are organized for maintainability. Aligns with `docs/
 
 ## Where to add code
 
-- **New table**: Add a table definition in `scripts/createTables.ts`, then add `backend/src/models/<entity>.ts` with types and static access methods.
+- **New table**: Add an entry to `backend/src/db/tableDefinitions.json` (include `envKey`, e.g. `MY_TABLE` for Lambda env). Then add `backend/src/models/<entity>.ts` with types and static access methods. CDK reads the same JSON and creates the table on deploy; the createTables script uses it for local DynamoDB.
 - **New access pattern**: Add a method on the relevant model (e.g. `findByShortUrl` on SmartLinkModel using the GSI).
 - **New route**: Add a route file under `backend/src/routes/` and mount it in `app.ts`; use the model for DB access.

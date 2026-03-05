@@ -6,16 +6,14 @@ import {
   ListTablesCommand,
   type CreateTableCommandInput,
 } from '@aws-sdk/client-dynamodb';
+import {
+  tableDefinitions,
+  tableEnvKeys,
+  type TableDefinition,
+} from '../db/tableDefinitions.js';
 
 const REGION = process.env['AWS_REGION'] ?? 'local-env';
 const ENDPOINT = process.env['DYNAMODB_ENDPOINT'] ?? 'http://localhost:8000';
-
-const USERS_TABLE = process.env['USERS_TABLE'] ?? 'Users';
-const DOWNLOAD_GATES_TABLE = process.env['DOWNLOAD_GATES_TABLE'] ?? 'DownloadGates';
-const GATE_STEPS_TABLE = process.env['GATE_STEPS_TABLE'] ?? 'GateSteps';
-const SMART_LINKS_TABLE = process.env['SMART_LINKS_TABLE'] ?? 'SmartLinks';
-const SMART_LINK_DESTINATIONS_TABLE =
-  process.env['SMART_LINK_DESTINATIONS_TABLE'] ?? 'SmartLinkDestinations';
 
 const client = new DynamoDBClient({
   region: REGION,
@@ -46,6 +44,55 @@ const gsiThroughput = useOnDemand
       },
     };
 
+function collectAttributeNames(def: TableDefinition): Set<string> {
+  const names = new Set<string>();
+  names.add(def.partitionKey.name);
+  if (def.sortKey) names.add(def.sortKey.name);
+  def.gsis?.forEach((gsi) => {
+    names.add(gsi.partitionKey.name);
+    if (gsi.sortKey) names.add(gsi.sortKey.name);
+  });
+  return names;
+}
+
+function toCreateTableInput(def: TableDefinition, tableName: string): CreateTableCommandInput {
+  const attrNames = collectAttributeNames(def);
+  const attributeDefinitions = Array.from(attrNames).map((name) => ({
+    AttributeName: name,
+    AttributeType: 'S' as const,
+  }));
+
+  const keySchema = [
+    { AttributeName: def.partitionKey.name, KeyType: 'HASH' as const },
+    ...(def.sortKey ? [{ AttributeName: def.sortKey.name, KeyType: 'RANGE' as const }] : []),
+  ];
+
+  const globalSecondaryIndexes = def.gsis?.map((gsi) => ({
+    IndexName: gsi.indexName,
+    KeySchema: [
+      { AttributeName: gsi.partitionKey.name, KeyType: 'HASH' as const },
+      ...(gsi.sortKey ? [{ AttributeName: gsi.sortKey.name, KeyType: 'RANGE' as const }] : []),
+    ],
+    Projection: { ProjectionType: 'ALL' as const },
+    ...gsiThroughput,
+  }));
+
+  return {
+    TableName: tableName,
+    AttributeDefinitions: attributeDefinitions,
+    KeySchema: keySchema,
+    ...(globalSecondaryIndexes?.length ? { GlobalSecondaryIndexes: globalSecondaryIndexes } : {}),
+    BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
+    ...throughput,
+  };
+}
+
+function getTableName(def: TableDefinition): string {
+  const envKey = def.envKey ?? tableEnvKeys[def.tableName];
+  const fromEnv = envKey ? process.env[envKey] : undefined;
+  return fromEnv ?? def.tableName;
+}
+
 async function tableExists(tableName: string): Promise<boolean> {
   try {
     await client.send(new DescribeTableCommand({ TableName: tableName }));
@@ -65,115 +112,12 @@ async function createTable(params: CreateTableCommandInput): Promise<void> {
   console.log(`Table "${tableName}" created.`);
 }
 
-async function createUsersTable(): Promise<void> {
-  await createTable({
-    TableName: USERS_TABLE,
-    AttributeDefinitions: [
-      { AttributeName: 'user_id', AttributeType: 'S' },
-      { AttributeName: 'status', AttributeType: 'S' },
-    ],
-    KeySchema: [{ AttributeName: 'user_id', KeyType: 'HASH' }],
-    GlobalSecondaryIndexes: [
-      {
-        IndexName: 'status-index',
-        KeySchema: [{ AttributeName: 'status', KeyType: 'HASH' }],
-        Projection: { ProjectionType: 'ALL' },
-        ...gsiThroughput,
-      },
-    ],
-    BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
-    ...throughput,
-  });
-}
-
-async function createDownloadGatesTable(): Promise<void> {
-  await createTable({
-    TableName: DOWNLOAD_GATES_TABLE,
-    AttributeDefinitions: [
-      { AttributeName: 'user_id', AttributeType: 'S' },
-      { AttributeName: 'gate_id', AttributeType: 'S' },
-    ],
-    KeySchema: [
-      { AttributeName: 'user_id', KeyType: 'HASH' },
-      { AttributeName: 'gate_id', KeyType: 'RANGE' },
-    ],
-    GlobalSecondaryIndexes: [
-      {
-        IndexName: 'gate_id-index',
-        KeySchema: [{ AttributeName: 'gate_id', KeyType: 'HASH' }],
-        Projection: { ProjectionType: 'ALL' },
-        ...gsiThroughput,
-      },
-    ],
-    BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
-    ...throughput,
-  });
-}
-
-async function createGateStepsTable(): Promise<void> {
-  await createTable({
-    TableName: GATE_STEPS_TABLE,
-    AttributeDefinitions: [
-      { AttributeName: 'gate_id', AttributeType: 'S' },
-      { AttributeName: 'step_id', AttributeType: 'S' },
-    ],
-    KeySchema: [
-      { AttributeName: 'gate_id', KeyType: 'HASH' },
-      { AttributeName: 'step_id', KeyType: 'RANGE' },
-    ],
-    BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
-    ...throughput,
-  });
-}
-
-async function createSmartLinksTable(): Promise<void> {
-  await createTable({
-    TableName: SMART_LINKS_TABLE,
-    AttributeDefinitions: [
-      { AttributeName: 'user_id', AttributeType: 'S' },
-      { AttributeName: 'link_id', AttributeType: 'S' },
-      { AttributeName: 'short_url', AttributeType: 'S' },
-    ],
-    KeySchema: [
-      { AttributeName: 'user_id', KeyType: 'HASH' },
-      { AttributeName: 'link_id', KeyType: 'RANGE' },
-    ],
-    GlobalSecondaryIndexes: [
-      {
-        IndexName: 'short_url-index',
-        KeySchema: [{ AttributeName: 'short_url', KeyType: 'HASH' }],
-        Projection: { ProjectionType: 'ALL' },
-        ...gsiThroughput,
-      },
-    ],
-    BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
-    ...throughput,
-  });
-}
-
-async function createSmartLinkDestinationsTable(): Promise<void> {
-  await createTable({
-    TableName: SMART_LINK_DESTINATIONS_TABLE,
-    AttributeDefinitions: [
-      { AttributeName: 'smart_link_id', AttributeType: 'S' },
-      { AttributeName: 'id', AttributeType: 'S' },
-    ],
-    KeySchema: [
-      { AttributeName: 'smart_link_id', KeyType: 'HASH' },
-      { AttributeName: 'id', KeyType: 'RANGE' },
-    ],
-    BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
-    ...throughput,
-  });
-}
-
 async function main(): Promise<void> {
   console.log(`DynamoDB endpoint: ${ENDPOINT}`);
-  await createUsersTable();
-  await createDownloadGatesTable();
-  await createGateStepsTable();
-  await createSmartLinksTable();
-  await createSmartLinkDestinationsTable();
+  for (const def of tableDefinitions) {
+    const tableName = getTableName(def);
+    await createTable(toCreateTableInput(def, tableName));
+  }
   const list = await client.send(new ListTablesCommand({}));
   console.log('Tables:', list.TableNames ?? []);
 }
