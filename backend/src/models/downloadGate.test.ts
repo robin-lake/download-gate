@@ -14,7 +14,9 @@ beforeEach(() => {
 describe('DownloadGateModel', () => {
   describe('create', () => {
     it('sends PutCommand with correct table, item shape, and condition', async () => {
-      mockSend.mockResolvedValueOnce(undefined);
+      // create() calls generateUniqueShortCode() → findByShortCode() (Query), then PutCommand
+      mockSend.mockResolvedValueOnce({ Items: [] }); // findByShortCode: no existing short_code
+      mockSend.mockResolvedValueOnce(undefined); // PutCommand
 
       const result = await DownloadGateModel.create({
         user_id: 'user-1',
@@ -23,8 +25,8 @@ describe('DownloadGateModel', () => {
         audio_file_url: 'https://example.com/audio.mp3',
       });
 
-      expect(mockSend).toHaveBeenCalledTimes(1);
-      const [command] = mockSend.mock.calls[0];
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      const [command] = mockSend.mock.calls[1]; // second call is PutCommand
       expect(command.input.TableName).toBeDefined();
       expect(command.input.Item).toMatchObject({
         user_id: 'user-1',
@@ -46,7 +48,9 @@ describe('DownloadGateModel', () => {
     });
 
     it('uses provided gate_id when given', async () => {
-      mockSend.mockResolvedValueOnce(undefined);
+      // create() still calls generateUniqueShortCode() when no short_code provided
+      mockSend.mockResolvedValueOnce({ Items: [] }); // findByShortCode
+      mockSend.mockResolvedValueOnce(undefined); // PutCommand
 
       const result = await DownloadGateModel.create({
         user_id: 'user-1',
@@ -57,7 +61,7 @@ describe('DownloadGateModel', () => {
       });
 
       expect(result.gate_id).toBe('my-gate-123');
-      expect(mockSend.mock.calls[0][0].input.Item.gate_id).toBe('my-gate-123');
+      expect(mockSend.mock.calls[1][0].input.Item.gate_id).toBe('my-gate-123');
     });
   });
 
