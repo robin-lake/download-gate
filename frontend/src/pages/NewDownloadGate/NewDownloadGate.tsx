@@ -161,6 +161,7 @@ export default function NewDownloadGate() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openStep, setOpenStep] = useState(1);
   const {
     register,
     control,
@@ -221,7 +222,13 @@ export default function NewDownloadGate() {
         onSubmit={handleSubmit(onSubmit)}
         noValidate
       >
-        <ToggleMenuItem stepNumber={1} title="Source" completed>
+        <ToggleMenuItem
+          stepNumber={1}
+          title="Source"
+          completed
+          expanded={openStep === 1}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 1 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Enter source/track URL for your title
           </p>
@@ -248,7 +255,11 @@ export default function NewDownloadGate() {
             )}
           </div>
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(2)}
+            >
               Next
             </Button>
             <Button type="button" variant="outline">
@@ -257,7 +268,13 @@ export default function NewDownloadGate() {
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={2} title="Genre" completed defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={2}
+          title="Genre"
+          completed
+          expanded={openStep === 2}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 2 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Select genre of your title.
           </p>
@@ -299,13 +316,22 @@ export default function NewDownloadGate() {
             )}
           />
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(3)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={3} title="Upload">
+        <ToggleMenuItem
+          stepNumber={3}
+          title="Upload"
+          expanded={openStep === 3}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 3 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Upload cover art (optional) and the audio file you would like to share with fans.
           </p>
@@ -372,13 +398,23 @@ export default function NewDownloadGate() {
             />
           </div>
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(4)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={4} title="Title" completed defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={4}
+          title="Title"
+          completed
+          expanded={openStep === 4}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 4 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Enter artist and title for your release.
           </p>
@@ -405,13 +441,23 @@ export default function NewDownloadGate() {
             />
           </div>
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(5)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={5} title="Design" completed defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={5}
+          title="Design"
+          completed
+          expanded={openStep === 5}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 5 : 0)}
+        >
           <p className="new-download-gate__instruction">Customize design</p>
           <Controller
             name="design"
@@ -438,13 +484,22 @@ export default function NewDownloadGate() {
             )}
           />
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(6)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={6} title="Gate steps" defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={6}
+          title="Gate steps"
+          expanded={openStep === 6}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 6 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Choose how you want fans to support this track.
           </p>
@@ -480,13 +535,23 @@ export default function NewDownloadGate() {
             )}
           />
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(7)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={7} title="Link URL" completed defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={7}
+          title="Link URL"
+          completed
+          expanded={openStep === 7}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 7 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Choose a short code for your gate link. Use only letters, numbers,
             hyphens and underscores (3–32 characters). Leave blank to auto-generate
@@ -527,13 +592,22 @@ export default function NewDownloadGate() {
             </p>
           </div>
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(8)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={8} title="Tracking pixels" defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={8}
+          title="Tracking pixels"
+          expanded={openStep === 8}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 8 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Enter pixels for tracking and retargeting fans that visit your
             download gate.
@@ -570,13 +644,22 @@ export default function NewDownloadGate() {
             </CardContent>
           </Card>
           <div className="new-download-gate__actions">
-            <Button type="button" variant="default">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setOpenStep(9)}
+            >
               Next
             </Button>
           </div>
         </ToggleMenuItem>
 
-        <ToggleMenuItem stepNumber={9} title="Confirmation" defaultExpanded={false}>
+        <ToggleMenuItem
+          stepNumber={9}
+          title="Confirmation"
+          expanded={openStep === 9}
+          onExpandedChange={(expanded) => setOpenStep(expanded ? 9 : 0)}
+        >
           <p className="new-download-gate__instruction">
             Review and create your download gate.
           </p>

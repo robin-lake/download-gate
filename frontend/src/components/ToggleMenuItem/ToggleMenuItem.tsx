@@ -6,6 +6,9 @@ export interface ToggleMenuItemProps {
   title: string;
   completed?: boolean;
   defaultExpanded?: boolean;
+  /** Controlled: when provided with onExpandedChange, parent controls open state (e.g. accordion). */
+  expanded?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
   children: ReactNode;
 }
 
@@ -14,16 +17,28 @@ export default function ToggleMenuItem({
   title,
   completed = false,
   defaultExpanded = false,
+  expanded: controlledExpanded,
+  onExpandedChange,
   children,
 }: ToggleMenuItemProps) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+  const isControlled = controlledExpanded !== undefined && onExpandedChange !== undefined;
+  const isExpanded = isControlled ? controlledExpanded : internalExpanded;
+
+  const setExpanded = (value: boolean) => {
+    if (isControlled) {
+      onExpandedChange?.(value);
+    } else {
+      setInternalExpanded(value);
+    }
+  };
 
   return (
     <div className={`toggle-menu-item ${isExpanded ? 'toggle-menu-item--expanded' : ''}`}>
       <button
         type="button"
         className="toggle-menu-item__header"
-        onClick={() => setIsExpanded((prev) => !prev)}
+        onClick={() => setExpanded(!isExpanded)}
         aria-expanded={isExpanded}
         aria-controls={`toggle-menu-item-content-${stepNumber}`}
         id={`toggle-menu-item-header-${stepNumber}`}
