@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   isDownloadGateResponse,
   isListDownloadGatesResponse,
+  isDownloadGateStatsResponse,
   type DownloadGateResponse,
   type ListDownloadGatesResponse,
+  type DownloadGateStatsResponse,
 } from './types';
 
 const validGate: DownloadGateResponse = {
@@ -111,5 +113,69 @@ describe('isListDownloadGatesResponse', () => {
   it('returns false when nextToken is not null or string', () => {
     expect(isListDownloadGatesResponse({ items: [], nextToken: 0 })).toBe(false);
     expect(isListDownloadGatesResponse({ items: [], nextToken: {} })).toBe(false);
+  });
+});
+
+describe('isDownloadGateStatsResponse', () => {
+  const validStats: DownloadGateStatsResponse = {
+    total_visits: 10,
+    total_downloads: 3,
+    total_emails_captured: 2,
+  };
+
+  it('returns true for a valid DownloadGateStatsResponse', () => {
+    expect(isDownloadGateStatsResponse(validStats)).toBe(true);
+  });
+
+  it('returns true for zeros', () => {
+    expect(
+      isDownloadGateStatsResponse({
+        total_visits: 0,
+        total_downloads: 0,
+        total_emails_captured: 0,
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for null', () => {
+    expect(isDownloadGateStatsResponse(null)).toBe(false);
+  });
+
+  it('returns false for non-object', () => {
+    expect(isDownloadGateStatsResponse(42)).toBe(false);
+    expect(isDownloadGateStatsResponse('string')).toBe(false);
+    expect(isDownloadGateStatsResponse([])).toBe(false);
+  });
+
+  it('returns false when a count is not a number', () => {
+    expect(isDownloadGateStatsResponse({ ...validStats, total_visits: '10' })).toBe(false);
+    expect(isDownloadGateStatsResponse({ ...validStats, total_downloads: null })).toBe(false);
+    expect(isDownloadGateStatsResponse({ ...validStats, total_emails_captured: undefined })).toBe(
+      false
+    );
+  });
+
+  it('returns false when a count is not an integer', () => {
+    expect(isDownloadGateStatsResponse({ ...validStats, total_visits: 1.5 })).toBe(false);
+  });
+
+  it('returns false when a count is negative', () => {
+    expect(isDownloadGateStatsResponse({ ...validStats, total_visits: -1 })).toBe(false);
+    expect(isDownloadGateStatsResponse({ ...validStats, total_downloads: -1 })).toBe(false);
+  });
+
+  it('returns false when object is missing required fields', () => {
+    expect(
+      isDownloadGateStatsResponse({
+        total_visits: 10,
+        total_downloads: 3,
+      })
+    ).toBe(false);
+    expect(
+      isDownloadGateStatsResponse({
+        total_visits: 10,
+        total_emails_captured: 2,
+      })
+    ).toBe(false);
   });
 });

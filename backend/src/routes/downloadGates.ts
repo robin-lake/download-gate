@@ -38,6 +38,24 @@ export interface CreateDownloadGateBody {
 router.use(requireAuth);
 
 /**
+ * GET /api/download-gates/stats
+ * Return summed visits, downloads, and emails_captured for all gates owned by the authenticated user.
+ */
+router.get('/stats', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = getClerkUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+    const stats = await DownloadGateModel.getStatsByUserId(userId);
+    res.status(200).json(stats);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/download-gates
  * List download gates for the authenticated user. Supports limit and cursor pagination.
  */

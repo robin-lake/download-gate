@@ -181,6 +181,77 @@ describe('DownloadGateModel', () => {
     });
   });
 
+  describe('getStatsByUserId', () => {
+    it('returns zeros when user has no gates', async () => {
+      mockSend.mockResolvedValueOnce({ Items: [] });
+
+      const result = await DownloadGateModel.getStatsByUserId('user-1');
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      expect(mockSend.mock.calls[0][0].input.KeyConditionExpression).toContain('user_id');
+      expect(mockSend.mock.calls[0][0].input.ProjectionExpression).toContain('visits');
+      expect(mockSend.mock.calls[0][0].input.ProjectionExpression).toContain('downloads');
+      expect(mockSend.mock.calls[0][0].input.ProjectionExpression).toContain('emails_captured');
+      expect(result).toEqual({
+        total_visits: 0,
+        total_downloads: 0,
+        total_emails_captured: 0,
+      });
+    });
+
+    it('sums visits, downloads, and emails_captured from all gates', async () => {
+      mockSend.mockResolvedValueOnce({
+        Items: [
+          { visits: 10, downloads: 3, emails_captured: 2 },
+          { visits: 5, downloads: 1, emails_captured: 0 },
+        ],
+      });
+
+      const result = await DownloadGateModel.getStatsByUserId('user-1');
+
+      expect(result).toEqual({
+        total_visits: 15,
+        total_downloads: 4,
+        total_emails_captured: 2,
+      });
+    });
+
+    it('paginates and sums when LastEvaluatedKey is present', async () => {
+      mockSend
+        .mockResolvedValueOnce({
+          Items: [{ visits: 1, downloads: 0, emails_captured: 1 }],
+          LastEvaluatedKey: { user_id: 'user-1', gate_id: 'gate-1' },
+        })
+        .mockResolvedValueOnce({
+          Items: [{ visits: 2, downloads: 1, emails_captured: 0 }],
+        });
+
+      const result = await DownloadGateModel.getStatsByUserId('user-1');
+
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        total_visits: 3,
+        total_downloads: 1,
+        total_emails_captured: 1,
+      });
+    });
+
+    it('coerces non-number or missing count fields to zero', async () => {
+      mockSend.mockResolvedValueOnce({
+        Items: [
+          { visits: 1, downloads: undefined, emails_captured: null },
+          {},
+        ],
+      });
+
+      const result = await DownloadGateModel.getStatsByUserId('user-1');
+
+      expect(result.total_visits).toBe(1);
+      expect(result.total_downloads).toBe(0);
+      expect(result.total_emails_captured).toBe(0);
+    });
+  });
+
   describe('incrementCount', () => {
     it('sends UpdateCommand with correct key and expression for visits', async () => {
       const updated = {

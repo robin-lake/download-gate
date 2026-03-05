@@ -3,9 +3,11 @@ import request from 'supertest';
 import type { Express } from 'express';
 
 const mockListByUserId = vi.fn();
+const mockGetStatsByUserId = vi.fn();
 vi.mock('../models/downloadGate.js', () => ({
   default: {
     listByUserId: (...args: unknown[]) => mockListByUserId(...args),
+    getStatsByUserId: (...args: unknown[]) => mockGetStatsByUserId(...args),
     create: vi.fn(),
   },
 }));
@@ -110,5 +112,55 @@ describe('GET /api/download-gates', () => {
     await request(app).get(`/api/download-gates?cursor=${encodeURIComponent(cursor)}`);
 
     expect(mockListByUserId).toHaveBeenCalledWith('user-1', { limit: 50, exclusiveStartKey: lastKey });
+  });
+});
+
+describe('GET /api/download-gates/stats', () => {
+  it('returns 401 when not authenticated', async () => {
+    mockGetAuth.mockReturnValue({ isAuthenticated: false, userId: null });
+
+    const res = await request(app).get('/api/download-gates/stats');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: 'Authentication required' });
+    expect(mockGetStatsByUserId).not.toHaveBeenCalled();
+  });
+
+  it('returns 200 and summed stats for authenticated user', async () => {
+    mockGetAuth.mockReturnValue({ isAuthenticated: true, userId: 'user-123' });
+    mockGetStatsByUserId.mockResolvedValueOnce({
+      total_visits: 100,
+      total_downloads: 25,
+      total_emails_captured: 10,
+    });
+
+    const res = await request(app).get('/api/download-gates/stats');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      total_visits: 100,
+      total_downloads: 25,
+      total_emails_captured: 10,
+    });
+    expect(mockGetStatsByUserId).toHaveBeenCalledTimes(1);
+    expect(mockGetStatsByUserId).toHaveBeenCalledWith('user-123');
+  });
+
+  it('returns zeros when user has no gates', async () => {
+    mockGetAuth.mockReturnValue({ isAuthenticated: true, userId: 'user-empty' });
+    mockGetStatsByUserId.mockResolvedValueOnce({
+      total_visits: 0,
+      total_downloads: 0,
+      total_emails_captured: 0,
+    });
+
+    const res = await request(app).get('/api/download-gates/stats');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      total_visits: 0,
+      total_downloads: 0,
+      total_emails_captured: 0,
+    });
   });
 });

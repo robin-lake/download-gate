@@ -73,6 +73,13 @@ export interface ListByUserResult {
   lastEvaluatedKey?: Record<string, unknown>;
 }
 
+/** Aggregated stats for all gates belonging to a user. */
+export interface UserDownloadGateStats {
+  total_visits: number;
+  total_downloads: number;
+  total_emails_captured: number;
+}
+
 class DownloadGateModel {
   static async create(input: CreateDownloadGateInput): Promise<DownloadGate> {
     const now = new Date().toISOString();
@@ -193,6 +200,48 @@ class DownloadGateModel {
         lastEvaluatedKey: response.LastEvaluatedKey as Record<string, unknown>,
       }),
     };
+  }
+
+  /**
+   * Get summed visits, downloads, and emails_captured for all gates owned by a user.
+   * Uses a single Query with ProjectionExpression to fetch only count fields, then
+   * paginates and sums in memory (DynamoDB has no native aggregation).
+   */
+  static async getStatsByUserId(userId: string): Promise<UserDownloadGateStats> {
+    const result: UserDownloadGateStats = {
+      total_visits: 0,
+      total_downloads: 0,
+      total_emails_captured: 0,
+    };
+    let exclusiveStartKey: Record<string, unknown> | undefined;
+
+    do {
+      const response = await docClient.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'user_id = :user_id',
+          ExpressionAttributeValues: { ':user_id': userId },
+          ProjectionExpression: 'visits, downloads, emails_captured',
+          ExclusiveStartKey: exclusiveStartKey,
+          Limit: 100,
+        })
+      );
+      const items = (response.Items ?? []) as Pick<
+        DownloadGate,
+        'visits' | 'downloads' | 'emails_captured'
+      >[];
+      for (const item of items) {
+        result.total_visits += Number(item.visits) || 0;
+        result.total_downloads += Number(item.downloads) || 0;
+        result.total_emails_captured += Number(item.emails_captured) || 0;
+      }
+      exclusiveStartKey =
+        response.LastEvaluatedKey != null
+          ? (response.LastEvaluatedKey as Record<string, unknown>)
+          : undefined;
+    } while (exclusiveStartKey != null);
+
+    return result;
   }
 
   static async update(

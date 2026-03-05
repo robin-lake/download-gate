@@ -4,6 +4,7 @@ import type { DownloadGate } from './DownloadGateCard/DownloadGateCard';
 import type { SmartLink } from './SmartLinkCard/SmartLinkCard';
 import type { DashboardCardStat } from './StatCard';
 import { useGetDownloadGates, mapDownloadGateResponseToCard } from '@/network/downloadGates/getDownloadGates';
+import { useGetDownloadGatesStats } from '@/network/downloadGates/getDownloadGateStats';
 type TabId = 'smart-links' | 'download-gates';
 export type DashboardStats = Record<'smart-links' | 'download-gates', DashboardCardStat[]> 
 
@@ -106,6 +107,7 @@ export function useGetDashboardState() {
   );
   const [smartLinks, setSmartLinks] = useState<SmartLink[]>(MOCK_SMART_LINKS);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>(MOCK_STATS);
+  const downloadGatesStats = useGetDownloadGatesStats();
 
   return {
     activeTab,
@@ -116,5 +118,6 @@ export function useGetDashboardState() {
     setSmartLinks,
     dashboardStats,
     setDashboardStats,
+    downloadGatesStats,
   };
 }

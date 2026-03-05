@@ -79,3 +79,26 @@ export function isGateStepsResponse(d: unknown): d is GateStepsResponse {
   const o = d as Record<string, unknown>;
   return Array.isArray(o['steps']);
 }
+
+/** Response shape of GET /api/download-gates/stats (summed across all user gates). */
+export interface DownloadGateStatsResponse {
+  total_visits: number;
+  total_downloads: number;
+  total_emails_captured: number;
+}
+
+export function isDownloadGateStatsResponse(d: unknown): d is DownloadGateStatsResponse {
+  if (typeof d !== 'object' || d === null) return false;
+  const o = d as Record<string, unknown>;
+  return (
+    typeof o['total_visits'] === 'number' &&
+    typeof o['total_downloads'] === 'number' &&
+    typeof o['total_emails_captured'] === 'number' &&
+    Number.isInteger(o['total_visits']) &&
+    Number.isInteger(o['total_downloads']) &&
+    Number.isInteger(o['total_emails_captured']) &&
+    (o['total_visits'] as number) >= 0 &&
+    (o['total_downloads'] as number) >= 0 &&
+    (o['total_emails_captured'] as number) >= 0
+  );
+}
