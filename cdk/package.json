@@ -12,7 +12,8 @@
     "cdk": "cdk",
     "deploy": "cdk deploy --all --require-approval never",
     "deploy:staging": "cd ../frontend && npm run build:staging && cd ../cdk && STAGE=staging cdk deploy --all --require-approval never",
-    "deploy:production": "cd ../frontend && npm run build && cd ../cdk && STAGE=production cdk deploy --all --require-approval never"
+    "deploy:production": "cd ../frontend && npm run build && cd ../cdk && STAGE=production cdk deploy --all --require-approval never",
+    "destroy:staging": "STAGE=staging npx cdk destroy --all"
   },
   "devDependencies": {
     "@types/jest": "^30",

@@ -69,6 +69,9 @@ export class BackendStack extends cdk.Stack {
       domainName: apiDomain,
       validation: acm.CertificateValidation.fromDns(zone),
     });
+    // Retain certificate on stack destroy so deletion order (DomainName → Certificate) doesn't
+    // cause "Certificate is in use" failures; you can delete the certificate manually in ACM if needed.
+    apiCertificate.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
 
     const apiDomainName = new DomainName(this, 'ApiDomainName', {
       domainName: apiDomain,
