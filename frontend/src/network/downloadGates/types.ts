@@ -59,3 +59,23 @@ export function isListDownloadGatesResponse(d: unknown): d is ListDownloadGatesR
   if (o['nextToken'] !== null && typeof o['nextToken'] !== 'string') return false;
   return true;
 }
+
+/** Gate step shape from API (snake_case). Used on the public gate page. */
+export interface GateStepResponse {
+  gate_id: string;
+  step_id: string;
+  service_type: string;
+  step_order: number;
+  is_skippable: boolean;
+  config: Record<string, unknown>;
+}
+
+export interface GateStepsResponse {
+  steps: GateStepResponse[];
+}
+
+export function isGateStepsResponse(d: unknown): d is GateStepsResponse {
+  if (typeof d !== 'object' || d === null) return false;
+  const o = d as Record<string, unknown>;
+  return Array.isArray(o['steps']);
+}
