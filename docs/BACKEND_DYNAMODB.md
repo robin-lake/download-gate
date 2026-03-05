@@ -24,6 +24,14 @@ How tables and data access are organized for maintainability. Aligns with `docs/
 4. **Ids**: Use UUIDs for `gate_id`, `step_id`, `link_id`, destination `id`; can be generated in the model or route.
 5. **Env**: Each table has an env var (e.g. `DOWNLOAD_GATES_TABLE`); defaults for local dev are set in the create script and in the model.
 
+## Deploy-time check: tables must exist
+
+On every `cdk deploy`, a Custom Resource runs and verifies that all DynamoDB tables (from `tableDefinitions.json`) exist in the account. If you delete tables **outside** CloudFormation (e.g. in the AWS console), the next deploy will **fail** with a message like:
+
+`DynamoDB tables were deleted outside CloudFormation: Users, DownloadGates, ... Run "cdk destroy" for this stack, then "cdk deploy" to recreate tables.`
+
+**To fix:** Run `cdk destroy DownloadGateBackendStack` (or your backend stack name), then `cdk deploy` again. That removes the stack state and recreates all resources, including the tables. Do not delete prod tables manually; manage them only via CDK.
+
 ## Where to add code
 
 - **New table**: Add an entry to `backend/src/db/tableDefinitions.json` (include `envKey`, e.g. `MY_TABLE` for Lambda env). Then add `backend/src/models/<entity>.ts` with types and static access methods. CDK reads the same JSON and creates the table on deploy; the createTables script uses it for local DynamoDB.

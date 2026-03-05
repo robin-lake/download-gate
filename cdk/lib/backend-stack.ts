@@ -16,6 +16,7 @@ import {
   DomainName,
 } from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
+import * as cr from 'aws-cdk-lib/custom-resources';
 
 /** Optional Grafana Cloud OTLP destination (traces sent in addition to X-Ray). */
 export interface GrafanaCloudOtlpConfig {
@@ -188,6 +189,41 @@ export class BackendStack extends cdk.Stack {
 
     for (const def of tableDefs) {
       tables[def.tableName].grantReadWriteData(backendFn);
+    }
+
+    // Custom resource: on every Create/Update, verify all DynamoDB tables exist.
+    // If tables were deleted outside CloudFormation (e.g. in the console), this fails
+    // so the deploy fails instead of succeeding with a broken app.
+    const expectedTableNames = tableDefs.map((d) =>
+      stage === 'staging' ? `${d.tableName}-staging` : d.tableName
+    );
+    const tableCheckHandler = new NodejsFunction(this, 'DynamoTableCheckHandler', {
+      entry: path.join(__dirname, '../lambdas/dynamo-table-check.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      bundling: { forceDockerBundling: false },
+      timeout: cdk.Duration.seconds(60),
+    });
+    tableCheckHandler.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['dynamodb:DescribeTable'],
+        resources: ['*'],
+      })
+    );
+    const tableCheckProvider = new cr.Provider(this, 'DynamoTableCheckProvider', {
+      onEventHandler: tableCheckHandler,
+    });
+    const tableCheckResource = new cdk.CustomResource(this, 'DynamoTableCheck', {
+      serviceToken: tableCheckProvider.serviceToken,
+      properties: {
+        TableNames: expectedTableNames,
+        // Change each deploy so the custom resource runs on every update (not just when TableNames change)
+        DeployTime: new Date().toISOString(),
+      },
+    });
+    for (const def of tableDefs) {
+      tableCheckResource.node.addDependency(tables[def.tableName]);
     }
 
     const integration = new HttpLambdaIntegration('LambdaIntegration', backendFn);
