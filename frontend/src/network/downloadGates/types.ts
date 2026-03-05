@@ -7,6 +7,7 @@ export interface DownloadGateResponse {
   gate_id: string;
   artist_name: string;
   title: string;
+  short_code?: string;
   thumbnail_url?: string;
   audio_file_url: string;
   visits: number;
@@ -28,6 +29,7 @@ export function isDownloadGateResponse(d: unknown): d is DownloadGateResponse {
     typeof o['visits'] === 'number' &&
     typeof o['downloads'] === 'number' &&
     typeof o['emails_captured'] === 'number' &&
+    (o['short_code'] === undefined || typeof o['short_code'] === 'string') &&
     (o['thumbnail_url'] === undefined || typeof o['thumbnail_url'] === 'string') &&
     (o['created_at'] === undefined || typeof o['created_at'] === 'string') &&
     (o['updated_at'] === undefined || typeof o['updated_at'] === 'string')
@@ -40,6 +42,7 @@ export interface CreateDownloadGateRequest {
   title: string;
   audio_file_url: string;
   thumbnail_url?: string;
+  short_code?: string;
 }
 
 /** Response shape of GET /api/download-gates (list for current user) */

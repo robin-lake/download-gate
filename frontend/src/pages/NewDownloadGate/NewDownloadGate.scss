@@ -210,11 +210,18 @@
   &__link-url {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 0;
+    margin-bottom: 8px;
     padding: 10px 14px;
     background: #fafafa;
     border-radius: 6px;
+    border: 1px solid #e5e5e5;
+  }
+
+  &__link-url-prefix {
+    font-size: 14px;
+    color: #737373;
+    flex-shrink: 0;
   }
 
   &__link-url-text,
@@ -228,10 +235,17 @@
     border: none;
     background: transparent;
     font-family: inherit;
+    min-width: 0;
 
     &:focus {
       outline: none;
     }
+  }
+
+  &__hint {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #737373;
   }
 
   &__link-url-edit {

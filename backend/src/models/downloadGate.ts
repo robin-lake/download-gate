@@ -10,11 +10,29 @@ import { docClient } from '../config/dynamodb.js';
 
 const TABLE_NAME = process.env['DOWNLOAD_GATES_TABLE'] ?? 'DownloadGates';
 
+/** Allowed characters for short_code: alphanumeric, hyphen, underscore. Length 3–32. */
+export const SHORT_CODE_REGEX = /^[a-zA-Z0-9_-]{3,32}$/;
+
+export function isShortCodeValid(code: string): boolean {
+  return SHORT_CODE_REGEX.test(code);
+}
+
+/** Generate a random 8-character alphanumeric short code. */
+export function generateShortCode(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export interface DownloadGate {
   user_id: string;
   gate_id: string;
   artist_name: string;
   title: string;
+  short_code?: string;
   thumbnail_url?: string;
   audio_file_url: string;
   visits: number;
@@ -28,6 +46,7 @@ export interface CreateDownloadGateInput {
   user_id: string;
   artist_name: string;
   title: string;
+  short_code?: string;
   thumbnail_url?: string;
   audio_file_url: string;
   gate_id?: string;
@@ -36,6 +55,7 @@ export interface CreateDownloadGateInput {
 export interface UpdateDownloadGateInput {
   artist_name?: string;
   title?: string;
+  short_code?: string;
   thumbnail_url?: string;
   audio_file_url?: string;
   visits?: number;
@@ -57,12 +77,28 @@ class DownloadGateModel {
   static async create(input: CreateDownloadGateInput): Promise<DownloadGate> {
     const now = new Date().toISOString();
     const gateId = input.gate_id ?? uuidv4();
+    let shortCode: string | undefined = input.short_code?.trim();
+    if (shortCode !== undefined && shortCode !== '') {
+      if (!isShortCodeValid(shortCode)) {
+        throw new Error(
+          'short_code must be 3–32 characters and only contain letters, numbers, hyphens, and underscores'
+        );
+      }
+      const existing = await this.findByShortCode(shortCode);
+      if (existing) {
+        throw new Error('short_code is already in use');
+      }
+    } else {
+      shortCode = await this.generateUniqueShortCode();
+    }
+
     const item: DownloadGate = {
       user_id: input.user_id,
       gate_id: gateId,
       artist_name: input.artist_name,
       title: input.title,
-      thumbnail_url: input.thumbnail_url,
+      short_code: shortCode,
+      ...(input.thumbnail_url !== undefined && { thumbnail_url: input.thumbnail_url }),
       audio_file_url: input.audio_file_url,
       visits: 0,
       downloads: 0,
@@ -80,6 +116,31 @@ class DownloadGateModel {
     );
 
     return item;
+  }
+
+  /** Generate a short_code that does not yet exist. */
+  static async generateUniqueShortCode(maxAttempts = 10): Promise<string> {
+    for (let i = 0; i < maxAttempts; i++) {
+      const code = generateShortCode();
+      const existing = await this.findByShortCode(code);
+      if (!existing) return code;
+    }
+    throw new Error('Could not generate a unique short_code');
+  }
+
+  /** Get a gate by short_code (uses GSI; for public URL lookup). */
+  static async findByShortCode(shortCode: string): Promise<DownloadGate | null> {
+    const response = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        IndexName: 'short_code-index',
+        KeyConditionExpression: 'short_code = :short_code',
+        ExpressionAttributeValues: { ':short_code': shortCode },
+        Limit: 1,
+      })
+    );
+    const item = response.Items?.[0];
+    return (item as DownloadGate) ?? null;
   }
 
   /** Get a gate by user_id and gate_id (primary key). */
@@ -128,7 +189,9 @@ class DownloadGateModel {
     );
     return {
       items: (response.Items as DownloadGate[]) ?? [],
-      lastEvaluatedKey: response.LastEvaluatedKey,
+      ...(response.LastEvaluatedKey != null && {
+        lastEvaluatedKey: response.LastEvaluatedKey as Record<string, unknown>,
+      }),
     };
   }
 

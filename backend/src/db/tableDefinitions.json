@@ -10,7 +10,10 @@
     "envKey": "DOWNLOAD_GATES_TABLE",
     "partitionKey": { "name": "user_id", "type": "S" },
     "sortKey": { "name": "gate_id", "type": "S" },
-    "gsis": [{ "indexName": "gate_id-index", "partitionKey": { "name": "gate_id", "type": "S" } }]
+    "gsis": [
+      { "indexName": "gate_id-index", "partitionKey": { "name": "gate_id", "type": "S" } },
+      { "indexName": "short_code-index", "partitionKey": { "name": "short_code", "type": "S" } }
+    ]
   },
   {
     "tableName": "GateSteps",

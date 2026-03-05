@@ -35,14 +35,15 @@ The system stores **users** (auth/identity), **download gates** (gate a download
 | `user_id`        | string | FK, required | From user table. |
 | `artist_name`    | string | required    | Artist name. |
 | `title`          | string | required    | Song title. |
+| `short_code`     | string | optional, unique | Custom URL slug (e.g. `qsro6b`, `saxy-sax`). Used for public URL: `example.com/:short_code`. Alphanumeric, hyphen, underscore; 3–32 chars. Unique across all gates. GSI `short_code-index`. |
 | `thumbnail_url`  | string | optional    | URL. |
 | `audio_file_url` | string | required    | **Reference only.** The actual audio file is stored in object storage (e.g. S3); this field holds the download URL (or S3 key if you issue signed URLs server-side). Max file size 100 MB (enforced at upload in business logic). |
 | `visits`         | number | required    | Count. |
 | `downloads`     | number | required    | Count. |
 | `emails_captured` | number | required   | Count. |
 
-- **Storage**: Not yet implemented (frontend uses mocks; see `frontend/src/pages/Dashboard/dashboardState.ts` and `DownloadGateCard.tsx`).
-- **Keys**: TBD (e.g. `user_id` (PK) + `gate_id` (SK), or single-table design).
+- **Storage**: DynamoDB table `DownloadGates` (see `backend/src/db/tableDefinitions.json`).
+- **Keys**: Partition key `user_id` (HASH), sort key `gate_id` (RANGE). GSI `gate_id-index` on `gate_id`; GSI `short_code-index` on `short_code` for public lookup by short URL.
 - **Relationships**: Belongs to one User (owner). Has many **GateSteps** (ordered); each step is one service type with its own config.
 - **Audio file**: Store the file in S3 (or similar); store only the URL or object key in `audio_file_url`. Do not store the binary in the database.
 
@@ -147,11 +148,13 @@ Each provider (Spotify, SoundCloud, Instagram, Email capture, etc.) should have 
 - `user_id` values must match the auth provider’s user id (e.g. Clerk).
 - For each GateStep, `config` must conform to the shape for its `service_type` (enforced in business logic).
 - DownloadGate audio file: max 100 MB; file stored in object storage (e.g. S3), not in the database; only URL or key stored in `audio_file_url`.
+- DownloadGate `short_code` is unique across all gates (enforced at create; optional; used for public short URL).
 
 ---
 
 ## Changelog
 
+- **2025-03-05**: DownloadGate: added `short_code` (optional, unique); GSI `short_code-index` for public URL lookup.
 - **2025-03-04**: DownloadGate: added `audio_file_url` (reference only; file in S3, max 100 MB); documented “binary assets in object storage, not DB” in Database vs business logic.
 - **2025-03-04**: Added SmartLinkDestination entity (url, click_count, smart_link_id, platform_name); updated SmartLink (removed emails_captured and platforms array, added short_url, total_clicks, cover_image_url; no email capture for smart links).
 - **2025-03-04**: Added GateStep entity and service-type config (email_capture, spotify, soundcloud, instagram, bandcamp, apple_music, deezer); added “Database vs business logic” section; linked DownloadGate to GateSteps.

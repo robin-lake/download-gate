@@ -26,6 +26,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import "./NewDownloadGate.scss";
 
+/** Short code: 3–32 chars, letters, numbers, hyphens, underscores only. */
+export const SHORT_CODE_PATTERN = /^[a-zA-Z0-9_-]{3,32}$/;
+
 export interface NewDownloadGateFormValues {
   sourceUrl: string;
   genre: string;
@@ -34,7 +37,7 @@ export interface NewDownloadGateFormValues {
   title: string;
   design: string;
   gateSteps: string[];
-  linkUrl: string;
+  shortCode: string;
   facebookPixelId: string;
   conversionApiToken: string;
   includeInNewReleases: boolean;
@@ -145,7 +148,7 @@ const defaultValues: NewDownloadGateFormValues = {
   title: "",
   design: "impact-light",
   gateSteps: [],
-  linkUrl: "https://downloadgate.com/it71zr",
+  shortCode: "",
   facebookPixelId: "",
   conversionApiToken: "",
   includeInNewReleases: false,
@@ -179,6 +182,7 @@ export default function NewDownloadGate() {
           title: data.title.trim(),
           audio_file_url: "", // TODO: set from file upload when implemented
           thumbnail_url: undefined,
+          short_code: data.shortCode.trim() ? data.shortCode.trim() : undefined,
         },
         { getToken }
       );
@@ -431,20 +435,43 @@ export default function NewDownloadGate() {
 
         <ToggleMenuItem stepNumber={7} title="Link URL" completed defaultExpanded={false}>
           <p className="new-download-gate__instruction">
-            Customize your link URL. Please note that link URLs for download
-            gates are permanent and cannot be changed or edited after the gate
-            has been created.
+            Choose a short code for your gate link. Use only letters, numbers,
+            hyphens and underscores (3–32 characters). Leave blank to auto-generate
+            one. This cannot be changed after the gate is created.
           </p>
-          <div className="new-download-gate__link-url">
-            <Input
-              type="text"
-              className="new-download-gate__link-url-input"
-              aria-label="Link URL"
-              {...register("linkUrl")}
-            />
-            <Button type="button" variant="outline" size="sm">
-              Edit
-            </Button>
+          <div className="new-download-gate__field">
+            <Label htmlFor="short-code">Short code</Label>
+            <div className="new-download-gate__link-url">
+              <span className="new-download-gate__link-url-prefix">
+                {typeof window !== "undefined" ? window.location.origin : ""}/
+              </span>
+              <Input
+                id="short-code"
+                type="text"
+                placeholder="e.g. saxy-sax or leave blank"
+                className="new-download-gate__link-url-input"
+                aria-label="Short code for link URL"
+                aria-invalid={Boolean(errors.shortCode)}
+                {...register("shortCode", {
+                  validate: (v) =>
+                    !v?.trim() ||
+                    SHORT_CODE_PATTERN.test(v.trim()) ||
+                    "Use 3–32 characters: letters, numbers, hyphens and underscores only",
+                })}
+              />
+            </div>
+            {errors.shortCode && (
+              <p className="new-download-gate__error">
+                {errors.shortCode.message}
+              </p>
+            )}
+            <p className="new-download-gate__hint">
+              Your gate will be at:{" "}
+              <strong>
+                {typeof window !== "undefined" ? window.location.origin : ""}/
+                {watch("shortCode")?.trim() || "…"}
+              </strong>
+            </p>
           </div>
           <div className="new-download-gate__actions">
             <Button type="button" variant="default">
@@ -546,7 +573,7 @@ export default function NewDownloadGate() {
               />
             </div>
             <div className="new-download-gate__field new-download-gate__field--row">
-              <Controller
+              {/* <Controller
                 name="includeInNewReleases"
                 control={control}
                 render={({ field }) => (
@@ -567,9 +594,9 @@ export default function NewDownloadGate() {
                     />
                   </>
                 )}
-              />
+              /> */}
             </div>
-            <div className="new-download-gate__field">
+            {/* <div className="new-download-gate__field">
               <Label htmlFor="conf-notes">Custom Notes:</Label>
               <Button type="button" variant="outline" size="sm">
                 Edit
@@ -581,7 +608,7 @@ export default function NewDownloadGate() {
                 aria-label="Custom Notes"
                 {...register("customNotes")}
               />
-            </div>
+            </div> */}
           </div>
           {errors.root?.message && (
             <p className="new-download-gate__error" role="alert">

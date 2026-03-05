@@ -32,6 +32,7 @@ export interface CreateDownloadGateBody {
   title: string;
   audio_file_url: string;
   thumbnail_url?: string;
+  short_code?: string;
 }
 
 router.use(requireAuth);
@@ -112,16 +113,26 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
       typeof body.thumbnail_url === 'string' && body.thumbnail_url.trim()
         ? body.thumbnail_url.trim()
         : undefined;
+    const shortCode =
+      typeof body.short_code === 'string' && body.short_code.trim()
+        ? body.short_code.trim()
+        : undefined;
     const gate = await DownloadGateModel.create({
       user_id: userId,
       artist_name: body.artist_name.trim(),
       title: body.title.trim(),
       audio_file_url: body.audio_file_url.trim() || '',
       ...(thumbnailUrl !== undefined && { thumbnail_url: thumbnailUrl }),
+      ...(shortCode !== undefined && shortCode !== '' && { short_code: shortCode }),
     });
 
     res.status(201).json(gate);
   } catch (err) {
+    const message = err instanceof Error ? err.message : '';
+    if (message.includes('short_code') || message.includes('unique short_code')) {
+      res.status(400).json({ error: message });
+      return;
+    }
     next(err);
   }
 });
