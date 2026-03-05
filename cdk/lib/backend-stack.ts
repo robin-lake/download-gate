@@ -124,6 +124,20 @@ export class BackendStack extends cdk.Stack {
       if (envKey) tableEnv[envKey] = tables[def.tableName].tableName;
     }
 
+    // Media bucket for cover art and audio (download gates). Omit in local dev; Lambda checks MEDIA_BUCKET.
+    const mediaBucket = new s3.Bucket(this, 'MediaBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      cors: [
+        {
+          allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.HEAD],
+          allowedOrigins: corsOrigins,
+          allowedHeaders: ['*'],
+        },
+      ],
+    });
+
     const backendFn = new NodejsFunction(this, 'BackendFn', {
       entry: path.join(__dirname, '../../backend/src/lambda.ts'),
       handler: 'handler',
@@ -135,6 +149,7 @@ export class BackendStack extends cdk.Stack {
         CORS_ORIGINS: corsOrigins.join(','),
         CLERK_SECRET_KEY: clerkSecretKey,
         CLERK_PUBLISHABLE_KEY: clerkPublishableKey,
+        MEDIA_BUCKET: mediaBucket.bucketName,
         ...tableEnv,
       },
       tracing: lambda.Tracing.ACTIVE,
@@ -193,6 +208,7 @@ export class BackendStack extends cdk.Stack {
     for (const def of tableDefs) {
       tables[def.tableName].grantReadWriteData(backendFn);
     }
+    mediaBucket.grantReadWrite(backendFn);
 
     // Custom resource: on every Create/Update, verify all DynamoDB tables exist.
     // If tables were deleted outside CloudFormation (e.g. in the console), this fails

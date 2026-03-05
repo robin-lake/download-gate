@@ -81,6 +81,23 @@ Then, add the following to your github environment variables:
 GRAFANA_CLOUD_OTLP_ENDPOINT={your-grafana-endpoint}
 ```
 
+### Cover art and audio uploads (media storage) ###
+
+Cover art and audio for download gates are stored in **object storage**. The backend uses a small abstraction so you can run the same code locally and in production.
+
+- **Why S3?** In production, media is stored in **Amazon S3**. S3 is a good fit: it scales with traffic, is cost-effective for binary blobs, integrates with your existing AWS/CDK setup, and supports private objects with short-lived signed URLs so you don’t expose the bucket. The same API works with **LocalStack** if you want a full S3-compatible stack locally.
+
+- **Local development (no AWS):** If `MEDIA_BUCKET` is not set (e.g. when running the backend with `npm run dev` and no bucket env), the backend uses **local filesystem storage**. Files are written under `backend/local-storage` and served at `GET /api/uploads/:key`. Set `STORAGE_BASE_URL` in `backend/.env.development` to your dev server (e.g. `http://localhost:3000`) so returned URLs work from the frontend. Optional: `LOCAL_STORAGE_DIR` overrides the directory (default `./local-storage`).
+
+- **Production (or LocalStack):** When the backend runs in Lambda, CDK sets `MEDIA_BUCKET` and `BASE_URL`. Uploads go to S3; the API returns stable URLs that point to `GET /api/media/stream?key=...`, which redirects to a presigned S3 URL so the bucket can stay private.
+
+**Upload endpoints (authenticated):**
+
+- `POST /api/media/upload-cover` — field `file`; image (JPEG, PNG, GIF, WebP); max 5 MB. Returns `{ url, key }` for `thumbnail_url`.
+- `POST /api/media/upload-audio` — field `file`; audio (MP3, WAV, FLAC, AAC, OGG); max 100 MB. Returns `{ url, key }` for `audio_file_url`.
+
+Use the returned `url` in the create/update download-gate payloads. No extra env is required for local dev beyond your usual backend URL and optional `STORAGE_BASE_URL`.
+
 ### Adding Music Provider Integrations ###
 
 Each of the music services requires an api key. Here are the steps for connecting them.

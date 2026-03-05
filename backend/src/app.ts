@@ -5,6 +5,7 @@ import { clerkMiddleware } from '@clerk/express';
 import userRoutes from './routes/users.js';
 import downloadGateRoutes from './routes/downloadGates.js';
 import publicGateRoutes from './routes/publicGates.js';
+import mediaRoutes, { serveLocalUploads } from './routes/media.js';
 import errorHandler from './middleware/errorHandler.js';
 import swaggerSpec from './swagger.js';
 
@@ -68,6 +69,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteT
 app.use('/api/users', userRoutes);
 app.use('/api/download-gates', downloadGateRoutes);
 app.use('/api/gates', publicGateRoutes);
+app.use('/api/media', mediaRoutes);
+// Local dev: serve uploaded files from disk when MEDIA_BUCKET is not set
+app.get('/api/uploads/*key', serveLocalUploads);
 
 // Error handling (must be last)
 app.use(errorHandler);

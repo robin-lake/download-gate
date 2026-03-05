@@ -17,6 +17,7 @@ frontend/.env.staging
 backend/.env.production
 backend/.env.staging
 backend/.env.development
+backend/local-storage
 cdk/.env.staging
 cdk/.env
 
