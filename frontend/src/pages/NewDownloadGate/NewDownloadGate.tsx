@@ -1,5 +1,8 @@
 import { useForm, Controller } from "react-hook-form";
+import { useAuth } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import ToggleMenuItem from "../../components/ToggleMenuItem/ToggleMenuItem";
+import { createDownloadGate } from "@/network/downloadGates/createDownloadGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -150,12 +153,15 @@ const defaultValues: NewDownloadGateFormValues = {
 };
 
 export default function NewDownloadGate() {
+  const { getToken } = useAuth();
+  const navigate = useNavigate();
   const {
     register,
     control,
     handleSubmit,
     watch,
     formState: { errors },
+    setError,
   } = useForm<NewDownloadGateFormValues>({
     defaultValues,
   });
@@ -165,25 +171,23 @@ export default function NewDownloadGate() {
   const watchedSourceUrl = watch("sourceUrl");
   const watchedGenre = watch("genre");
 
-  function onSubmit(data: NewDownloadGateFormValues) {
-    // TODO: call createDownloadGate API with payload
-    const payload = {
-      sourceUrl: data.sourceUrl,
-      genre: data.genre || undefined,
-      artist: data.artist,
-      title: data.title,
-      design: data.design,
-      gateSteps: data.gateSteps,
-      linkUrl: data.linkUrl,
-      trackingPixels: {
-        facebookPixelId: data.facebookPixelId || undefined,
-        conversionApiToken: data.conversionApiToken || undefined,
-      },
-      includeInNewReleases: data.includeInNewReleases,
-      customNotes: data.customNotes || undefined,
-      // file would be sent as FormData in a real implementation
-    };
-    console.log("Submit download gate:", payload);
+  async function onSubmit(data: NewDownloadGateFormValues) {
+    try {
+      const gate = await createDownloadGate(
+        {
+          artist_name: data.artist.trim(),
+          title: data.title.trim(),
+          audio_file_url: "", // TODO: set from file upload when implemented
+          thumbnail_url: undefined,
+        },
+        { getToken }
+      );
+      navigate("/dashboard", { state: { createdGateId: gate.gate_id } });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create download gate";
+      setError("root", { type: "submit", message });
+      console.error("Create download gate failed:", err);
+    }
   }
 
   return (
@@ -579,6 +583,11 @@ export default function NewDownloadGate() {
               />
             </div>
           </div>
+          {errors.root?.message && (
+            <p className="new-download-gate__error" role="alert">
+              {errors.root.message}
+            </p>
+          )}
           <div className="new-download-gate__actions">
             <Button type="submit" variant="default">
               Create
