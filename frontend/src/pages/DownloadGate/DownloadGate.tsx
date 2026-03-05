@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGetDownloadGateById } from '../../network/downloadGates/getDownloadGateById';
 import { useGetGateSteps } from '../../network/downloadGates/getGateSteps';
+import { recordDownload, recordVisit } from '../../network/downloadGates/recordGateAnalytics';
 import type { GateStepResponse } from '../../network/downloadGates/types';
 import './DownloadGate.scss';
 
@@ -36,6 +37,7 @@ export default function DownloadGate() {
   const [unlocked, setUnlocked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const visitRecordedRef = useRef(false);
 
   const { data: stepsData, isLoading: stepsLoading } = useGetGateSteps({
     gateId: gateIdOrSlug,
@@ -73,9 +75,12 @@ export default function DownloadGate() {
 
   const handleUnlockDownload = useCallback(() => {
     if (!gate?.audio_file_url) return;
+    if (gateIdOrSlug?.trim()) {
+      recordDownload(gateIdOrSlug);
+    }
     setUnlocked(true);
     window.open(gate.audio_file_url, '_blank', 'noopener');
-  }, [gate?.audio_file_url]);
+  }, [gate?.audio_file_url, gateIdOrSlug]);
 
   const handleCloseModal = useCallback(() => {
     setModalOpen(false);
@@ -89,6 +94,13 @@ export default function DownloadGate() {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [modalOpen, handleCloseModal]);
+
+  // Record visit once when the gate page is successfully loaded
+  useEffect(() => {
+    if (!gate || !gateIdOrSlug?.trim() || visitRecordedRef.current) return;
+    visitRecordedRef.current = true;
+    recordVisit(gateIdOrSlug);
+  }, [gate, gateIdOrSlug]);
 
   if (gateIdOrSlug === undefined) {
     return (

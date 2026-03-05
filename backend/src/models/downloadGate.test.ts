@@ -180,4 +180,69 @@ describe('DownloadGateModel', () => {
       expect(result.lastEvaluatedKey).toBeUndefined();
     });
   });
+
+  describe('incrementCount', () => {
+    it('sends UpdateCommand with correct key and expression for visits', async () => {
+      const updated = {
+        user_id: 'user-1',
+        gate_id: 'gate-1',
+        artist_name: 'Artist',
+        title: 'Track',
+        audio_file_url: 'https://example.com/audio.mp3',
+        visits: 1,
+        downloads: 0,
+        emails_captured: 0,
+      };
+      mockSend.mockResolvedValueOnce({ Attributes: updated });
+
+      const result = await DownloadGateModel.incrementCount('user-1', 'gate-1', 'visits');
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const [command] = mockSend.mock.calls[0];
+      expect(command.input.Key).toEqual({ user_id: 'user-1', gate_id: 'gate-1' });
+      expect(command.input.UpdateExpression).toContain('#field');
+      expect(command.input.ExpressionAttributeNames).toMatchObject({
+        '#field': 'visits',
+        '#updated_at': 'updated_at',
+      });
+      expect(command.input.ExpressionAttributeValues).toMatchObject({
+        ':zero': 0,
+        ':one': 1,
+      });
+      expect(command.input.ConditionExpression).toContain('attribute_exists');
+      expect(result).toEqual(updated);
+    });
+
+    it('increments downloads when field is downloads', async () => {
+      const updated = {
+        user_id: 'user-1',
+        gate_id: 'gate-1',
+        visits: 0,
+        downloads: 1,
+        emails_captured: 0,
+      };
+      mockSend.mockResolvedValueOnce({ Attributes: updated });
+
+      await DownloadGateModel.incrementCount('user-1', 'gate-1', 'downloads');
+
+      expect(mockSend.mock.calls[0][0].input.ExpressionAttributeNames['#field']).toBe('downloads');
+    });
+
+    it('increments emails_captured when field is emails_captured', async () => {
+      const updated = {
+        user_id: 'user-1',
+        gate_id: 'gate-1',
+        visits: 0,
+        downloads: 0,
+        emails_captured: 1,
+      };
+      mockSend.mockResolvedValueOnce({ Attributes: updated });
+
+      await DownloadGateModel.incrementCount('user-1', 'gate-1', 'emails_captured');
+
+      expect(mockSend.mock.calls[0][0].input.ExpressionAttributeNames['#field']).toBe(
+        'emails_captured'
+      );
+    });
+  });
 });

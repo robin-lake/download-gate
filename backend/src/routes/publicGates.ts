@@ -42,6 +42,62 @@ router.get(
 );
 
 /**
+ * POST /api/gates/:gateIdOrSlug/visit
+ * Public endpoint: increment the gate's visit count by 1. No auth required.
+ */
+router.post(
+  '/:gateIdOrSlug/visit',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const idOrSlug = req.params.gateIdOrSlug?.trim();
+      if (!idOrSlug) {
+        res.status(400).json({ error: 'gateIdOrSlug is required' });
+        return;
+      }
+
+      const gate = await resolveGate(idOrSlug);
+      if (!gate) {
+        res.status(404).json({ error: 'Download gate not found' });
+        return;
+      }
+
+      await DownloadGateModel.incrementCount(gate.user_id, gate.gate_id, 'visits');
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/**
+ * POST /api/gates/:gateIdOrSlug/download
+ * Public endpoint: increment the gate's download count by 1. No auth required.
+ */
+router.post(
+  '/:gateIdOrSlug/download',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const idOrSlug = req.params.gateIdOrSlug?.trim();
+      if (!idOrSlug) {
+        res.status(400).json({ error: 'gateIdOrSlug is required' });
+        return;
+      }
+
+      const gate = await resolveGate(idOrSlug);
+      if (!gate) {
+        res.status(404).json({ error: 'Download gate not found' });
+        return;
+      }
+
+      await DownloadGateModel.incrementCount(gate.user_id, gate.gate_id, 'downloads');
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/**
  * GET /api/gates/:gateIdOrSlug
  * Public endpoint: fetch a single download gate by gate_id or short_code (no auth required).
  * Tries short_code first, then gate_id. Used for the public gate landing page (e.g. example.com/qsro6b).
