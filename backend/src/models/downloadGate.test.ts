@@ -124,4 +124,56 @@ describe('DownloadGateModel', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('listByUserId', () => {
+    it('sends QueryCommand with user_id and returns items and lastEvaluatedKey', async () => {
+      const mockItems = [
+        {
+          user_id: 'user-1',
+          gate_id: 'gate-1',
+          artist_name: 'Artist',
+          title: 'Track',
+          audio_file_url: 'https://example.com/audio.mp3',
+          visits: 0,
+          downloads: 0,
+          emails_captured: 0,
+        },
+      ];
+      const mockLastKey = { user_id: 'user-1', gate_id: 'gate-1' };
+      mockSend.mockResolvedValueOnce({ Items: mockItems, LastEvaluatedKey: mockLastKey });
+
+      const result = await DownloadGateModel.listByUserId('user-1');
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const [command] = mockSend.mock.calls[0];
+      expect(command.input.KeyConditionExpression).toContain('user_id');
+      expect(command.input.ExpressionAttributeValues).toEqual({ ':user_id': 'user-1' });
+      expect(command.input.Limit).toBe(50);
+      expect(result.items).toEqual(mockItems);
+      expect(result.lastEvaluatedKey).toEqual(mockLastKey);
+    });
+
+    it('uses custom limit and exclusiveStartKey when provided', async () => {
+      mockSend.mockResolvedValueOnce({ Items: [] });
+
+      await DownloadGateModel.listByUserId('user-1', {
+        limit: 10,
+        exclusiveStartKey: { user_id: 'user-1', gate_id: 'prev-gate' },
+      });
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const [command] = mockSend.mock.calls[0];
+      expect(command.input.Limit).toBe(10);
+      expect(command.input.ExclusiveStartKey).toEqual({ user_id: 'user-1', gate_id: 'prev-gate' });
+    });
+
+    it('returns empty items and undefined lastEvaluatedKey when no results', async () => {
+      mockSend.mockResolvedValueOnce({ Items: [] });
+
+      const result = await DownloadGateModel.listByUserId('user-1');
+
+      expect(result.items).toEqual([]);
+      expect(result.lastEvaluatedKey).toBeUndefined();
+    });
+  });
 });

@@ -1,8 +1,9 @@
-import {useState} from 'react';
+import { useState, useMemo } from 'react';
 
 import type { DownloadGate } from './DownloadGateCard/DownloadGateCard';
 import type { SmartLink } from './SmartLinkCard/SmartLinkCard';
 import type { DashboardCardStat } from './StatCard';
+import { useGetDownloadGates, mapDownloadGateResponseToCard } from '@/network/downloadGates/getDownloadGates';
 type TabId = 'smart-links' | 'download-gates';
 export type DashboardStats = Record<'smart-links' | 'download-gates', DashboardCardStat[]> 
 
@@ -43,35 +44,6 @@ const MOCK_STATS:DashboardStats = {
   },
   ]
 };
-
-const MOCK_DOWNLOAD_GATES: DownloadGate[] = [
-  {
-    id: '1',
-    title: 'Lilotus',
-    subtitle: 'Saxy Sax',
-    thumbnailUrl: 'https://picsum.photos/seed/lilotus/80/80',
-    visits: 33,
-    downloads: 0,
-    emailsCaptured: 0,
-  },
-  {
-    id: '2',
-    title: 'Lotus Grrl',
-    subtitle: 'In My Mind',
-    thumbnailUrl: 'https://picsum.photos/seed/lotus/80/80',
-    visits: 12,
-    downloads: 4,
-    emailsCaptured: 2,
-  },
-  {
-    id: '3',
-    title: 'New Release',
-    subtitle: 'Single - Out Now',
-    visits: 8,
-    downloads: 1,
-    emailsCaptured: 0,
-  },
-];
 
 const MOCK_SMART_LINKS = [
   {
@@ -125,9 +97,13 @@ const MOCK_SMART_LINKS = [
 ];
 
 
-export function useGetDashboardState(){
+export function useGetDashboardState() {
   const [activeTab, setActiveTab] = useState<TabId>('download-gates');
-  const [downloadGates, setDownloadGates] = useState<DownloadGate[]>(MOCK_DOWNLOAD_GATES);
+  const { data: downloadGatesData, refetch: refetchDownloadGates } = useGetDownloadGates();
+  const downloadGates: DownloadGate[] = useMemo(
+    () => (downloadGatesData?.items ?? []).map(mapDownloadGateResponseToCard),
+    [downloadGatesData]
+  );
   const [smartLinks, setSmartLinks] = useState<SmartLink[]>(MOCK_SMART_LINKS);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>(MOCK_STATS);
 
@@ -135,10 +111,10 @@ export function useGetDashboardState(){
     activeTab,
     setActiveTab,
     downloadGates,
-    setDownloadGates,
+    refetchDownloadGates,
     smartLinks,
     setSmartLinks,
     dashboardStats,
-    setDashboardStats
-  }
+    setDashboardStats,
+  };
 }

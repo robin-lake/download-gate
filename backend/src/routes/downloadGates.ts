@@ -4,6 +4,12 @@ import DownloadGateModel from '../models/downloadGate.js';
 
 const router = Router();
 
+/** Query params for GET /api/download-gates */
+interface ListDownloadGatesQuery {
+  limit?: string;
+  cursor?: string;
+}
+
 /** Require Clerk auth; call next() or send 401. */
 function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const { isAuthenticated } = getAuth(req);
@@ -29,6 +35,52 @@ export interface CreateDownloadGateBody {
 }
 
 router.use(requireAuth);
+
+/**
+ * GET /api/download-gates
+ * List download gates for the authenticated user. Supports limit and cursor pagination.
+ */
+router.get(
+  '/',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = getClerkUserId(req);
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
+      const { limit, cursor } = req.query as ListDownloadGatesQuery;
+      const limitNum = limit != null ? parseInt(limit, 10) : undefined;
+      const effectiveLimit = limitNum != null && !Number.isNaN(limitNum) && limitNum > 0 ? Math.min(limitNum, 100) : 50;
+
+      let exclusiveStartKey: Record<string, unknown> | undefined;
+      if (cursor && typeof cursor === 'string') {
+        try {
+          const decoded = Buffer.from(cursor, 'base64url').toString('utf8');
+          exclusiveStartKey = JSON.parse(decoded) as Record<string, unknown>;
+        } catch {
+          res.status(400).json({ error: 'Invalid cursor' });
+          return;
+        }
+      }
+
+      const result = await DownloadGateModel.listByUserId(userId, {
+        limit: effectiveLimit,
+        ...(exclusiveStartKey !== undefined && { exclusiveStartKey }),
+      });
+
+      const nextToken =
+        result.lastEvaluatedKey != null
+          ? Buffer.from(JSON.stringify(result.lastEvaluatedKey), 'utf8').toString('base64url')
+          : null;
+
+      res.status(200).json({ items: result.items, nextToken });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 /**
  * POST /api/download-gates

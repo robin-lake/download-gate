@@ -41,3 +41,18 @@ export interface CreateDownloadGateRequest {
   audio_file_url: string;
   thumbnail_url?: string;
 }
+
+/** Response shape of GET /api/download-gates (list for current user) */
+export interface ListDownloadGatesResponse {
+  items: DownloadGateResponse[];
+  nextToken: string | null;
+}
+
+export function isListDownloadGatesResponse(d: unknown): d is ListDownloadGatesResponse {
+  if (typeof d !== 'object' || d === null) return false;
+  const o = d as Record<string, unknown>;
+  if (!Array.isArray(o['items'])) return false;
+  if (!o['items'].every((item: unknown) => isDownloadGateResponse(item))) return false;
+  if (o['nextToken'] !== null && typeof o['nextToken'] !== 'string') return false;
+  return true;
+}
