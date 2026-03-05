@@ -15,7 +15,7 @@ function App() {
       <Header />
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<div className="app-home">Welcome to Download Gate test</div>} />
+          <Route path="/" element={<div className="app-home">Welcome to Download Gate</div>} />
           <Route path="/download-gates" element={<DownloadGate />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-download-gate" element={<NewDownloadGate />} />

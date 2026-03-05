@@ -21,7 +21,7 @@ export default function Header() {
          </Link>
         </SignedOut>
         <div className="header-links">
-          <SignedOut>z
+          <SignedOut>
             <Link to="/login">
               <button className="header-btn header-btn--secondary">Log in</button>
             </Link>
