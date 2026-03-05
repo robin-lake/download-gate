@@ -16,6 +16,25 @@ function requireAuth(req: Request, res: Response, next: NextFunction): void {
   next();
 }
 
+/**
+ * @openapi
+ * /api/users/webhooks/clerk:
+ *   post:
+ *     tags: [Users]
+ *     summary: Clerk webhook (user.created)
+ *     description: Called by Clerk when a user signs up. Creates the user in DynamoDB. Not authenticated by Bearer; secured by Clerk webhook secret.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type: { type: string, example: user.created }
+ *               data: { type: object }
+ *     responses:
+ *       200:
+ *         description: Processed or ignored
+ */
 // Clerk webhook: create user in DB when someone signs up (must be before requireAuth)
 router.post('/webhooks/clerk', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -66,6 +85,30 @@ function getClerkUserId(req: Request): string | null {
   return (auth as { userId: string }).userId ?? null;
 }
 
+/**
+ * @openapi
+ * /api/users/me:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get current user
+ *     description: Returns the DynamoDB user record for the authenticated Clerk user.
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Current user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User record not found (create via POST /api/users)
+ */
 // GET /api/users/me - Current user (DynamoDB record for the authenticated Clerk user)
 router.get('/me', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -88,6 +131,42 @@ router.get('/me', async (req: Request, res: Response, next: NextFunction): Promi
   }
 });
 
+/**
+ * @openapi
+ * /api/users:
+ *   post:
+ *     tags: [Users]
+ *     summary: Get-or-create current user
+ *     description: Syncs DynamoDB with the authenticated Clerk identity. Creates user if missing; returns existing otherwise.
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email]
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200:
+ *         description: Existing user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       201:
+ *         description: User created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Name and email are required
+ *       401:
+ *         description: Authentication required
+ */
 // POST /api/users - Get-or-create current user (sync DynamoDB with Clerk identity)
 router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -110,6 +189,32 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
   }
 });
 
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get user by ID
+ *     description: Returns a user by user_id. Requires authentication.
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Clerk user ID
+ *     responses:
+ *       200:
+ *         description: User
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: User not found
+ */
 // GET /api/users/:id - Get a user by ID (declare after /me so "me" is not treated as id)
 router.get('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -145,6 +250,33 @@ router.get('/:id', async (req: Request<{ id: string }>, res: Response, next: Nex
 // });
 
 
+/**
+ * @openapi
+ * /api/users:
+ *   get:
+ *     tags: [Users]
+ *     summary: List users (paginated)
+ *     description: Returns a paginated list of users. Use lastKey from the response as the cursor query param for the next page.
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *         description: Max number of users to return
+ *       - in: query
+ *         name: cursor
+ *         schema: { type: string }
+ *         description: Pagination cursor from previous response nextToken
+ *     responses:
+ *       200:
+ *         description: Paginated users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ListUsersResponse'
+ *       401:
+ *         description: Authentication required
+ */
 // GET /api/users - List users with pagination
 router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res: Response, next: NextFunction): Promise<void> => {
   const { limit, cursor } = req.query;
@@ -173,6 +305,45 @@ router.get('/', async (req: Request<object, object, object, ListUsersQuery>, res
 });
 
 
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   patch:
+ *     tags: [Users]
+ *     summary: Update user
+ *     description: Update the authenticated user. Caller may only update their own record (user_id must match).
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Clerk user ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string, format: email }
+ *               status: { type: string }
+ *     responses:
+ *       200:
+ *         description: Updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: No valid fields to update
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Forbidden (can only update own user)
+ *       404:
+ *         description: User not found
+ */
 // PATCH /api/users/:id - Update a user (caller may only update their own record unless you add admin checks)
 router.patch('/:id', async (req: Request<{ id: string }, object, UpdateUserBody>, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -204,6 +375,37 @@ router.patch('/:id', async (req: Request<{ id: string }, object, UpdateUserBody>
   }
 });
 
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   delete:
+ *     tags: [Users]
+ *     summary: Delete user
+ *     description: Delete the user. Caller may only delete their own record (user_id must match).
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Clerk user ID
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 user: { $ref: '#/components/schemas/User' }
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Forbidden (can only delete own user)
+ *       404:
+ *         description: User not found
+ */
 // DELETE /api/users/:id - Delete a user (caller may only delete their own record)
 router.delete('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
