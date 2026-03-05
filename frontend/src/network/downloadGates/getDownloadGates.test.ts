@@ -56,6 +56,7 @@ describe('mapDownloadGateResponseToCard', () => {
       visits: 10,
       downloads: 3,
       emailsCaptured: 2,
+      publicPath: '/gate-abc',
     });
   });
 
@@ -72,6 +73,23 @@ describe('mapDownloadGateResponseToCard', () => {
     };
     const card = mapDownloadGateResponseToCard(apiGate);
     expect(card).toHaveProperty('thumbnailUrl', undefined);
+  });
+
+  it('uses short_code for publicPath when present, otherwise gate_id', () => {
+    const withShortCode = {
+      user_id: 'u',
+      gate_id: 'gate-xyz',
+      short_code: 'saxy-sax',
+      artist_name: 'A',
+      title: 'T',
+      audio_file_url: 'https://x/a.mp3',
+      visits: 0,
+      downloads: 0,
+      emails_captured: 0,
+    };
+    expect(mapDownloadGateResponseToCard(withShortCode).publicPath).toBe('/saxy-sax');
+    const withoutShortCode = { ...withShortCode, short_code: undefined };
+    expect(mapDownloadGateResponseToCard(withoutShortCode).publicPath).toBe('/gate-xyz');
   });
 });
 

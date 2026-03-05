@@ -8,6 +8,8 @@ export interface DownloadGate {
   visits: number;
   downloads: number;
   emailsCaptured: number;
+  /** Path to open the gate in a new tab (e.g. /abc123 or /gate-id). */
+  publicPath: string;
 }
 
 function ActionIcon({ label, children }: { label: string; children: React.ReactNode }) {
@@ -45,11 +47,17 @@ export default function DownloadGateCard({ downloadGate }: DownloadGateCardProps
               <circle cx="12" cy="12" r="8" />
             </svg>
           </ActionIcon>
-          <ActionIcon label="Open external link">
+          <a
+            href={downloadGate.publicPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="download-gate-card__action-icon"
+            aria-label="Open external link"
+          >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-          </ActionIcon>
+          </a>
           <ActionIcon label="Edit">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -83,14 +91,6 @@ export default function DownloadGateCard({ downloadGate }: DownloadGateCardProps
         </div>
       </div>
 
-      <div className="download-gate-card__aside">
-        <button type="button" className="download-gate-card__btn download-gate-card__btn--primary">
-          Promote
-        </button>
-        <button type="button" className="download-gate-card__btn download-gate-card__btn--primary">
-          Submit
-        </button>
-      </div>
     </div>
   );
 }

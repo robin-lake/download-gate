@@ -39,6 +39,7 @@ export function useGetDownloadGates(params: UseGetDownloadGatesParams = {}) {
  * Maps API DownloadGateResponse to dashboard card shape (id, title, subtitle, etc.).
  */
 export function mapDownloadGateResponseToCard(gate: DownloadGateResponse) {
+  const slug = gate.short_code ?? gate.gate_id;
   return {
     id: gate.gate_id,
     title: gate.title,
@@ -47,5 +48,6 @@ export function mapDownloadGateResponseToCard(gate: DownloadGateResponse) {
     visits: gate.visits,
     downloads: gate.downloads,
     emailsCaptured: gate.emails_captured,
+    publicPath: `/${slug}`,
   };
 }

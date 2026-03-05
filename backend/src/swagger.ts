@@ -2,7 +2,11 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// In Lambda/bundled env, import.meta.url can be undefined; avoid fileURLToPath(undefined).
+const __dirname =
+  typeof import.meta?.url === 'string'
+    ? path.dirname(fileURLToPath(import.meta.url))
+    : undefined;
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -55,10 +59,13 @@ const options: swaggerJsdoc.Options = {
       { name: 'Users', description: 'User management (Clerk-backed)' },
     ],
   },
-  apis: [
-    path.join(__dirname, 'app.ts'),
-    path.join(__dirname, 'routes', '*.ts'),
-  ],
+  apis:
+    __dirname !== undefined
+      ? [
+          path.join(__dirname, 'app.ts'),
+          path.join(__dirname, 'routes', '*.ts'),
+        ]
+      : [], // Lambda bundle: no source files to scan; use definition-only spec
 };
 
 const spec = swaggerJsdoc(options);
