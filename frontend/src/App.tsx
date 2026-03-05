@@ -3,6 +3,7 @@ import Header from './components/Header/Header';
 import Dashboard from './pages/Dashboard/Dashboard';
 import NewDownloadGate from './pages/NewDownloadGate/NewDownloadGate';
 import Users from './pages/Users';
+import DownloadGate from './pages/DownloadGate';
 import Me from './pages/Me';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
@@ -15,12 +16,15 @@ function App() {
       <main className="app-main">
         <Routes>
           <Route path="/" element={<div className="app-home">Welcome to Download Gate test</div>} />
+          <Route path="/download-gates" element={<DownloadGate />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-download-gate" element={<NewDownloadGate />} />
           <Route path="/login" element={<div className="app-page"><SignIn /></div>} />
           <Route path="/signup" element={<div className="app-page"><SignUp /></div>} />
           <Route path="/users" element={<div className="app-page"><Users /></div>} />
           <Route path="/me" element={<div className="app-page"><Me /></div>} />
+          {/* Short URL for a single download gate (e.g. /abc123). Must be last so other paths match first. */}
+          <Route path="/:gateIdOrSlug" element={<DownloadGate />} />
         </Routes>
       </main>
     </BrowserRouter>

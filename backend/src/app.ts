@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import { clerkMiddleware } from '@clerk/express';
 import userRoutes from './routes/users.js';
 import downloadGateRoutes from './routes/downloadGates.js';
+import publicGateRoutes from './routes/publicGates.js';
 import errorHandler from './middleware/errorHandler.js';
 import swaggerSpec from './swagger.js';
 
@@ -66,6 +67,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteT
 // Mount routes
 app.use('/api/users', userRoutes);
 app.use('/api/download-gates', downloadGateRoutes);
+app.use('/api/gates', publicGateRoutes);
 
 // Error handling (must be last)
 app.use(errorHandler);
