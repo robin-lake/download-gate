@@ -1,0 +1,1 @@
+// get smart links for a user. Will come with pagination

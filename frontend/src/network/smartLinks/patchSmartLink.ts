@@ -1,0 +1,1 @@
+// patch a given smart link
