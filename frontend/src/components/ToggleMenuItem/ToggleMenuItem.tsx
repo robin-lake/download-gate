@@ -13,7 +13,7 @@ export default function ToggleMenuItem({
   stepNumber,
   title,
   completed = false,
-  defaultExpanded = true,
+  defaultExpanded = false,
   children,
 }: ToggleMenuItemProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
