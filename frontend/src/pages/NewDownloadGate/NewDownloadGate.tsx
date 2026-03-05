@@ -1,5 +1,24 @@
 import { useForm, Controller } from "react-hook-form";
 import ToggleMenuItem from "../../components/ToggleMenuItem/ToggleMenuItem";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import "./NewDownloadGate.scss";
 
 export interface NewDownloadGateFormValues {
@@ -109,29 +128,32 @@ export default function NewDownloadGate() {
           <div className="new-download-gate__icons">
             {/* Platform icons placeholder - SoundCloud, YouTube, Spotify, etc. */}
           </div>
-          <input
-            type="url"
-            className="new-download-gate__input"
-            placeholder="https://www..."
-            aria-label="Source URL"
-            {...register("sourceUrl")}
-          />
-          {errors.sourceUrl && (
-            <p className="new-download-gate__error">{errors.sourceUrl.message}</p>
-          )}
+          <div className="new-download-gate__field">
+            <Label htmlFor="source-url" className="sr-only">
+              Source URL
+            </Label>
+            <Input
+              id="source-url"
+              type="url"
+              placeholder="https://www..."
+              aria-label="Source URL"
+              aria-invalid={Boolean(errors.sourceUrl)}
+              className="new-download-gate__input"
+              {...register("sourceUrl")}
+            />
+            {errors.sourceUrl && (
+              <p className="new-download-gate__error">
+                {errors.sourceUrl.message}
+              </p>
+            )}
+          </div>
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--secondary"
-            >
+            </Button>
+            <Button type="button" variant="outline">
               Enter Later
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -139,22 +161,33 @@ export default function NewDownloadGate() {
           <p className="new-download-gate__instruction">
             Select genre of your title.
           </p>
-          <div className="new-download-gate__select-wrapper">
-            <select
-              className="new-download-gate__select"
-              aria-label="Genre"
-              {...register("genre")}
-            >
-              <option value="">Select genre</option>
-            </select>
-          </div>
+          <Controller
+            name="genre"
+            control={control}
+            render={({ field }) => (
+              <div className="new-download-gate__field">
+                <Label htmlFor="genre">Genre</Label>
+                <Select
+                  value={field.value || "__none__"}
+                  onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger
+                    id="genre"
+                    className="w-full new-download-gate__select-trigger"
+                  >
+                    <SelectValue placeholder="Select genre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select genre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          />
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -190,12 +223,9 @@ export default function NewDownloadGate() {
             )}
           />
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -204,59 +234,64 @@ export default function NewDownloadGate() {
             Enter artist and title for your release.
           </p>
           <div className="new-download-gate__field">
-            <label htmlFor="artist-name">Enter artist name</label>
-            <input
+            <Label htmlFor="artist-name">Enter artist name</Label>
+            <Input
               id="artist-name"
               type="text"
-              className="new-download-gate__input"
               placeholder="Artist name"
               aria-label="Artist name"
+              className="new-download-gate__input"
               {...register("artist")}
             />
           </div>
           <div className="new-download-gate__field">
-            <label htmlFor="title">Enter title</label>
-            <input
+            <Label htmlFor="title">Enter title</Label>
+            <Input
               id="title"
               type="text"
-              className="new-download-gate__input"
               placeholder="Title"
               aria-label="Title"
+              className="new-download-gate__input"
               {...register("title")}
             />
           </div>
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
         <ToggleMenuItem stepNumber={5} title="Design" completed defaultExpanded={false}>
           <p className="new-download-gate__instruction">Customize design</p>
-          <div className="new-download-gate__select-wrapper">
-            <select
-              className="new-download-gate__select"
-              aria-label="Design theme"
-              {...register("design")}
-            >
-              {DESIGN_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Controller
+            name="design"
+            control={control}
+            render={({ field }) => (
+              <div className="new-download-gate__field">
+                <Label htmlFor="design">Design theme</Label>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger
+                    id="design"
+                    className="w-full new-download-gate__select-trigger"
+                  >
+                    <SelectValue placeholder="Select design" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DESIGN_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          />
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -272,10 +307,14 @@ export default function NewDownloadGate() {
                 {GATE_STEP_LABELS.map((label) => {
                   const isSelected = value.includes(label);
                   return (
-                    <button
+                    <Button
                       key={label}
                       type="button"
-                      className={`new-download-gate__gate-step ${isSelected ? "new-download-gate__gate-step--selected" : ""}`}
+                      variant={isSelected ? "default" : "outline"}
+                      className={cn(
+                        "new-download-gate__gate-step",
+                        isSelected && "new-download-gate__gate-step--selected"
+                      )}
                       onClick={() =>
                         onChange(
                           isSelected
@@ -285,19 +324,16 @@ export default function NewDownloadGate() {
                       }
                     >
                       {label} +
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
             )}
           />
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -308,28 +344,20 @@ export default function NewDownloadGate() {
             has been created.
           </p>
           <div className="new-download-gate__link-url">
-            <input
+            <Input
               type="text"
               className="new-download-gate__link-url-input"
               aria-label="Link URL"
               {...register("linkUrl")}
             />
-            <button
-              type="button"
-              className="new-download-gate__link-url-edit"
-              aria-label="Edit URL"
-              onClick={() => {}}
-            >
+            <Button type="button" variant="outline" size="sm">
               Edit
-            </button>
+            </Button>
           </div>
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -338,42 +366,41 @@ export default function NewDownloadGate() {
             Enter pixels for tracking and retargeting fans that visit your
             download gate.
           </p>
-          <div className="new-download-gate__tracking-card">
-            <div className="new-download-gate__tracking-header">
-              <span>Facebook</span>
-            </div>
-            <div className="new-download-gate__field">
-              <label htmlFor="facebook-pixel-id">Facebook Pixel ID</label>
-              <input
-                id="facebook-pixel-id"
-                type="text"
-                className="new-download-gate__input"
-                placeholder="Enter Facebook Pixel ID"
-                aria-label="Facebook Pixel ID"
-                {...register("facebookPixelId")}
-              />
-            </div>
-            <div className="new-download-gate__field">
-              <label htmlFor="conversion-api-token">
-                Conversion API access token (optional)
-              </label>
-              <input
-                id="conversion-api-token"
-                type="text"
-                className="new-download-gate__input"
-                placeholder="Enter Conversion API access token"
-                aria-label="Conversion API access token"
-                {...register("conversionApiToken")}
-              />
-            </div>
-          </div>
+          <Card className="new-download-gate__tracking-card">
+            <CardHeader>
+              <CardTitle>Facebook</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="new-download-gate__field">
+                <Label htmlFor="facebook-pixel-id">Facebook Pixel ID</Label>
+                <Input
+                  id="facebook-pixel-id"
+                  type="text"
+                  placeholder="Enter Facebook Pixel ID"
+                  aria-label="Facebook Pixel ID"
+                  className="new-download-gate__input"
+                  {...register("facebookPixelId")}
+                />
+              </div>
+              <div className="new-download-gate__field">
+                <Label htmlFor="conversion-api-token">
+                  Conversion API access token (optional)
+                </Label>
+                <Input
+                  id="conversion-api-token"
+                  type="text"
+                  placeholder="Enter Conversion API access token"
+                  aria-label="Conversion API access token"
+                  className="new-download-gate__input"
+                  {...register("conversionApiToken")}
+                />
+              </div>
+            </CardContent>
+          </Card>
           <div className="new-download-gate__actions">
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="button" variant="default">
               Next
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
 
@@ -383,88 +410,94 @@ export default function NewDownloadGate() {
           </p>
           <div className="new-download-gate__confirmation-fields">
             <div className="new-download-gate__field">
-              <label htmlFor="conf-artist">Artist:</label>
-              <input
+              <Label htmlFor="conf-artist">Artist:</Label>
+              <Input
                 id="conf-artist"
                 type="text"
-                className="new-download-gate__input"
-                aria-label="Artist"
                 readOnly
+                className="new-download-gate__input"
                 value={watchedArtist}
+                aria-label="Artist"
               />
             </div>
             <div className="new-download-gate__field">
-              <label htmlFor="conf-title">Title:</label>
-              <input
+              <Label htmlFor="conf-title">Title:</Label>
+              <Input
                 id="conf-title"
                 type="text"
-                className="new-download-gate__input"
-                aria-label="Title"
                 readOnly
+                className="new-download-gate__input"
                 value={watchedTitle}
+                aria-label="Title"
               />
             </div>
             <div className="new-download-gate__field">
-              <label htmlFor="conf-source">Source:</label>
-              <input
+              <Label htmlFor="conf-source">Source:</Label>
+              <Input
                 id="conf-source"
                 type="text"
-                className="new-download-gate__input"
-                aria-label="Source"
                 readOnly
+                className="new-download-gate__input"
                 value={watchedSourceUrl}
+                aria-label="Source"
               />
             </div>
             <div className="new-download-gate__field">
-              <label htmlFor="conf-genre">Genre:</label>
-              <input
+              <Label htmlFor="conf-genre">Genre:</Label>
+              <Input
                 id="conf-genre"
                 type="text"
-                className="new-download-gate__input"
-                aria-label="Genre"
                 readOnly
+                className="new-download-gate__input"
                 value={watchedGenre}
+                aria-label="Genre"
               />
             </div>
             <div className="new-download-gate__field new-download-gate__field--row">
-              <label htmlFor="conf-new-releases">
-                Include in New Releases:
-              </label>
-              <input
-                id="conf-new-releases"
-                type="checkbox"
-                className="new-download-gate__checkbox"
-                aria-label="Include in New Releases"
-                {...register("includeInNewReleases")}
+              <Controller
+                name="includeInNewReleases"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <Label
+                      htmlFor="conf-new-releases"
+                      className="cursor-pointer"
+                    >
+                      Include in New Releases:
+                    </Label>
+                    <Checkbox
+                      id="conf-new-releases"
+                      checked={field.value}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked === true)
+                      }
+                      aria-label="Include in New Releases"
+                    />
+                  </>
+                )}
               />
             </div>
             <div className="new-download-gate__field">
-              <label htmlFor="conf-notes">Custom Notes:</label>
-              <button type="button" className="new-download-gate__link-url-edit">
+              <Label htmlFor="conf-notes">Custom Notes:</Label>
+              <Button type="button" variant="outline" size="sm">
                 Edit
-              </button>
-              <textarea
+              </Button>
+              <Textarea
                 id="conf-notes"
-                className="new-download-gate__input new-download-gate__textarea"
                 rows={3}
+                className="new-download-gate__textarea mt-2"
                 aria-label="Custom Notes"
                 {...register("customNotes")}
               />
             </div>
           </div>
           <div className="new-download-gate__actions">
-            <button
-              type="submit"
-              className="new-download-gate__btn new-download-gate__btn--primary"
-            >
+            <Button type="submit" variant="default">
               Create
-            </button>
-            <button
-              type="button"
-              className="new-download-gate__btn new-download-gate__btn--secondary"
-            >
+            </Button>
+            <Button type="button" variant="outline">
               Cancel
-            </button>
+            </Button>
           </div>
         </ToggleMenuItem>
       </form>
