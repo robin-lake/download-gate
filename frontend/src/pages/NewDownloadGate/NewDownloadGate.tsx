@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -58,6 +60,78 @@ const GATE_STEP_LABELS = [
   "TikTok",
   "Bandcamp",
   "Donation",
+];
+
+/** Genre options with category subheadings, in display order. */
+const GENRE_GROUPS: { heading: string; genres: string[] }[] = [
+  {
+    heading: "DANCE / ELECTRONIC",
+    genres: [
+      "Afro House",
+      "Bass",
+      "Bass House",
+      "Breaks",
+      "Chill Out",
+      "Deep House",
+      "Drum & Bass",
+      "Dubstep",
+      "Electro House",
+      "Electronica",
+      "Future House",
+      "Glitch Hop",
+      "Hard Dance",
+      "Hardcore / Hard Techno",
+      "House",
+      "Indie Dance / Nu Disco",
+      "Progressive House",
+      "Psy Trance",
+      "Tech House",
+      "Techno",
+      "Trance",
+      "Trap",
+      "Trip-Hop",
+    ],
+  },
+  {
+    heading: "HIP-HOP / R&B",
+    genres: ["R&B", "Disco", "Funk", "Hip-Hop", "Soul"],
+  },
+  {
+    heading: "POP / ROCK",
+    genres: [
+      "Acoustic",
+      "Alternative",
+      "Pop",
+      "Country",
+      "Folk",
+      "Indie",
+      "K-Pop",
+      "Metal",
+      "Punk",
+      "Rock",
+      "Singer Songwriter",
+    ],
+  },
+  {
+    heading: "",
+    genres: ["World"],
+  },
+  {
+    heading: "OTHER",
+    genres: [
+      "Blues",
+      "Christian",
+      "Classical",
+      "Dancehall",
+      "Dub",
+      "Gospel",
+      "Jazz",
+      "Latin",
+      "Reggae",
+      "Reggaeton",
+      "Other",
+    ],
+  },
 ];
 
 const defaultValues: NewDownloadGateFormValues = {
@@ -179,6 +253,20 @@ export default function NewDownloadGate() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Select genre</SelectItem>
+                    {GENRE_GROUPS.map((group) => (
+                      <SelectGroup key={group.heading || group.genres[0]}>
+                        {group.heading ? (
+                          <SelectLabel className="uppercase font-semibold text-muted-foreground">
+                            {group.heading}
+                          </SelectLabel>
+                        ) : null}
+                        {group.genres.map((genre) => (
+                          <SelectItem key={genre} value={genre}>
+                            {genre}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
