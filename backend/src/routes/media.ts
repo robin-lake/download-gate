@@ -131,7 +131,8 @@ export default router;
  */
 export async function serveLocalUploads(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const key = (req.params as { key?: string }).key ?? (req.path.replace(/^\/api\/uploads\/?/, '') || '');
+    const rawKey = (req.params as { key?: string | string[] }).key ?? (req.path.replace(/^\/api\/uploads\/?/, '') || '');
+    const key = Array.isArray(rawKey) ? rawKey.join('/') : rawKey;
     if (!key || key.includes('..')) {
       res.status(400).json({ error: 'Invalid key' });
       return;

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import ToggleMenuItem from "../../components/ToggleMenuItem/ToggleMenuItem";
 import { createDownloadGate } from "@/network/downloadGates/createDownloadGate";
+import { uploadCoverArt, uploadAudio } from "@/network/media/uploadMedia";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +32,7 @@ export const SHORT_CODE_PATTERN = /^[a-zA-Z0-9_-]{3,32}$/;
 export interface NewDownloadGateFormValues {
   sourceUrl: string;
   genre: string;
+  coverFile: FileList | null;
   file: FileList | null;
   artist: string;
   title: string;
@@ -141,6 +144,7 @@ const GENRE_GROUPS: { heading: string; genres: string[] }[] = [
 const defaultValues: NewDownloadGateFormValues = {
   sourceUrl: "",
   genre: "",
+  coverFile: null,
   file: null,
   artist: "",
   title: "",
@@ -156,6 +160,7 @@ const defaultValues: NewDownloadGateFormValues = {
 export default function NewDownloadGate() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     control,
@@ -173,13 +178,26 @@ export default function NewDownloadGate() {
   const watchedGenre = watch("genre");
 
   async function onSubmit(data: NewDownloadGateFormValues) {
+    const audioFile = data.file?.[0];
+    if (!audioFile) {
+      setError("root", { type: "submit", message: "Please upload an audio file in step 3." });
+      return;
+    }
+    setIsSubmitting(true);
     try {
+      const uploadOpts = { getToken };
+      const [coverResult, audioResult] = await Promise.all([
+        data.coverFile?.[0]
+          ? uploadCoverArt(data.coverFile[0], uploadOpts)
+          : Promise.resolve(null),
+        uploadAudio(audioFile, uploadOpts),
+      ]);
       const gate = await createDownloadGate(
         {
           artist_name: data.artist.trim(),
           title: data.title.trim(),
-          audio_file_url: "", // TODO: set from file upload when implemented
-          thumbnail_url: undefined,
+          audio_file_url: audioResult.url,
+          thumbnail_url: coverResult?.url,
           short_code: data.shortCode.trim() ? data.shortCode.trim() : undefined,
         },
         { getToken }
@@ -189,6 +207,8 @@ export default function NewDownloadGate() {
       const message = err instanceof Error ? err.message : "Failed to create download gate";
       setError("root", { type: "submit", message });
       console.error("Create download gate failed:", err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -287,35 +307,70 @@ export default function NewDownloadGate() {
 
         <ToggleMenuItem stepNumber={3} title="Upload">
           <p className="new-download-gate__instruction">
-            Upload the audio file you would like to share with fans (mp3, wav,
-            aiff, zip).
+            Upload cover art (optional) and the audio file you would like to share with fans.
           </p>
-          <Controller
-            name="file"
-            control={control}
-            render={({ field: { onChange, onBlur, ref } }) => (
-              <div className="new-download-gate__dropzone">
-                <input
-                  ref={ref}
-                  type="file"
-                  accept=".mp3,.wav,.aiff,.zip,audio/mpeg,audio/wav,audio/aiff"
-                  className="new-download-gate__file-input"
-                  aria-label="Upload audio file"
-                  onChange={(e) => onChange(e.target.files)}
-                  onBlur={onBlur}
-                />
-                <span className="new-download-gate__dropzone-icon" aria-hidden>
-                  ♪
-                </span>
-                <p className="new-download-gate__dropzone-text">
-                  Drop your audio file here or browse
-                </p>
-                <p className="new-download-gate__dropzone-hint">
-                  Supports mp3, wav
-                </p>
-              </div>
-            )}
-          />
+          <div className="new-download-gate__field">
+            <Label className="new-download-gate__dropzone-label">Cover art (optional)</Label>
+            <Controller
+              name="coverFile"
+              control={control}
+              render={({ field: { onChange, onBlur, ref } }) => (
+                <div className="new-download-gate__dropzone">
+                  <input
+                    ref={ref}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
+                    className="new-download-gate__file-input"
+                    aria-label="Upload cover art"
+                    onChange={(e) => onChange(e.target.files)}
+                    onBlur={onBlur}
+                  />
+                  <span className="new-download-gate__dropzone-icon" aria-hidden>
+                    🖼
+                  </span>
+                  <p className="new-download-gate__dropzone-text">
+                    {watch("coverFile")?.[0]
+                      ? watch("coverFile")![0].name
+                      : "Drop cover image or browse"}
+                  </p>
+                  <p className="new-download-gate__dropzone-hint">
+                    JPEG, PNG, GIF or WebP, max 5 MB
+                  </p>
+                </div>
+              )}
+            />
+          </div>
+          <div className="new-download-gate__field">
+            <Label className="new-download-gate__dropzone-label">Audio file (required)</Label>
+            <Controller
+              name="file"
+              control={control}
+              render={({ field: { onChange, onBlur, ref } }) => (
+                <div className="new-download-gate__dropzone">
+                  <input
+                    ref={ref}
+                    type="file"
+                    accept=".mp3,.wav,.flac,.aac,.ogg,audio/mpeg,audio/mp3,audio/wav,audio/flac,audio/x-flac,audio/aac,audio/ogg"
+                    className="new-download-gate__file-input"
+                    aria-label="Upload audio file"
+                    onChange={(e) => onChange(e.target.files)}
+                    onBlur={onBlur}
+                  />
+                  <span className="new-download-gate__dropzone-icon" aria-hidden>
+                    ♪
+                  </span>
+                  <p className="new-download-gate__dropzone-text">
+                    {watch("file")?.[0]
+                      ? watch("file")![0].name
+                      : "Drop your audio file here or browse"}
+                  </p>
+                  <p className="new-download-gate__dropzone-hint">
+                    MP3, WAV, FLAC, AAC or OGG, max 100 MB
+                  </p>
+                </div>
+              )}
+            />
+          </div>
           <div className="new-download-gate__actions">
             <Button type="button" variant="default">
               Next
@@ -614,10 +669,10 @@ export default function NewDownloadGate() {
             </p>
           )}
           <div className="new-download-gate__actions">
-            <Button type="submit" variant="default">
-              Create
+            <Button type="submit" variant="default" disabled={isSubmitting}>
+              {isSubmitting ? "Uploading & creating…" : "Create"}
             </Button>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={isSubmitting}>
               Cancel
             </Button>
           </div>
