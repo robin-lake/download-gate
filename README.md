@@ -105,4 +105,10 @@ Each of the music services requires an api key. Here are the steps for connectin
 #### SoundCloud ####
 Go to https://soundcloud.com/you/apps
 Register a new app
-Copy Client Id and Client Secret into your Github environment variables as `SOUNDCLOUD_CLIENT_ID` and `SOUNDCLOUD_CLIENT_SECRET`
+You will need to add the following variables to your environment variables/secrets:
+```
+SOUNDCLOUD_CLIENT_ID
+SOUNDCLOUD_CLIEND_SECRET
+SOUNDCLOUD_REDIRECT_URI
+SOUNDCLOUD_SUCCESS_REDIRECT_URI
+```
