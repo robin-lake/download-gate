@@ -29,6 +29,13 @@ import "./NewDownloadGate.scss";
 /** Short code: 3–32 chars, letters, numbers, hyphens, underscores only. */
 export const SHORT_CODE_PATTERN = /^[a-zA-Z0-9_-]{3,32}$/;
 
+/** One gate step in the form (selection order = step_order). */
+export interface GateStepFormItem {
+  service_type: string;
+  is_skippable: boolean;
+  config: Record<string, unknown>;
+}
+
 export interface NewDownloadGateFormValues {
   sourceUrl: string;
   genre: string;
@@ -37,7 +44,7 @@ export interface NewDownloadGateFormValues {
   artist: string;
   title: string;
   design: string;
-  gateSteps: string[];
+  gateSteps: GateStepFormItem[];
   shortCode: string;
   facebookPixelId: string;
   conversionApiToken: string;
@@ -52,21 +59,22 @@ const DESIGN_OPTIONS = [
   { value: "minimal-dark", label: "Minimal - Dark" },
 ] as const;
 
-const GATE_STEP_LABELS = [
-  "Email capture",
-  "SoundCloud",
-  "YouTube",
-  "Spotify",
-  "Apple Music",
-  "Deezer",
-  "Twitch",
-  "Mixcloud",
-  "Facebook",
-  "Instagram",
-  "X / Twitter",
-  "TikTok",
-  "Bandcamp",
-  "Donation",
+/** Gate step options: label (UI) and service_type (API / DATA_MODEL). */
+const GATE_STEP_OPTIONS: { label: string; service_type: string }[] = [
+  { label: "Email capture", service_type: "email_capture" },
+  { label: "SoundCloud", service_type: "soundcloud" },
+  { label: "YouTube", service_type: "youtube" },
+  { label: "Spotify", service_type: "spotify" },
+  { label: "Apple Music", service_type: "apple_music" },
+  { label: "Deezer", service_type: "deezer" },
+  { label: "Twitch", service_type: "twitch" },
+  { label: "Mixcloud", service_type: "mixcloud" },
+  { label: "Facebook", service_type: "facebook" },
+  { label: "Instagram", service_type: "instagram" },
+  { label: "X / Twitter", service_type: "twitter" },
+  { label: "TikTok", service_type: "tiktok" },
+  { label: "Bandcamp", service_type: "bandcamp" },
+  { label: "Donation", service_type: "donation" },
 ];
 
 /** Genre options with category subheadings, in display order. */
@@ -177,6 +185,7 @@ export default function NewDownloadGate() {
   const watchedTitle = watch("title");
   const watchedSourceUrl = watch("sourceUrl");
   const watchedGenre = watch("genre");
+  const watchedGateSteps = watch("gateSteps");
 
   async function onSubmit(data: NewDownloadGateFormValues) {
     const audioFile = data.file?.[0];
@@ -200,6 +209,14 @@ export default function NewDownloadGate() {
           audio_file_url: audioResult.url,
           thumbnail_url: coverResult?.url,
           short_code: data.shortCode.trim() ? data.shortCode.trim() : undefined,
+          steps:
+            data.gateSteps.length > 0
+              ? data.gateSteps.map((s) => ({
+                  service_type: s.service_type,
+                  is_skippable: s.is_skippable,
+                  config: s.config,
+                }))
+              : undefined,
         },
         { getToken }
       );
@@ -508,24 +525,31 @@ export default function NewDownloadGate() {
             control={control}
             render={({ field: { value, onChange } }) => (
               <div className="new-download-gate__gate-steps">
-                {GATE_STEP_LABELS.map((label) => {
-                  const isSelected = value.includes(label);
+                {GATE_STEP_OPTIONS.map(({ label, service_type }) => {
+                  const isSelected = value.some((s) => s.service_type === service_type);
                   return (
                     <Button
-                      key={label}
+                      key={service_type}
                       type="button"
                       variant={isSelected ? "default" : "outline"}
                       className={cn(
                         "new-download-gate__gate-step",
                         isSelected && "new-download-gate__gate-step--selected"
                       )}
-                      onClick={() =>
-                        onChange(
-                          isSelected
-                            ? value.filter((s) => s !== label)
-                            : [...value, label]
-                        )
-                      }
+                      onClick={() => {
+                        if (isSelected) {
+                          onChange(value.filter((s) => s.service_type !== service_type));
+                        } else {
+                          onChange([
+                            ...value,
+                            {
+                              service_type,
+                              is_skippable: false,
+                              config: {},
+                            },
+                          ]);
+                        }
+                      }}
                     >
                       {label} +
                     </Button>
@@ -706,6 +730,27 @@ export default function NewDownloadGate() {
                 className="new-download-gate__input"
                 value={watchedGenre}
                 aria-label="Genre"
+              />
+            </div>
+            <div className="new-download-gate__field">
+              <Label htmlFor="conf-gate-steps">Gate steps:</Label>
+              <Input
+                id="conf-gate-steps"
+                type="text"
+                readOnly
+                className="new-download-gate__input"
+                value={
+                  watchedGateSteps.length === 0
+                    ? "None"
+                    : watchedGateSteps
+                        .map(
+                          (s) =>
+                            GATE_STEP_OPTIONS.find((o) => o.service_type === s.service_type)
+                              ?.label ?? s.service_type
+                        )
+                        .join(", ")
+                }
+                aria-label="Gate steps"
               />
             </div>
             <div className="new-download-gate__field new-download-gate__field--row">

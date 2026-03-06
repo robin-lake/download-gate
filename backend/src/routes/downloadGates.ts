@@ -1,6 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { getAuth } from '@clerk/express';
 import DownloadGateModel from '../models/downloadGate.js';
+import GateStepModel from '../models/gateStep.js';
 
 const router = Router();
 
@@ -26,6 +27,13 @@ function getClerkUserId(req: Request): string | null {
   return (auth as { userId: string }).userId ?? null;
 }
 
+/** One step in the create-gate request body. */
+export interface CreateGateStepBody {
+  service_type: string;
+  is_skippable?: boolean;
+  config?: Record<string, unknown>;
+}
+
 /** Request body for POST /api/download-gates */
 export interface CreateDownloadGateBody {
   artist_name: string;
@@ -33,6 +41,8 @@ export interface CreateDownloadGateBody {
   audio_file_url: string;
   thumbnail_url?: string;
   short_code?: string;
+  /** Optional gate steps to create with the gate (order = array order). */
+  steps?: CreateGateStepBody[];
 }
 
 router.use(requireAuth);
@@ -143,6 +153,21 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
       ...(thumbnailUrl !== undefined && { thumbnail_url: thumbnailUrl }),
       ...(shortCode !== undefined && shortCode !== '' && { short_code: shortCode }),
     });
+
+    if (Array.isArray(body.steps) && body.steps.length > 0) {
+      for (let i = 0; i < body.steps.length; i++) {
+        const step = body.steps[i];
+        if (step && typeof step.service_type === 'string') {
+          await GateStepModel.create({
+            gate_id: gate.gate_id,
+            service_type: step.service_type.trim(),
+            step_order: i + 1,
+            is_skippable: step.is_skippable === true,
+            config: step.config && typeof step.config === 'object' ? step.config : {},
+          });
+        }
+      }
+    }
 
     res.status(201).json(gate);
   } catch (err) {

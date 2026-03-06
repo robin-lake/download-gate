@@ -36,6 +36,13 @@ export function isDownloadGateResponse(d: unknown): d is DownloadGateResponse {
   );
 }
 
+/** One gate step in the create-gate request (order = array index). */
+export interface CreateGateStepRequest {
+  service_type: string;
+  is_skippable?: boolean;
+  config?: Record<string, unknown>;
+}
+
 /** Request body for POST /api/download-gates */
 export interface CreateDownloadGateRequest {
   artist_name: string;
@@ -43,6 +50,8 @@ export interface CreateDownloadGateRequest {
   audio_file_url: string;
   thumbnail_url?: string;
   short_code?: string;
+  /** Optional gate steps to create with the gate (order = array order). */
+  steps?: CreateGateStepRequest[];
 }
 
 /** Response shape of GET /api/download-gates (list for current user) */
