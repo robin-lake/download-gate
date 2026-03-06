@@ -112,3 +112,12 @@ SOUNDCLOUD_CLIEND_SECRET
 SOUNDCLOUD_REDIRECT_URI
 SOUNDCLOUD_SUCCESS_REDIRECT_URI
 ```
+
+
+### Local Deployment ###
+To run locally, you can set up a local instance of dynamodb using the docker image:
+```
+docker-compose up -d
+```
+
+You can examine local dynamodb data using nosqlworkbench by connecting it to `localhost:8000`
