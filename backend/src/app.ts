@@ -76,7 +76,7 @@ app.use('/api/gates', publicGateRoutes);
 app.use('/api/media', mediaRoutes);
 // Local dev: serve uploaded files from disk when MEDIA_BUCKET is not set
 app.get('/api/uploads/*key', serveLocalUploads);
-app.get('/api/integrations', soundcloudRoutes);
+app.use('/api/integrations', soundcloudRoutes);
 
 // Error handling (must be last)
 app.use(errorHandler);

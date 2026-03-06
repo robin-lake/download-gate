@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import NewDownloadGate from './pages/NewDownloadGate/NewDownloadGate';
 import Users from './pages/Users';
 import DownloadGate from './pages/DownloadGate';
+import OAuthSoundCloudSuccess from './pages/OAuthSoundCloudSuccess';
 import Me from './pages/Me';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
@@ -23,6 +24,7 @@ function App() {
           <Route path="/signup" element={<div className="app-page"><SignUp /></div>} />
           <Route path="/users" element={<div className="app-page"><Users /></div>} />
           <Route path="/me" element={<div className="app-page"><Me /></div>} />
+          <Route path="/oauth/soundcloud/success" element={<OAuthSoundCloudSuccess />} />
           {/* Short URL for a single download gate (e.g. /abc123). Must be last so other paths match first. */}
           <Route path="/:gateIdOrSlug" element={<DownloadGate />} />
         </Routes>

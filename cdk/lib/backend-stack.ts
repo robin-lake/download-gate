@@ -142,6 +142,7 @@ export class BackendStack extends cdk.Stack {
       entry: path.join(__dirname, '../../backend/src/lambda.ts'),
       handler: 'handler',
       runtime: lambda.Runtime.NODEJS_20_X,
+      timeout: cdk.Duration.seconds(30),
       bundling: {
         forceDockerBundling: false,
       },

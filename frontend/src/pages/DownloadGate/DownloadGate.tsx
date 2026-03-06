@@ -4,7 +4,11 @@ import { useGetDownloadGateById } from '../../network/downloadGates/getDownloadG
 import { useGetGateSteps } from '../../network/downloadGates/getGateSteps';
 import { recordDownload, recordVisit } from '../../network/downloadGates/recordGateAnalytics';
 import type { GateStepResponse } from '../../network/downloadGates/types';
+import { MESSAGE_TYPE } from '../../pages/OAuthSoundCloudSuccess';
 import './DownloadGate.scss';
+
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+const SOUNDCLOUD_SIGNIN_URL = `${API_BASE}/api/integrations/signin/soundcloud`;
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   email_capture: 'Enter your email',
@@ -35,6 +39,7 @@ export default function DownloadGate() {
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+  const [soundcloudConnected, setSoundcloudConnected] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const visitRecordedRef = useRef(false);
@@ -45,6 +50,8 @@ export default function DownloadGate() {
   });
 
   const steps = stepsData?.steps ?? [];
+  const hasSoundCloudStep = steps.some((s) => s.service_type === 'soundcloud');
+  const canUnlock = !hasSoundCloudStep || soundcloudConnected;
   const handlePlayPause = useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
@@ -94,6 +101,16 @@ export default function DownloadGate() {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [modalOpen, handleCloseModal]);
+
+  // Listen for SoundCloud OAuth success from popup
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type === MESSAGE_TYPE) setSoundcloudConnected(true);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
 
   // Record visit once when the gate page is successfully loaded
   useEffect(() => {
@@ -221,14 +238,50 @@ export default function DownloadGate() {
                   Complete the action below to get your download.
                 </p>
               ) : (
-                steps.map((step, i) => (
-                  <div key={step.step_id} className="download-gate-modal__step">
-                    <span className="download-gate-modal__step-num">{i + 1}</span>
-                    <span className="download-gate-modal__step-label">
-                      {stepLabel(step)}
-                    </span>
-                  </div>
-                ))
+                <>
+                  {steps.map((step, i) => (
+                    <div key={step.step_id} className="download-gate-modal__step">
+                      <span className="download-gate-modal__step-num">{i + 1}</span>
+                      <span className="download-gate-modal__step-label">
+                        {stepLabel(step)}
+                      </span>
+                    </div>
+                  ))}
+                  {hasSoundCloudStep && (
+                    <div className="download-gate-modal__soundcloud">
+                      <p className="download-gate-modal__soundcloud-desc">
+                        {soundcloudConnected
+                          ? 'Connected with SoundCloud.'
+                          : `You will like and repost this track and follow ${gate?.artist_name ?? 'the artist'}.`}
+                      </p>
+                      {!soundcloudConnected ? (
+                        <a
+                          href={SOUNDCLOUD_SIGNIN_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="download-gate-modal__soundcloud-connect"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const w = 500;
+                            const h = 600;
+                            const left = Math.round((window.screen.width - w) / 2);
+                            const top = Math.round((window.screen.height - h) / 2);
+                            window.open(
+                              SOUNDCLOUD_SIGNIN_URL,
+                              'soundcloud-oauth',
+                              `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`
+                            );
+                          }}
+                        >
+                          <SoundCloudIcon />
+                          <span>CONNECT</span>
+                        </a>
+                      ) : (
+                        <span className="download-gate-modal__soundcloud-done">✓ Connected</span>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <div className="download-gate-modal__footer">
@@ -236,6 +289,7 @@ export default function DownloadGate() {
                 type="button"
                 className="download-gate-modal__unlock-btn"
                 onClick={handleUnlockDownload}
+                disabled={!canUnlock}
               >
                 {unlocked ? 'Open download' : 'Get download'}
               </button>
@@ -266,6 +320,14 @@ function PauseIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+    </svg>
+  );
+}
+
+function SoundCloudIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className="download-gate-modal__soundcloud-icon">
+      <path d="M1.175 12.225c-.051 0-.094.046-.101.1l-.233 2.154.233 2.105c.007.058.05.098.101.098.05 0 .09-.04.099-.098l.255-2.105-.254-2.154c-.009-.054-.049-.1-.1-.1m-.582.857c-.051 0-.094.046-.101.1l-.233 2.154.233 2.105c.007.058.05.098.101.098.05 0 .09-.04.099-.098l.255-2.105-.254-2.154c-.009-.054-.049-.1-.1-.1m.582-2.857c-.051 0-.094.046-.101.1L1.264 12.38l.233 2.105c.007.058.05.098.101.098.05 0 .09-.04.099-.098l.255-2.105-.254-2.154c-.009-.054-.049-.1-.1-.1m1.036 2.786c-.064 0-.117.05-.125.117l-.176 2.412.176 2.353c.008.067.061.118.125.118.063 0 .116-.051.124-.118l.198-2.353-.198-2.412c-.008-.067-.061-.117-.124-.117m-.454-2.786c-.064 0-.117.05-.125.117L1.4 12.38l.176 2.353c.008.067.061.118.125.118.063 0 .116-.051.124-.118l.198-2.353-.198-2.412c-.008-.067-.061-.117-.124-.117m2.267.857c-.075 0-.137.06-.146.137l-.117 2.47.117 2.334c.009.078.071.138.146.138.074 0 .137-.06.146-.138l.132-2.334-.132-2.47c-.009-.077-.072-.137-.146-.137m-.454-2.857c-.075 0-.137.06-.146.137l-.117 2.47.117 2.334c.009.078.071.138.146.138.074 0 .137-.06.146-.138l.132-2.334-.132-2.47c-.009-.077-.072-.137-.146-.137m.908 2.857c-.083 0-.151.067-.161.151l-.059 2.528.059 2.305c.01.084.078.152.161.152.082 0 .15-.068.16-.152l.067-2.305-.067-2.528c-.01-.084-.078-.151-.16-.151m-.454-2.857c-.083 0-.151.067-.161.151l-.059 2.528.059 2.305c.01.084.078.152.161.152.082 0 .15-.068.16-.152l.067-2.305-.067-2.528c-.01-.084-.078-.151-.16-.151m4.494 2.857c-.093 0-.169.075-.181.169l-.059 2.528.059 2.305c.012.094.088.169.181.169.092 0 .168-.075.18-.169l.067-2.305-.067-2.528c-.012-.094-.088-.169-.18-.169m-.454-2.857c-.093 0-.169.075-.181.169l-.059 2.528.059 2.305c.012.094.088.169.181.169.092 0 .168-.075.18-.169l.067-2.305-.067-2.528c-.012-.094-.088-.169-.18-.169m.908 2.857c-.102 0-.185.083-.198.185l-.059 2.528.059 2.305c.013.102.096.185.198.185.101 0 .184-.083.197-.185l.067-2.305-.067-2.528c-.013-.102-.096-.185-.197-.185m-.454-2.857c-.102 0-.185.083-.198.185l-.059 2.528.059 2.305c.013.102.096.185.198.185.101 0 .184-.083.197-.185l.067-2.305-.067-2.528c-.013-.102-.096-.185-.197-.185m.908 2.857c-.113 0-.205.093-.219.206l-.059 2.528.059 2.305c.014.113.106.206.219.206.112 0 .204-.093.218-.206l.067-2.305-.067-2.528c-.014-.113-.106-.206-.218-.206m-.454-2.857c-.113 0-.205.093-.219.206l-.059 2.528.059 2.305c.014.113.106.206.219.206.112 0 .204-.093.218-.206l.067-2.305-.067-2.528c-.014-.113-.106-.206-.218-.206m.908 2.857c-.124 0-.225.102-.24.226l-.059 2.528.059 2.305c.015.124.116.226.24.226.123 0 .224-.102.239-.226l.067-2.305-.067-2.528c-.015-.124-.116-.226-.239-.226m-.454-2.857c-.124 0-.225.102-.24.226l-.059 2.528.059 2.305c.015.124.116.226.24.226.123 0 .224-.102.239-.226l.067-2.305-.067-2.528c-.015-.124-.116-.226-.239-.226m.908 2.857c-.135 0-.245.111-.261.247l-.059 2.528.059 2.305c.016.136.126.247.261.247.134 0 .244-.111.26-.247l.067-2.305-.067-2.528c-.016-.136-.126-.247-.26-.247m-.454-2.857c-.135 0-.245.111-.261.247l-.059 2.528.059 2.305c.016.136.126.247.261.247.134 0 .244-.111.26-.247l.067-2.305-.067-2.528c-.016-.136-.126-.247-.26-.247m.908 2.857c-.147 0-.266.12-.283.268l-.059 2.528.059 2.305c.017.148.136.268.283.268.146 0 .265-.12.282-.268l.067-2.305-.067-2.528c-.017-.148-.136-.268-.282-.268m-.454-2.857c-.147 0-.266.12-.283.268l-.059 2.528.059 2.305c.017.148.136.268.283.268.146 0 .265-.12.282-.268l.067-2.305-.067-2.528c-.017-.148-.136-.268-.282-.268m.908 2.857c-.158 0-.287.129-.304.289l-.059 2.528.059 2.305c.017.16.146.289.304.289.157 0 .286-.129.303-.289l.067-2.305-.067-2.528c-.017-.16-.146-.289-.303-.289m-.454-2.857c-.158 0-.287.129-.304.289l-.059 2.528.059 2.305c.017.16.146.289.304.289.157 0 .286-.129.303-.289l.067-2.305-.067-2.528c-.017-.16-.146-.289-.303-.289m.908 2.857c-.17 0-.308.139-.326.31l-.059 2.528.059 2.305c.018.171.156.31.326.31.169 0 .307-.139.325-.31l.067-2.305-.067-2.528c-.018-.171-.156-.31-.325-.31m-.454-2.857c-.17 0-.308.139-.326.31l-.059 2.528.059 2.305c.018.171.156.31.326.31.169 0 .307-.139.325-.31l.067-2.305-.067-2.528c-.018-.171-.156-.31-.325-.31" />
     </svg>
   );
 }

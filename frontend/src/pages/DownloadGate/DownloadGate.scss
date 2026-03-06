@@ -289,3 +289,58 @@
   font-size: 0.95rem;
   padding: 0.5rem 0;
 }
+
+.download-gate-modal__soundcloud {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.download-gate-modal__soundcloud-desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+.download-gate-modal__soundcloud-connect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #ff5500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.download-gate-modal__soundcloud-connect:hover {
+  background: #e64a00;
+  transform: translateY(-1px);
+}
+
+.download-gate-modal__soundcloud-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__soundcloud-done {
+  display: inline-block;
+  color: #0bcca9;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.download-gate-modal__unlock-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
