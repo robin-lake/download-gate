@@ -340,6 +340,79 @@
   font-weight: 600;
 }
 
+/* Spotify Connect section */
+.download-gate-modal__spotify {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.download-gate-modal__spotify-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+.download-gate-modal__spotify-connect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #1db954;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__spotify-connect:hover {
+  background: #1ed760;
+  transform: translateY(-1px);
+}
+
+.download-gate-modal__spotify-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__spotify-desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.download-gate-modal__spotify-desc strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.download-gate-modal__spotify-optout {
+  text-decoration: underline;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.download-gate-modal__spotify-done {
+  display: inline-block;
+  color: #1db954;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .download-gate-modal__unlock-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;

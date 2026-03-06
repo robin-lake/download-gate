@@ -47,6 +47,15 @@ interface BackendStackProps extends cdk.StackProps {
     /** Where to send the user after successful OAuth (e.g. frontend /oauth/soundcloud/success). */
     successRedirectUri: string;
   };
+  /** Optional: Spotify OAuth (client ID, secret, redirect URIs). If set, Connect Spotify works on the gate. */
+  spotify?: {
+    clientId: string;
+    clientSecret: string;
+    /** Backend callback URL (Spotify redirects here with ?code=). Must match Spotify app redirect URI. */
+    redirectUri: string;
+    /** Where to send the user after successful OAuth (e.g. frontend /oauth/spotify/success). */
+    successRedirectUri: string;
+  };
 }
 
 export class BackendStack extends cdk.Stack {
@@ -64,6 +73,7 @@ export class BackendStack extends cdk.Stack {
       clerkPublishableKey,
       grafanaCloudOtlp,
       soundcloud,
+      spotify,
     } = props;
     const frontendOrigin = `https://${siteSubDomain}.${domainName}`;
     const apexOrigin = `https://${domainName}`;
@@ -168,6 +178,14 @@ export class BackendStack extends cdk.Stack {
               SOUNDCLOUD_CLIENT_SECRET: soundcloud.clientSecret,
               SOUNDCLOUD_REDIRECT_URI: soundcloud.redirectUri,
               SOUNDCLOUD_SUCCESS_REDIRECT_URI: soundcloud.successRedirectUri,
+            }
+          : {}),
+        ...(spotify
+          ? {
+              SPOTIFY_CLIENT_ID: spotify.clientId,
+              SPOTIFY_CLIENT_SECRET: spotify.clientSecret,
+              SPOTIFY_REDIRECT_URI: spotify.redirectUri,
+              SPOTIFY_SUCCESS_REDIRECT_URI: spotify.successRedirectUri,
             }
           : {}),
       },

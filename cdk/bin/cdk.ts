@@ -48,6 +48,17 @@ new BackendStack(app, backendStackId, {
             `https://${process.env.SITE_SUBDOMAIN}.${process.env.DOMAIN_NAME}/oauth/soundcloud/success`,
         }
       : undefined,
+  spotify:
+    process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_REDIRECT_URI
+      ? {
+          clientId: process.env.SPOTIFY_CLIENT_ID,
+          clientSecret: process.env.SPOTIFY_CLIENT_SECRET || '',
+          redirectUri: process.env.SPOTIFY_REDIRECT_URI,
+          successRedirectUri:
+            process.env.SPOTIFY_SUCCESS_REDIRECT_URI ||
+            `https://${process.env.SITE_SUBDOMAIN}.${process.env.DOMAIN_NAME}/oauth/spotify/success`,
+        }
+      : undefined,
   // Optional: set GRAFANA_CLOUD_OTLP_ENDPOINT and GRAFANA_CLOUD_OTLP_AUTH to send traces to Grafana Cloud
   // grafanaCloudOtlp:
   //   process.env.GRAFANA_CLOUD_OTLP_ENDPOINT && process.env.GRAFANA_CLOUD_OTLP_AUTH
