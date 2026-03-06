@@ -23,7 +23,11 @@ router.get(
       const clientId = process.env.SOUNDCLOUD_CLIENT_ID;
       const redirectUri = process.env.SOUNDCLOUD_REDIRECT_URI;
       if (!clientId || !redirectUri) {
-        res.status(500).json({ error: 'SoundCloud OAuth not configured' });
+        const missing = []; if (!clientId) missing.push('SOUNDCLOUD_CLIENT_ID'); if (!redirectUri) missing.push('SOUNDCLOUD_REDIRECT_URI');
+        res.status(500).json({
+          error: 'SoundCloud OAuth not configured',
+          missing_env: missing,
+        });
         return;
       }
 

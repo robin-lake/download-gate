@@ -38,6 +38,15 @@ interface BackendStackProps extends cdk.StackProps {
   clerkPublishableKey: string;
   /** Optional: send OTLP traces to Grafana Cloud (in addition to X-Ray and CloudWatch). */
   grafanaCloudOtlp?: GrafanaCloudOtlpConfig;
+  /** Optional: SoundCloud OAuth (client ID, secret, redirect URIs). If set, Connect SoundCloud works on the gate. */
+  soundcloud?: {
+    clientId: string;
+    clientSecret: string;
+    /** Backend callback URL (SoundCloud redirects here with ?code=). Must match SoundCloud app redirect URI. */
+    redirectUri: string;
+    /** Where to send the user after successful OAuth (e.g. frontend /oauth/soundcloud/success). */
+    successRedirectUri: string;
+  };
 }
 
 export class BackendStack extends cdk.Stack {
@@ -54,6 +63,7 @@ export class BackendStack extends cdk.Stack {
       clerkSecretKey,
       clerkPublishableKey,
       grafanaCloudOtlp,
+      soundcloud,
     } = props;
     const frontendOrigin = `https://${siteSubDomain}.${domainName}`;
     const apexOrigin = `https://${domainName}`;
@@ -152,6 +162,14 @@ export class BackendStack extends cdk.Stack {
         CLERK_PUBLISHABLE_KEY: clerkPublishableKey,
         MEDIA_BUCKET: mediaBucket.bucketName,
         ...tableEnv,
+        ...(soundcloud
+          ? {
+              SOUNDCLOUD_CLIENT_ID: soundcloud.clientId,
+              SOUNDCLOUD_CLIENT_SECRET: soundcloud.clientSecret,
+              SOUNDCLOUD_REDIRECT_URI: soundcloud.redirectUri,
+              SOUNDCLOUD_SUCCESS_REDIRECT_URI: soundcloud.successRedirectUri,
+            }
+          : {}),
       },
       tracing: lambda.Tracing.ACTIVE,
       // ADOT layer + AWS_LAMBDA_EXEC_WRAPPER removed: caused init/runtime issues (e.g. /opt/otel-instrument

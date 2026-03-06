@@ -9,7 +9,7 @@ const stage = process.env.STAGE || 'production';
 if (stage === 'staging') {
   dotenv.config({ path: '.env.staging' });
 } else {
-  dotenv.config(); // .env (production)
+  dotenv.config({ path: '.env.production'});
 }
 
 const app = new cdk.App();
@@ -37,6 +37,17 @@ new BackendStack(app, backendStackId, {
   clerkSecretKey: process.env.CLERK_SECRET_KEY as string,
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY as string,
   env,
+  soundcloud:
+    process.env.SOUNDCLOUD_CLIENT_ID && process.env.SOUNDCLOUD_REDIRECT_URI
+      ? {
+          clientId: process.env.SOUNDCLOUD_CLIENT_ID,
+          clientSecret: process.env.SOUNDCLOUD_CLIENT_SECRET || '',
+          redirectUri: process.env.SOUNDCLOUD_REDIRECT_URI,
+          successRedirectUri:
+            process.env.SOUNDCLOUD_SUCCESS_REDIRECT_URI ||
+            `https://${process.env.SITE_SUBDOMAIN}.${process.env.DOMAIN_NAME}/oauth/soundcloud/success`,
+        }
+      : undefined,
   // Optional: set GRAFANA_CLOUD_OTLP_ENDPOINT and GRAFANA_CLOUD_OTLP_AUTH to send traces to Grafana Cloud
   // grafanaCloudOtlp:
   //   process.env.GRAFANA_CLOUD_OTLP_ENDPOINT && process.env.GRAFANA_CLOUD_OTLP_AUTH

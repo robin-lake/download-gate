@@ -10,6 +10,15 @@ API_SUBDOMAIN=your-api-subdomain
 CLERK_PUBLISHABLE_KEY=your-publishable-key
 CLERK_SECRET_KEY=your-secret-key
 ```
+**Optional – SoundCloud Connect (gate modal):** To enable "Connect SoundCloud" on download gates, add the following to **`cdk/.env`** (same file as above; or GitHub env/secrets for CI/CD). **Important:** `npm run deploy:production` only reads `cdk/.env` — it does **not** read `backend/.env.production`. If these are missing from `cdk/.env`, the deployed API will return "SoundCloud OAuth not configured".
+```
+SOUNDCLOUD_CLIENT_ID=your-soundcloud-client-id
+SOUNDCLOUD_CLIENT_SECRET=your-soundcloud-client-secret
+SOUNDCLOUD_REDIRECT_URI=https://api.your-subdomain.your-domain/api/integrations/auth/soundcloud/callback
+SOUNDCLOUD_SUCCESS_REDIRECT_URI=https://your-subdomain.your-domain/oauth/soundcloud/success
+```
+`SOUNDCLOUD_REDIRECT_URI` must be the **backend** callback URL (SoundCloud redirects the user here with `?code=`). Add this exact URL to your SoundCloud app’s redirect URIs. `SOUNDCLOUD_SUCCESS_REDIRECT_URI` is where the user is sent after OAuth (typically your frontend success page).
+
 The frontend can be deployed by running
 ``` 
 cd cdk
