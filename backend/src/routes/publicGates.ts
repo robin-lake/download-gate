@@ -21,7 +21,8 @@ router.get(
   '/:gateIdOrSlug/steps',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const idOrSlug = req.params.gateIdOrSlug?.trim();
+      const raw = req.params.gateIdOrSlug;
+      const idOrSlug = (typeof raw === 'string' ? raw : raw?.[0] ?? '').trim();
       if (!idOrSlug) {
         res.status(400).json({ error: 'gateIdOrSlug is required' });
         return;
@@ -49,7 +50,8 @@ router.post(
   '/:gateIdOrSlug/visit',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const idOrSlug = req.params.gateIdOrSlug?.trim();
+      const raw = req.params.gateIdOrSlug;
+      const idOrSlug = (typeof raw === 'string' ? raw : raw?.[0] ?? '').trim();
       if (!idOrSlug) {
         res.status(400).json({ error: 'gateIdOrSlug is required' });
         return;
@@ -77,7 +79,8 @@ router.post(
   '/:gateIdOrSlug/download',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const idOrSlug = req.params.gateIdOrSlug?.trim();
+      const raw = req.params.gateIdOrSlug;
+      const idOrSlug = (typeof raw === 'string' ? raw : raw?.[0] ?? '').trim();
       if (!idOrSlug) {
         res.status(400).json({ error: 'gateIdOrSlug is required' });
         return;
@@ -106,7 +109,8 @@ router.get(
   '/:gateIdOrSlug',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const idOrSlug = req.params.gateIdOrSlug?.trim();
+      const raw = req.params.gateIdOrSlug;
+      const idOrSlug = (typeof raw === 'string' ? raw : raw?.[0] ?? '').trim();
       if (!idOrSlug) {
         res.status(400).json({ error: 'gateIdOrSlug is required' });
         return;
