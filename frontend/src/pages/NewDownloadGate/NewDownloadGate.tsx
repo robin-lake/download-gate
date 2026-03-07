@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import ToggleMenuItem from "../../components/ToggleMenuItem/ToggleMenuItem";
+import GateStep from './GateStep';
 import { createDownloadGate } from "@/network/downloadGates/createDownloadGate";
 import { uploadCoverArt, uploadAudio } from "@/network/media/uploadMedia";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import "./NewDownloadGate.scss";
 
 /** Short code: 3–32 chars, letters, numbers, hyphens, underscores only. */
@@ -60,6 +60,7 @@ const DESIGN_OPTIONS = [
 ] as const;
 
 /** Gate step options: label (UI) and service_type (API / DATA_MODEL). */
+// const GATE_STEP_OPTIONS: { label: string; service_type: string }[] = [
 const GATE_STEP_OPTIONS: { label: string; service_type: string }[] = [
   { label: "Email capture", service_type: "email_capture" },
   { label: "SoundCloud", service_type: "soundcloud" },
@@ -525,36 +526,15 @@ export default function NewDownloadGate() {
             control={control}
             render={({ field: { value, onChange } }) => (
               <div className="new-download-gate__gate-steps">
-                {GATE_STEP_OPTIONS.map(({ label, service_type }) => {
-                  const isSelected = value.some((s) => s.service_type === service_type);
-                  return (
-                    <Button
-                      key={service_type}
-                      type="button"
-                      variant={isSelected ? "default" : "outline"}
-                      className={cn(
-                        "new-download-gate__gate-step",
-                        isSelected && "new-download-gate__gate-step--selected"
-                      )}
-                      onClick={() => {
-                        if (isSelected) {
-                          onChange(value.filter((s) => s.service_type !== service_type));
-                        } else {
-                          onChange([
-                            ...value,
-                            {
-                              service_type,
-                              is_skippable: false,
-                              config: {},
-                            },
-                          ]);
-                        }
-                      }}
-                    >
-                      {label} +
-                    </Button>
-                  );
-                })}
+                {GATE_STEP_OPTIONS.map(({ label, service_type }) => (
+                  <GateStep
+                    key={service_type}
+                    label={label}
+                    service_type={service_type}
+                    value={value}
+                    onChange={onChange}
+                  />
+                ))}
               </div>
             )}
           />
