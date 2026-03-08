@@ -316,4 +316,36 @@ describe('DownloadGateModel', () => {
       );
     });
   });
+
+  describe('delete', () => {
+    it('sends DeleteCommand with user_id and gate_id and returns deleted item', async () => {
+      const deleted = {
+        user_id: 'user-1',
+        gate_id: 'gate-1',
+        artist_name: 'Artist',
+        title: 'Track',
+        audio_file_url: 'https://example.com/audio.mp3',
+        visits: 0,
+        downloads: 0,
+        emails_captured: 0,
+      };
+      mockSend.mockResolvedValueOnce({ Attributes: deleted });
+
+      const result = await DownloadGateModel.delete('user-1', 'gate-1');
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const [command] = mockSend.mock.calls[0];
+      expect(command.input.Key).toEqual({ user_id: 'user-1', gate_id: 'gate-1' });
+      expect(command.input.ReturnValues).toBe('ALL_OLD');
+      expect(result).toEqual(deleted);
+    });
+
+    it('returns null when gate does not exist', async () => {
+      mockSend.mockResolvedValueOnce({});
+
+      const result = await DownloadGateModel.delete('user-1', 'gate-missing');
+
+      expect(result).toBeNull();
+    });
+  });
 });

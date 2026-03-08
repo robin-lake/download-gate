@@ -180,4 +180,43 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
   }
 });
 
+/**
+ * DELETE /api/download-gates/:gateId
+ * Delete a download gate and all its gate steps. Only the owning user can delete.
+ */
+router.delete(
+  '/:gateId',
+  async (req: Request<{ gateId: string }>, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = getClerkUserId(req);
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
+      const { gateId } = req.params;
+      if (!gateId || typeof gateId !== 'string' || gateId.trim() === '') {
+        res.status(400).json({ error: 'gateId is required' });
+        return;
+      }
+
+      const gate = await DownloadGateModel.findByUserAndGateId(userId, gateId.trim());
+      if (!gate) {
+        res.status(404).json({ error: 'Download gate not found' });
+        return;
+      }
+
+      const steps = await GateStepModel.listByGateId(gateId.trim());
+      for (const step of steps) {
+        await GateStepModel.delete(step.gate_id, step.step_id);
+      }
+
+      await DownloadGateModel.delete(userId, gateId.trim());
+      res.status(200).json({ deleted: true });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 export default router;

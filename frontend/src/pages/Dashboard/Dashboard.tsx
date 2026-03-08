@@ -9,12 +9,13 @@ import { useGetDashboardState } from './dashboardState';
 
 export default function Dashboard() {
   const {
-    activeTab, 
-    setActiveTab, 
-    downloadGates, 
+    activeTab,
+    setActiveTab,
+    downloadGates,
     smartLinks,
     dashboardStats,
-    downloadGatesStats
+    downloadGatesStats,
+    refetchDownloadGates,
   } = useGetDashboardState();
 
   return (
@@ -111,7 +112,11 @@ export default function Dashboard() {
             {activeTab === 'download-gates' && downloadGates.length ? (
               <div className="download-gates">
                 {downloadGates.map((gate) => (
-                  <DownloadGateCard key={gate.id} downloadGate={gate} />
+                  <DownloadGateCard
+                    key={gate.id}
+                    downloadGate={gate}
+                    onDeleted={refetchDownloadGates}
+                  />
                 ))}
               </div>
             ) : (

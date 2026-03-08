@@ -111,3 +111,14 @@ export function isDownloadGateStatsResponse(d: unknown): d is DownloadGateStatsR
     (o['total_emails_captured'] as number) >= 0
   );
 }
+
+/** Response shape of DELETE /api/download-gates/:gateId */
+export interface DeleteDownloadGateResponse {
+  deleted: true;
+}
+
+export function isDeleteDownloadGateResponse(d: unknown): d is DeleteDownloadGateResponse {
+  if (typeof d !== 'object' || d === null) return false;
+  const o = d as Record<string, unknown>;
+  return o['deleted'] === true;
+}

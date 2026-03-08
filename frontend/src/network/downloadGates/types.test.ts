@@ -3,6 +3,7 @@ import {
   isDownloadGateResponse,
   isListDownloadGatesResponse,
   isDownloadGateStatsResponse,
+  isDeleteDownloadGateResponse,
   type DownloadGateResponse,
   type ListDownloadGatesResponse,
   type DownloadGateStatsResponse,
@@ -177,5 +178,27 @@ describe('isDownloadGateStatsResponse', () => {
         total_emails_captured: 2,
       })
     ).toBe(false);
+  });
+});
+
+describe('isDeleteDownloadGateResponse', () => {
+  it('returns true for { deleted: true }', () => {
+    expect(isDeleteDownloadGateResponse({ deleted: true })).toBe(true);
+  });
+
+  it('returns false for null', () => {
+    expect(isDeleteDownloadGateResponse(null)).toBe(false);
+  });
+
+  it('returns false for non-object', () => {
+    expect(isDeleteDownloadGateResponse(42)).toBe(false);
+    expect(isDeleteDownloadGateResponse('deleted')).toBe(false);
+  });
+
+  it('returns false when deleted is not true', () => {
+    expect(isDeleteDownloadGateResponse({})).toBe(false);
+    expect(isDeleteDownloadGateResponse({ deleted: false })).toBe(false);
+    expect(isDeleteDownloadGateResponse({ deleted: 1 })).toBe(false);
+    expect(isDeleteDownloadGateResponse({ deleted: 'true' })).toBe(false);
   });
 });
