@@ -4,6 +4,7 @@ import { useGetDownloadGateById } from '../../network/downloadGates/getDownloadG
 import { useGetGateSteps } from '../../network/downloadGates/getGateSteps';
 import { recordDownload, recordVisit } from '../../network/downloadGates/recordGateAnalytics';
 import { useExecuteSpotifyActions } from '../../network/downloadGates/executeSpotifyActions';
+import { useExecuteSoundCloudActions } from '../../network/downloadGates/executeSoundCloudActions';
 import type { GateStepResponse } from '../../network/downloadGates/types';
 import { MESSAGE_TYPE as SOUNDCLOUD_MESSAGE_TYPE } from '../../pages/OAuthSoundCloudSuccess';
 import { MESSAGE_TYPE as SPOTIFY_MESSAGE_TYPE } from '../../pages/OAuthSpotifySuccess';
@@ -43,16 +44,27 @@ export default function DownloadGate() {
   const [modalOpen, setModalOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [soundcloudConnected, setSoundcloudConnected] = useState(false);
+  const [soundcloudComment, setSoundcloudComment] = useState('');
+  const [soundcloudExecuteTrigger, setSoundcloudExecuteTrigger] = useState(false);
+  const [soundcloudExecuted, setSoundcloudExecuted] = useState(false);
   const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [spotifyExecuteTrigger, setSpotifyExecuteTrigger] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const visitRecordedRef = useRef(false);
+  const pendingUnlockAfterSoundCloudRef = useRef(false);
 
   const { status: spotifyExecuteStatus } = useExecuteSpotifyActions({
     gateIdOrSlug,
     enabled: spotifyExecuteTrigger,
   });
+
+  const { status: soundcloudExecuteStatus, isLoading: soundcloudExecuteLoading } =
+    useExecuteSoundCloudActions({
+      gateIdOrSlug,
+      enabled: soundcloudExecuteTrigger,
+      comment: soundcloudComment,
+    });
 
   const { data: stepsData, isLoading: stepsLoading } = useGetGateSteps({
     gateId: gateIdOrSlug,
@@ -62,8 +74,22 @@ export default function DownloadGate() {
   const steps = stepsData?.steps ?? [];
   const hasSoundCloudStep = steps.some((s) => s.service_type === 'soundcloud');
   const hasSpotifyStep = steps.some((s) => s.service_type === 'spotify');
+  const soundcloudStep = steps.find((s) => s.service_type === 'soundcloud');
+  const soundcloudConfig = soundcloudStep?.config as {
+    follow_profile?: boolean;
+    like_track?: boolean;
+    repost_track?: boolean;
+    comment_on_track?: boolean;
+    profile_url?: string;
+    track_url?: string;
+  } | undefined;
+  const soundcloudCommentRequired = Boolean(
+    soundcloudConfig?.comment_on_track
+  );
   const canUnlock =
-    (!hasSoundCloudStep || soundcloudConnected) &&
+    (!hasSoundCloudStep ||
+      (soundcloudConnected &&
+        (!soundcloudCommentRequired || soundcloudComment.trim().length > 0))) &&
     (!hasSpotifyStep || spotifyConnected);
   const handlePlayPause = useCallback(() => {
     const el = audioRef.current;
@@ -102,6 +128,26 @@ export default function DownloadGate() {
     window.open(gate.audio_file_url, '_blank', 'noopener');
   }, [gate?.audio_file_url, gateIdOrSlug]);
 
+  const handleUnlockClick = useCallback(() => {
+    if (!canUnlock) return;
+    if (
+      hasSoundCloudStep &&
+      soundcloudConnected &&
+      !soundcloudExecuted
+    ) {
+      pendingUnlockAfterSoundCloudRef.current = true;
+      setSoundcloudExecuteTrigger(true);
+    } else {
+      handleUnlockDownload();
+    }
+  }, [
+    canUnlock,
+    hasSoundCloudStep,
+    soundcloudConnected,
+    soundcloudExecuted,
+    handleUnlockDownload,
+  ]);
+
   const handleCloseModal = useCallback(() => {
     setModalOpen(false);
   }, []);
@@ -130,6 +176,19 @@ export default function DownloadGate() {
   useEffect(() => {
     if (spotifyExecuteStatus === 'success') setSpotifyConnected(true);
   }, [spotifyExecuteStatus]);
+
+  // When SoundCloud execute succeeds and we were waiting to unlock, unlock now
+  useEffect(() => {
+    if (
+      soundcloudExecuteStatus === 'success' &&
+      pendingUnlockAfterSoundCloudRef.current
+    ) {
+      pendingUnlockAfterSoundCloudRef.current = false;
+      setSoundcloudExecuted(true);
+      setSoundcloudExecuteTrigger(false);
+      handleUnlockDownload();
+    }
+  }, [soundcloudExecuteStatus, handleUnlockDownload]);
 
   // Record visit once when the gate page is successfully loaded
   useEffect(() => {
@@ -271,8 +330,48 @@ export default function DownloadGate() {
                       <p className="download-gate-modal__soundcloud-desc">
                         {soundcloudConnected
                           ? 'Connected with SoundCloud.'
-                          : `You will like and repost this track and follow ${gate?.artist_name ?? 'the artist'}.`}
+                          : 'Connect with SoundCloud to complete the following:'}
                       </p>
+                      {soundcloudConfig &&
+                        (soundcloudConfig.follow_profile ||
+                          soundcloudConfig.like_track ||
+                          soundcloudConfig.repost_track ||
+                          soundcloudConfig.comment_on_track) && (
+                          <ul className="download-gate-modal__soundcloud-actions">
+                            {soundcloudConfig.follow_profile && (
+                              <li>Follow {gate?.artist_name ?? 'the artist'}</li>
+                            )}
+                            {soundcloudConfig.like_track && (
+                              <li>Like the track</li>
+                            )}
+                            {soundcloudConfig.repost_track && (
+                              <li>Repost the track</li>
+                            )}
+                            {soundcloudConfig.comment_on_track && (
+                              <li>Comment on the track</li>
+                            )}
+                          </ul>
+                        )}
+                      {soundcloudCommentRequired && (
+                        <div className="download-gate-modal__soundcloud-comment">
+                          <label
+                            htmlFor="soundcloud-comment"
+                            className="download-gate-modal__soundcloud-comment-label"
+                          >
+                            Your comment (required)
+                          </label>
+                          <textarea
+                            id="soundcloud-comment"
+                            className="download-gate-modal__soundcloud-comment-input"
+                            placeholder="Write a comment for the track..."
+                            value={soundcloudComment}
+                            onChange={(e) =>
+                              setSoundcloudComment(e.target.value)
+                            }
+                            rows={3}
+                          />
+                        </div>
+                      )}
                       {!soundcloudConnected ? (
                         <a
                           href={SOUNDCLOUD_SIGNIN_URL}
@@ -352,10 +451,14 @@ export default function DownloadGate() {
               <button
                 type="button"
                 className="download-gate-modal__unlock-btn"
-                onClick={handleUnlockDownload}
-                disabled={!canUnlock}
+                onClick={handleUnlockClick}
+                disabled={!canUnlock || soundcloudExecuteLoading}
               >
-                {unlocked ? 'Open download' : 'Get download'}
+                {soundcloudExecuteLoading
+                  ? 'Completing…'
+                  : unlocked
+                    ? 'Open download'
+                    : 'Get download'}
               </button>
               <button
                 type="button"

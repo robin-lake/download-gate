@@ -303,6 +303,62 @@
   line-height: 1.4;
 }
 
+.download-gate-modal__soundcloud-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+
+  li {
+    padding: 0.25rem 0;
+    padding-left: 1.25rem;
+    position: relative;
+
+    &::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #ff5500;
+    }
+  }
+}
+
+.download-gate-modal__soundcloud-comment {
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__soundcloud-comment-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+.download-gate-modal__soundcloud-comment-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #ff5500;
+  }
+}
+
 .download-gate-modal__soundcloud-connect {
   display: inline-flex;
   align-items: center;
