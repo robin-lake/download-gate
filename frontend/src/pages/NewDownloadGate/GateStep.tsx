@@ -7,6 +7,9 @@ import SpotifyStepConfigPopup, {
 import BandcampStepConfigPopup, {
   type BandcampStepConfig,
 } from "./BandcampStepConfigPopup";
+import SoundCloudStepConfigPopup, {
+  type SoundCloudStepConfig,
+} from "./SoundCloudStepConfigPopup";
 
 /** One gate step in the form (selection order = step_order). */
 export interface GateStepFormItem {
@@ -30,7 +33,7 @@ export default function GateStep(props: GateStepProps) {
   const isSelected = Boolean(existingStep);
 
   const handleClick = () => {
-    if (service_type === "spotify" || service_type === "bandcamp") {
+    if (service_type === "spotify" || service_type === "bandcamp" || service_type === "soundcloud") {
       setConfigPopupOpen(true);
     } else {
       // Simple add/remove for other integration types
@@ -90,8 +93,39 @@ export default function GateStep(props: GateStepProps) {
     setConfigPopupOpen(false);
   };
 
+  const handleSoundCloudSave = (config: SoundCloudStepConfig, is_skippable: boolean) => {
+    const others = value.filter((s) => s.service_type !== service_type);
+    const { follow_profile, like_track, repost_track, comment_on_track, profile_url, track_url } = config;
+    onChange([
+      ...others,
+      {
+        service_type,
+        is_skippable,
+        config: {
+          follow_profile,
+          like_track,
+          repost_track,
+          comment_on_track,
+          profile_url,
+          track_url,
+        } as unknown as Record<string, unknown>,
+      },
+    ]);
+    setConfigPopupOpen(false);
+  };
+
+  const handleSoundCloudCancel = () => {
+    setConfigPopupOpen(false);
+  };
+
+  const handleSoundCloudDelete = () => {
+    onChange(value.filter((s) => s.service_type !== service_type));
+    setConfigPopupOpen(false);
+  };
+
   const spotifyConfig = existingStep?.config as Partial<SpotifyStepConfig> | undefined;
   const bandcampConfig = existingStep?.config as Partial<BandcampStepConfig> | undefined;
+  const soundcloudConfig = existingStep?.config as Partial<SoundCloudStepConfig> | undefined;
 
   return (
     <>
@@ -131,6 +165,22 @@ export default function GateStep(props: GateStepProps) {
           onSave={handleBandcampSave}
           onCancel={handleBandcampCancel}
           onDelete={isSelected ? handleBandcampDelete : undefined}
+        />
+      )}
+      {service_type === "soundcloud" && (
+        <SoundCloudStepConfigPopup
+          open={configPopupOpen}
+          stepNumber={
+            existingStep
+              ? value.findIndex((s) => s.service_type === "soundcloud") + 1
+              : value.length + 1
+          }
+          initialConfig={soundcloudConfig}
+          initialIsSkippable={existingStep?.is_skippable ?? false}
+          isEditing={isSelected}
+          onSave={handleSoundCloudSave}
+          onCancel={handleSoundCloudCancel}
+          onDelete={isSelected ? handleSoundCloudDelete : undefined}
         />
       )}
     </>
