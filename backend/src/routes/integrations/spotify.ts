@@ -1,7 +1,29 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import crypto from 'node:crypto';
+import DownloadGateModel from '../../models/downloadGate.js';
+import GateStepModel from '../../models/gateStep.js';
 
 const router = Router();
+
+async function resolveGate(idOrSlug: string) {
+  let gate = await DownloadGateModel.findByShortCode(idOrSlug);
+  if (!gate) {
+    gate = await DownloadGateModel.findByGateId(idOrSlug);
+  }
+  return gate;
+}
+
+/** Extract Spotify resource ID from URL (artist, track, or album). */
+function extractSpotifyId(url: string, type: 'artist' | 'track' | 'album'): string | null {
+  try {
+    const u = new URL(url.trim());
+    if (u.hostname !== 'open.spotify.com' && u.hostname !== 'spotify.link') return null;
+    const match = u.pathname.match(new RegExp(`\\/${type}\\/([a-zA-Z0-9]+)`));
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
 
 function generateState(): string {
   return crypto.randomBytes(24).toString('base64url');
@@ -149,6 +171,124 @@ router.get(
       const successRedirect =
         process.env.SPOTIFY_SUCCESS_REDIRECT_URI ?? '/';
       res.redirect(successRedirect);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/** Spotify step config shape (from gate step config). */
+interface SpotifyStepConfig {
+  follow_artist?: boolean;
+  save_track_or_album?: boolean;
+  artist_profile_url?: string;
+  track_or_album_url?: string;
+}
+
+/**
+ * POST /spotify/execute
+ * Executes Spotify actions (follow artist, save track/album) for a gate's Spotify steps.
+ * Requires spotify_access_token cookie (set after OAuth). Body: { gateIdOrSlug: string }.
+ * Full path: /api/integrations/spotify/execute
+ */
+router.post(
+  '/spotify/execute',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const accessToken = req.cookies?.['spotify_access_token'];
+      if (!accessToken) {
+        res.status(401).json({ error: 'Not connected to Spotify. Complete the connection first.' });
+        return;
+      }
+
+      const { gateIdOrSlug } = req.body as { gateIdOrSlug?: string };
+      const idOrSlug = typeof gateIdOrSlug === 'string' ? gateIdOrSlug.trim() : '';
+      if (!idOrSlug) {
+        res.status(400).json({ error: 'gateIdOrSlug is required' });
+        return;
+      }
+
+      const gate = await resolveGate(idOrSlug);
+      if (!gate) {
+        res.status(404).json({ error: 'Download gate not found' });
+        return;
+      }
+
+      const steps = await GateStepModel.listByGateId(gate.gate_id);
+      const spotifySteps = steps.filter((s) => s.service_type === 'spotify');
+
+      const authHeader = `Bearer ${accessToken}`;
+
+      for (const step of spotifySteps) {
+        const config = (step.config ?? {}) as SpotifyStepConfig;
+        if (config.follow_artist && config.artist_profile_url) {
+          const artistId = extractSpotifyId(config.artist_profile_url, 'artist');
+          if (artistId) {
+            const url = `https://api.spotify.com/v1/me/following?type=artist&ids=${encodeURIComponent(artistId)}`;
+            const followRes = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                Authorization: authHeader,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!followRes.ok) {
+              const errBody = await followRes.text();
+              console.error('Spotify follow artist failed', followRes.status, errBody);
+              res.status(502).json({
+                error: 'Failed to follow artist on Spotify',
+                details: followRes.statusText,
+              });
+              return;
+            }
+          }
+        }
+        if (config.save_track_or_album && config.track_or_album_url) {
+          const trackId = extractSpotifyId(config.track_or_album_url, 'track');
+          const albumId = extractSpotifyId(config.track_or_album_url, 'album');
+          if (trackId) {
+            const url = 'https://api.spotify.com/v1/me/tracks';
+            const saveRes = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                Authorization: authHeader,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ ids: [trackId] }),
+            });
+            if (!saveRes.ok) {
+              const errBody = await saveRes.text();
+              console.error('Spotify save track failed', saveRes.status, errBody);
+              res.status(502).json({
+                error: 'Failed to save track on Spotify',
+                details: saveRes.statusText,
+              });
+              return;
+            }
+          } else if (albumId) {
+            const url = 'https://api.spotify.com/v1/me/albums';
+            const saveRes = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                Authorization: authHeader,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ ids: [albumId] }),
+            });
+            if (!saveRes.ok) {
+              const errBody = await saveRes.text();
+              console.error('Spotify save album failed', saveRes.status, errBody);
+              res.status(502).json({
+                error: 'Failed to save album on Spotify',
+                details: saveRes.statusText,
+              });
+              return;
+            }
+          }
+        }
+      }
+
+      res.status(204).send();
     } catch (err) {
       next(err);
     }

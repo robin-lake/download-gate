@@ -45,3 +45,4 @@ export async function recordDownload(gateIdOrSlug: string): Promise<void> {
     // Ignore network errors
   }
 }
+

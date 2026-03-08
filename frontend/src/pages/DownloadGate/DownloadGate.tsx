@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useGetDownloadGateById } from '../../network/downloadGates/getDownloadGateById';
 import { useGetGateSteps } from '../../network/downloadGates/getGateSteps';
 import { recordDownload, recordVisit } from '../../network/downloadGates/recordGateAnalytics';
+import { useExecuteSpotifyActions } from '../../network/downloadGates/executeSpotifyActions';
 import type { GateStepResponse } from '../../network/downloadGates/types';
 import { MESSAGE_TYPE as SOUNDCLOUD_MESSAGE_TYPE } from '../../pages/OAuthSoundCloudSuccess';
 import { MESSAGE_TYPE as SPOTIFY_MESSAGE_TYPE } from '../../pages/OAuthSpotifySuccess';
@@ -43,9 +44,15 @@ export default function DownloadGate() {
   const [unlocked, setUnlocked] = useState(false);
   const [soundcloudConnected, setSoundcloudConnected] = useState(false);
   const [spotifyConnected, setSpotifyConnected] = useState(false);
+  const [spotifyExecuteTrigger, setSpotifyExecuteTrigger] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const visitRecordedRef = useRef(false);
+
+  const { status: spotifyExecuteStatus } = useExecuteSpotifyActions({
+    gateIdOrSlug,
+    enabled: spotifyExecuteTrigger,
+  });
 
   const { data: stepsData, isLoading: stepsLoading } = useGetGateSteps({
     gateId: gateIdOrSlug,
@@ -113,11 +120,16 @@ export default function DownloadGate() {
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
       if (e.data?.type === SOUNDCLOUD_MESSAGE_TYPE) setSoundcloudConnected(true);
-      if (e.data?.type === SPOTIFY_MESSAGE_TYPE) setSpotifyConnected(true);
+      if (e.data?.type === SPOTIFY_MESSAGE_TYPE) setSpotifyExecuteTrigger(true);
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, []);
+
+  // Mark Spotify connected when execute request succeeds
+  useEffect(() => {
+    if (spotifyExecuteStatus === 'success') setSpotifyConnected(true);
+  }, [spotifyExecuteStatus]);
 
   // Record visit once when the gate page is successfully loaded
   useEffect(() => {
