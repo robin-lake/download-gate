@@ -59,6 +59,17 @@ new BackendStack(app, backendStackId, {
             `https://${process.env.SITE_SUBDOMAIN}.${process.env.DOMAIN_NAME}/oauth/spotify/success`,
         }
       : undefined,
+  instagram:
+    process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_REDIRECT_URI
+      ? {
+          clientId: process.env.INSTAGRAM_CLIENT_ID,
+          clientSecret: process.env.INSTAGRAM_CLIENT_SECRET || '',
+          redirectUri: process.env.INSTAGRAM_REDIRECT_URI,
+          successRedirectUri:
+            process.env.INSTAGRAM_SUCCESS_REDIRECT_URI ||
+            `https://${process.env.SITE_SUBDOMAIN}.${process.env.DOMAIN_NAME}/oauth/instagram/success`,
+        }
+      : undefined,
   // Optional: set GRAFANA_CLOUD_OTLP_ENDPOINT and GRAFANA_CLOUD_OTLP_AUTH to send traces to Grafana Cloud
   // grafanaCloudOtlp:
   //   process.env.GRAFANA_CLOUD_OTLP_ENDPOINT && process.env.GRAFANA_CLOUD_OTLP_AUTH

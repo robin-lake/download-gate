@@ -6,6 +6,7 @@ import Users from './pages/Users';
 import DownloadGate from './pages/DownloadGate';
 import OAuthSoundCloudSuccess from './pages/OAuthSoundCloudSuccess';
 import OAuthSpotifySuccess from './pages/OAuthSpotifySuccess';
+import OAuthInstagramSuccess from './pages/OAuthInstagramSuccess';
 import Me from './pages/Me';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
@@ -27,6 +28,7 @@ function App() {
           <Route path="/me" element={<div className="app-page"><Me /></div>} />
           <Route path="/oauth/soundcloud/success" element={<OAuthSoundCloudSuccess />} />
           <Route path="/oauth/spotify/success" element={<OAuthSpotifySuccess />} />
+          <Route path="/oauth/instagram/success" element={<OAuthInstagramSuccess />} />
           {/* Short URL for a single download gate (e.g. /abc123). Must be last so other paths match first. */}
           <Route path="/:gateIdOrSlug" element={<DownloadGate />} />
         </Routes>
