@@ -1,3 +1,7 @@
+:root {
+  --button-cta: rgb(55, 176, 131);
+  --accent: rgb(115, 41, 189);
+}
 .download-gate-view {
   position: relative;
   min-height: 100vh;
@@ -106,7 +110,7 @@
   transition: transform 0.15s ease, background-color 0.15s ease;
 
   &:hover {
-    background: #c62828;
+    background:var(--button-cta);
     transform: scale(1.05);
   }
 
@@ -171,7 +175,7 @@
   transition: background-color 0.15s ease, transform 0.15s ease;
 
   &:hover {
-    background: #c62828;
+    background: var(--button-cta); 
     transform: translateY(-1px);
   }
 }
@@ -233,7 +237,7 @@
   height: 24px;
   border-radius: 50%;
   background: rgba(229, 57, 53, 0.2);
-  color: #e53935;
+  color: var(--button-cta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -259,14 +263,14 @@
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
-  background: #e53935;
+  background: var(--button-cta); 
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 
   &:hover {
-    background: #c62828;
+    background: var(--button-cta); 
   }
 }
 
@@ -319,7 +323,7 @@
       content: "•";
       position: absolute;
       left: 0;
-      color: #ff5500;
+      color: var(--accent); 
     }
   }
 }
@@ -355,7 +359,7 @@
 
   &:focus {
     outline: none;
-    border-color: #ff5500;
+    border-color: var(--accent);
   }
 }
 
@@ -379,7 +383,7 @@
 }
 
 .download-gate-modal__soundcloud-connect:hover {
-  background: #e64a00;
+  background: var(--accent);
   transform: translateY(-1px);
 }
 
