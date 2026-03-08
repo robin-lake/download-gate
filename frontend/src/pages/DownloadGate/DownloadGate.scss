@@ -383,6 +383,18 @@
   transform: translateY(-1px);
 }
 
+.download-gate-modal__soundcloud-connect--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.download-gate-modal__soundcloud-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .download-gate-modal__soundcloud-icon {
   width: 20px;
   height: 20px;
@@ -394,6 +406,10 @@
   color: #0bcca9;
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+.download-gate-modal__soundcloud-done--pending {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* Spotify Connect section */

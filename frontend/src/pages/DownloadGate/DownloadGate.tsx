@@ -52,7 +52,6 @@ export default function DownloadGate() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const visitRecordedRef = useRef(false);
-  const pendingUnlockAfterSoundCloudRef = useRef(false);
 
   const { status: spotifyExecuteStatus } = useExecuteSpotifyActions({
     gateIdOrSlug,
@@ -86,10 +85,10 @@ export default function DownloadGate() {
   const soundcloudCommentRequired = Boolean(
     soundcloudConfig?.comment_on_track
   );
+  const canConnectSoundCloud =
+    !soundcloudCommentRequired || soundcloudComment.trim().length > 0;
   const canUnlock =
-    (!hasSoundCloudStep ||
-      (soundcloudConnected &&
-        (!soundcloudCommentRequired || soundcloudComment.trim().length > 0))) &&
+    (!hasSoundCloudStep || soundcloudExecuted) &&
     (!hasSpotifyStep || spotifyConnected);
   const handlePlayPause = useCallback(() => {
     const el = audioRef.current;
@@ -130,23 +129,8 @@ export default function DownloadGate() {
 
   const handleUnlockClick = useCallback(() => {
     if (!canUnlock) return;
-    if (
-      hasSoundCloudStep &&
-      soundcloudConnected &&
-      !soundcloudExecuted
-    ) {
-      pendingUnlockAfterSoundCloudRef.current = true;
-      setSoundcloudExecuteTrigger(true);
-    } else {
-      handleUnlockDownload();
-    }
-  }, [
-    canUnlock,
-    hasSoundCloudStep,
-    soundcloudConnected,
-    soundcloudExecuted,
-    handleUnlockDownload,
-  ]);
+    handleUnlockDownload();
+  }, [canUnlock, handleUnlockDownload]);
 
   const handleCloseModal = useCallback(() => {
     setModalOpen(false);
@@ -165,7 +149,10 @@ export default function DownloadGate() {
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
-      if (e.data?.type === SOUNDCLOUD_MESSAGE_TYPE) setSoundcloudConnected(true);
+      if (e.data?.type === SOUNDCLOUD_MESSAGE_TYPE) {
+        setSoundcloudConnected(true);
+        setSoundcloudExecuteTrigger(true); // Run execute right after OAuth
+      }
       if (e.data?.type === SPOTIFY_MESSAGE_TYPE) setSpotifyExecuteTrigger(true);
     };
     window.addEventListener('message', onMessage);
@@ -177,18 +164,10 @@ export default function DownloadGate() {
     if (spotifyExecuteStatus === 'success') setSpotifyConnected(true);
   }, [spotifyExecuteStatus]);
 
-  // When SoundCloud execute succeeds and we were waiting to unlock, unlock now
+  // Mark SoundCloud step complete when execute succeeds (after OAuth)
   useEffect(() => {
-    if (
-      soundcloudExecuteStatus === 'success' &&
-      pendingUnlockAfterSoundCloudRef.current
-    ) {
-      pendingUnlockAfterSoundCloudRef.current = false;
-      setSoundcloudExecuted(true);
-      setSoundcloudExecuteTrigger(false);
-      handleUnlockDownload();
-    }
-  }, [soundcloudExecuteStatus, handleUnlockDownload]);
+    if (soundcloudExecuteStatus === 'success') setSoundcloudExecuted(true);
+  }, [soundcloudExecuteStatus]);
 
   // Record visit once when the gate page is successfully loaded
   useEffect(() => {
@@ -328,9 +307,11 @@ export default function DownloadGate() {
                   {hasSoundCloudStep && (
                     <div className="download-gate-modal__soundcloud">
                       <p className="download-gate-modal__soundcloud-desc">
-                        {soundcloudConnected
-                          ? 'Connected with SoundCloud.'
-                          : 'Connect with SoundCloud to complete the following:'}
+                        {soundcloudExecuted
+                          ? 'SoundCloud step complete.'
+                          : soundcloudConnected
+                            ? 'Completing SoundCloud step…'
+                            : 'Connect with SoundCloud to complete the following:'}
                       </p>
                       {soundcloudConfig &&
                         (soundcloudConfig.follow_profile ||
@@ -373,29 +354,46 @@ export default function DownloadGate() {
                         </div>
                       )}
                       {!soundcloudConnected ? (
-                        <a
-                          href={SOUNDCLOUD_SIGNIN_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="download-gate-modal__soundcloud-connect"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            const w = 500;
-                            const h = 600;
-                            const left = Math.round((window.screen.width - w) / 2);
-                            const top = Math.round((window.screen.height - h) / 2);
-                            window.open(
-                              SOUNDCLOUD_SIGNIN_URL,
-                              'soundcloud-oauth',
-                              `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`
-                            );
-                          }}
-                        >
-                          <SoundCloudIcon />
-                          <span>CONNECT</span>
-                        </a>
+                        <>
+                          <a
+                            href={SOUNDCLOUD_SIGNIN_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={
+                              canConnectSoundCloud
+                                ? 'download-gate-modal__soundcloud-connect'
+                                : 'download-gate-modal__soundcloud-connect download-gate-modal__soundcloud-connect--disabled'
+                            }
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (!canConnectSoundCloud) return;
+                              const w = 500;
+                              const h = 600;
+                              const left = Math.round((window.screen.width - w) / 2);
+                              const top = Math.round((window.screen.height - h) / 2);
+                              window.open(
+                                SOUNDCLOUD_SIGNIN_URL,
+                                'soundcloud-oauth',
+                                `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`
+                              );
+                            }}
+                            aria-disabled={!canConnectSoundCloud}
+                          >
+                            <SoundCloudIcon />
+                            <span>CONNECT</span>
+                          </a>
+                          {soundcloudCommentRequired && !canConnectSoundCloud && (
+                            <p className="download-gate-modal__soundcloud-hint">
+                              Enter your comment above first.
+                            </p>
+                          )}
+                        </>
+                      ) : soundcloudExecuted ? (
+                        <span className="download-gate-modal__soundcloud-done">✓ Complete</span>
                       ) : (
-                        <span className="download-gate-modal__soundcloud-done">✓ Connected</span>
+                        <span className="download-gate-modal__soundcloud-done download-gate-modal__soundcloud-done--pending">
+                          {soundcloudExecuteLoading ? 'Completing…' : 'Connected'}
+                        </span>
                       )}
                     </div>
                   )}
@@ -452,13 +450,9 @@ export default function DownloadGate() {
                 type="button"
                 className="download-gate-modal__unlock-btn"
                 onClick={handleUnlockClick}
-                disabled={!canUnlock || soundcloudExecuteLoading}
+                disabled={!canUnlock}
               >
-                {soundcloudExecuteLoading
-                  ? 'Completing…'
-                  : unlocked
-                    ? 'Open download'
-                    : 'Get download'}
+                {unlocked ? 'Open download' : 'Get download'}
               </button>
               <button
                 type="button"
