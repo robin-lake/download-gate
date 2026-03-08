@@ -217,75 +217,43 @@ router.post(
       const steps = await GateStepModel.listByGateId(gate.gate_id);
       const spotifySteps = steps.filter((s) => s.service_type === 'spotify');
 
-      const authHeader = `Bearer ${accessToken}`;
-
+      const uris: string[] = [];
       for (const step of spotifySteps) {
         const config = (step.config ?? {}) as SpotifyStepConfig;
         if (config.follow_artist && config.artist_profile_url) {
           const artistId = extractSpotifyId(config.artist_profile_url, 'artist');
-          if (artistId) {
-            const url = `https://api.spotify.com/v1/me/following?type=artist&ids=${encodeURIComponent(artistId)}`;
-            const followRes = await fetch(url, {
-              method: 'PUT',
-              headers: {
-                Authorization: authHeader,
-                'Content-Type': 'application/json',
-              },
-            });
-            if (!followRes.ok) {
-              const errBody = await followRes.text();
-              console.error('Spotify follow artist failed', followRes.status, errBody);
-              res.status(502).json({
-                error: 'Failed to follow artist on Spotify',
-                details: followRes.statusText,
-              });
-              return;
-            }
-          }
+          if (artistId) uris.push(`spotify:artist:${artistId}`);
         }
         if (config.save_track_or_album && config.track_or_album_url) {
           const trackId = extractSpotifyId(config.track_or_album_url, 'track');
           const albumId = extractSpotifyId(config.track_or_album_url, 'album');
-          if (trackId) {
-            const url = 'https://api.spotify.com/v1/me/tracks';
-            const saveRes = await fetch(url, {
-              method: 'PUT',
-              headers: {
-                Authorization: authHeader,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ ids: [trackId] }),
-            });
-            if (!saveRes.ok) {
-              const errBody = await saveRes.text();
-              console.error('Spotify save track failed', saveRes.status, errBody);
-              res.status(502).json({
-                error: 'Failed to save track on Spotify',
-                details: saveRes.statusText,
-              });
-              return;
-            }
-          } else if (albumId) {
-            const url = 'https://api.spotify.com/v1/me/albums';
-            const saveRes = await fetch(url, {
-              method: 'PUT',
-              headers: {
-                Authorization: authHeader,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ ids: [albumId] }),
-            });
-            if (!saveRes.ok) {
-              const errBody = await saveRes.text();
-              console.error('Spotify save album failed', saveRes.status, errBody);
-              res.status(502).json({
-                error: 'Failed to save album on Spotify',
-                details: saveRes.statusText,
-              });
-              return;
-            }
-          }
+          if (trackId) uris.push(`spotify:track:${trackId}`);
+          else if (albumId) uris.push(`spotify:album:${albumId}`);
         }
+      }
+
+      if (uris.length === 0) {
+        res.status(204).send();
+        return;
+      }
+
+      const libraryUrl = `https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris.join(','))}`;
+      const libraryRes = await fetch(libraryUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!libraryRes.ok) {
+        const errBody = await libraryRes.text();
+        console.error('Spotify save to library failed', libraryRes.status, errBody);
+        res.status(502).json({
+          error: 'Failed to save items to Spotify library',
+          details: libraryRes.statusText,
+        });
+        return;
       }
 
       res.status(204).send();
