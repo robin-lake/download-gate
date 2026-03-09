@@ -5,6 +5,8 @@ import type { SmartLink } from './SmartLinkCard/SmartLinkCard';
 import type { DashboardCardStat } from './StatCard';
 import { useGetDownloadGates, mapDownloadGateResponseToCard } from '@/network/downloadGates/getDownloadGates';
 import { useGetDownloadGatesStats } from '@/network/downloadGates/getDownloadGateStats';
+import { useGetSmartLinks } from '@/network/smartLinks/getSmartLinks';
+import type { SmartLinkResponse } from '@/network/smartLinks/types';
 type TabId = 'smart-links' | 'download-gates';
 export type DashboardStats = Record<'smart-links' | 'download-gates', DashboardCardStat[]> 
 
@@ -46,56 +48,30 @@ const MOCK_STATS:DashboardStats = {
   ]
 };
 
-const MOCK_SMART_LINKS = [
-  {
-    id: '1',
-    title: 'Artist Profile: Lilotus',
-    subtitle: 'Breaks And Warmth',
-    engagement: '50% of fans who visited your artist profile successfully engaged with your music.',
-    totalVisits: 12,
-    clicks: 6,
-    emailsCaptured: 3,
-    platforms: [
-      { name: 'Spotify', clicks: 1, percent: 100 },
-      { name: 'Apple Music', clicks: 0, percent: 0 },
-      { name: 'Deezer', clicks: 0, percent: 0 },
-    ],
-    url: 'example.com/xgbmuf',
-    copyLabel: 'COPY ARTIST LINK',
-  },
-  {
-    id: '2',
-    title: 'Lotus Grrl',
-    subtitle: 'In My Mind',
-    engagement: '50% of fans who visited your artist profile successfully engaged with your music.',
-    totalVisits: 8,
-    clicks: 4,
-    emailsCaptured: 2,
-    platforms: [
-      { name: 'Spotify', clicks: 2, percent: 50 },
-      { name: 'Apple Music', clicks: 2, percent: 50 },
-      { name: 'Deezer', clicks: 0, percent: 0 },
-    ],
-    url: 'example.com/abc123',
-    copyLabel: 'COPY LINK',
-  },
-  {
-    id: '3',
-    title: 'Smart Link: New Release',
-    subtitle: 'Single - Out Now',
-    engagement: '35% of fans who visited successfully engaged.',
-    totalVisits: 24,
-    clicks: 8,
-    emailsCaptured: 5,
-    platforms: [
-      { name: 'Spotify', clicks: 5, percent: 62 },
-      { name: 'Apple Music', clicks: 2, percent: 25 },
-      { name: 'Bandcamp', clicks: 1, percent: 13 },
-    ],
-    url: 'example.com/xyz789',
-    copyLabel: 'COPY LINK',
-  },
-];
+function mapSmartLinkResponseToSmartLink(link: SmartLinkResponse): SmartLink {
+  const totalClicks = link.total_clicks;
+  const totalVisits = link.total_visits;
+  const engagementPercent =
+    totalVisits > 0 ? Math.round((totalClicks / totalVisits) * 100) : 0;
+  const platforms = (link.platforms ?? []).map((p) => ({
+    name: p.platform_name,
+    clicks: p.click_count,
+    percent: totalClicks > 0 ? Math.round((p.click_count / totalClicks) * 100) : 0,
+  }));
+
+  return {
+    id: link.link_id,
+    title: link.title,
+    subtitle: link.subtitle ?? '',
+    engagement: `${engagementPercent}% of fans who visited successfully engaged.`,
+    totalVisits,
+    clicks: totalClicks,
+    emailsCaptured: 0,
+    platforms,
+    url: link.short_url,
+    copyLabel: link.copy_label ?? 'COPY LINK',
+  };
+}
 
 
 export function useGetDashboardState() {
@@ -105,7 +81,11 @@ export function useGetDashboardState() {
     () => (downloadGatesData?.items ?? []).map(mapDownloadGateResponseToCard),
     [downloadGatesData]
   );
-  const [smartLinks, setSmartLinks] = useState<SmartLink[]>(MOCK_SMART_LINKS);
+  const { data: smartLinksData, refetch: refetchSmartLinks } = useGetSmartLinks();
+  const smartLinks: SmartLink[] = useMemo(
+    () => (smartLinksData?.items ?? []).map(mapSmartLinkResponseToSmartLink),
+    [smartLinksData]
+  );
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>(MOCK_STATS);
   const downloadGatesStats = useGetDownloadGatesStats();
 
@@ -115,7 +95,7 @@ export function useGetDashboardState() {
     downloadGates,
     refetchDownloadGates,
     smartLinks,
-    setSmartLinks,
+    refetchSmartLinks,
     dashboardStats,
     setDashboardStats,
     downloadGatesStats,
