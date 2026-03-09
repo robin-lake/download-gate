@@ -94,7 +94,8 @@ GRAFANA_CLOUD_OTLP_ENDPOINT={your-grafana-endpoint}
 
 Cover art and audio for download gates are stored in **object storage**. The backend uses a small abstraction so you can run the same code locally and in production.
 
-- **Why S3?** In production, media is stored in **Amazon S3**. S3 is a good fit: it scales with traffic, is cost-effective for binary blobs, integrates with your existing AWS/CDK setup, and supports private objects with short-lived signed URLs so you don’t expose the bucket. The same API works with **LocalStack** if you want a full S3-compatible stack locally.
+- **S3** In production, media is stored in **Amazon S3**. The same API works with **LocalStack** if you want a full S3-compatible stack locally.
+
 
 - **Local development (no AWS):** If `MEDIA_BUCKET` is not set (e.g. when running the backend with `npm run dev` and no bucket env), the backend uses **local filesystem storage**. Files are written under `backend/local-storage` and served at `GET /api/uploads/:key`. Set `STORAGE_BASE_URL` in `backend/.env.development` to your dev server (e.g. `http://localhost:3000`) so returned URLs work from the frontend. Optional: `LOCAL_STORAGE_DIR` overrides the directory (default `./local-storage`).
 
