@@ -24,7 +24,7 @@ export default function Home() {
       <section className="home__intro">
         <h2 className="home__section-title">Turn listeners into followers.</h2>
         <p className="home__section-text">
-          A download gate creates a fair exchange: fans get your music, you get a new follower or subscriber. One link. One landing page. You can ask for a follow on SoundCloud, Bandcamp, or your streaming platform of choice—so your audience grows where you already exist, and new listeners become people who'll see your next release.
+          Fans get your music, you get new followers. You can ask for a follow on SoundCloud, Bandcamp, or your streaming platform of choice. Your audience grows where you already exist, and new listeners become people who'll see your next release.
         </p>
       </section>
 
