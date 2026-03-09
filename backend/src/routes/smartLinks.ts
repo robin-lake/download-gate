@@ -39,6 +39,7 @@ export interface CreateSmartLinkBody {
   title: string;
   subtitle?: string;
   cover_image_url?: string;
+  audio_file_url?: string;
   short_url: string;
   copy_label?: string;
   platforms?: CreateSmartLinkPlatformBody[];
@@ -123,13 +124,25 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
       res.status(400).json({ error: 'short_url is required and must be a string' });
       return;
     }
-
-    const subtitle =
-      typeof body.subtitle === 'string' && body.subtitle.trim() ? body.subtitle.trim() : undefined;
     const coverImageUrl =
       typeof body.cover_image_url === 'string' && body.cover_image_url.trim()
         ? body.cover_image_url.trim()
         : undefined;
+    const audioFileUrl =
+      typeof body.audio_file_url === 'string' && body.audio_file_url.trim()
+        ? body.audio_file_url.trim()
+        : undefined;
+    if (!coverImageUrl) {
+      res.status(400).json({ error: 'cover_image_url is required' });
+      return;
+    }
+    if (!audioFileUrl) {
+      res.status(400).json({ error: 'audio_file_url is required' });
+      return;
+    }
+
+    const subtitle =
+      typeof body.subtitle === 'string' && body.subtitle.trim() ? body.subtitle.trim() : undefined;
     const copyLabel =
       typeof body.copy_label === 'string' && body.copy_label.trim() ? body.copy_label.trim() : undefined;
 
@@ -137,8 +150,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
       user_id: userId,
       title: body.title.trim(),
       short_url: body.short_url.trim(),
+      cover_image_url: coverImageUrl,
+      audio_file_url: audioFileUrl,
       ...(subtitle !== undefined && { subtitle }),
-      ...(coverImageUrl !== undefined && { cover_image_url: coverImageUrl }),
       ...(copyLabel !== undefined && { copy_label: copyLabel }),
     });
 

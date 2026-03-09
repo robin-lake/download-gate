@@ -51,10 +51,14 @@ describe('buildCreateSmartLinkPayload', () => {
       title: 'My Track',
       shortCode: 'my-track',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/cover.jpg',
+      audio_file_url: 'https://example.com/audio.mp3',
     });
     expect(payload).toEqual({
       title: 'My Track',
       short_url: 'my-track',
+      cover_image_url: 'https://example.com/cover.jpg',
+      audio_file_url: 'https://example.com/audio.mp3',
       platforms: undefined,
     });
   });
@@ -64,6 +68,8 @@ describe('buildCreateSmartLinkPayload', () => {
       title: 'Summer Vibes',
       shortCode: '',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.short_url).toBe('summer-vibes');
     expect(payload.title).toBe('Summer Vibes');
@@ -74,6 +80,8 @@ describe('buildCreateSmartLinkPayload', () => {
       title: 'Winter Blues',
       shortCode: '   ',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.short_url).toBe('winter-blues');
   });
@@ -84,6 +92,8 @@ describe('buildCreateSmartLinkPayload', () => {
       artist: 'The Artist',
       shortCode: 'x',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.subtitle).toBe('The Artist');
   });
@@ -94,6 +104,8 @@ describe('buildCreateSmartLinkPayload', () => {
       artist: '',
       shortCode: 'x',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.subtitle).toBeUndefined();
   });
@@ -108,6 +120,8 @@ describe('buildCreateSmartLinkPayload', () => {
       title: 'Track',
       shortCode: 't',
       platformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.platforms).toHaveLength(2);
     expect(payload.platforms).toContainEqual({
@@ -125,6 +139,8 @@ describe('buildCreateSmartLinkPayload', () => {
       title: 'Track',
       shortCode: 't',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.platforms).toBeUndefined();
   });
@@ -134,6 +150,8 @@ describe('buildCreateSmartLinkPayload', () => {
       title: '  Trimmed Title  ',
       shortCode: '  custom-slug  ',
       platformLinks: emptyPlatformLinks,
+      cover_image_url: 'https://example.com/c.jpg',
+      audio_file_url: 'https://example.com/a.mp3',
     });
     expect(payload.title).toBe('Trimmed Title');
     expect(payload.short_url).toBe('custom-slug');

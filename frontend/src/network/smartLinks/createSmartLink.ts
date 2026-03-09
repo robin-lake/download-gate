@@ -11,6 +11,52 @@ export const isCreateSmartLinkResponse = defineTypeGuard(
   (data: unknown): data is SmartLinkResponse => isSmartLinkResponse(data)
 );
 
+export interface CreateSmartLinkOptions {
+  /** Clerk getToken; required for authenticated request. */
+  getToken: (() => Promise<string | null>) | null;
+}
+
+/**
+ * Creates a new smart link via POST /api/smart-links.
+ * @throws Error if the request fails or the response fails the type guard.
+ */
+export async function createSmartLink(
+  payload: CreateSmartLinkRequest,
+  options: CreateSmartLinkOptions
+): Promise<SmartLinkResponse> {
+  const { getToken } = options;
+  const token = getToken ? await getToken() : null;
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}/api/smart-links`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  const raw: unknown = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message =
+      raw &&
+      typeof raw === 'object' &&
+      'error' in raw &&
+      typeof (raw as { error: unknown }).error === 'string'
+        ? (raw as { error: string }).error
+        : `Request failed: ${response.status}`;
+    throw new Error(message);
+  }
+
+  if (!isCreateSmartLinkResponse(raw)) {
+    throw new Error('Response failed type guard');
+  }
+
+  return raw;
+}
+
 export interface UseCreateSmartLinkResult {
   createSmartLink: (payload: CreateSmartLinkRequest) => void;
   data: SmartLinkResponse | null;

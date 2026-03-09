@@ -20,6 +20,8 @@ export interface BuildCreateSmartLinkPayloadInput {
   artist?: string;
   shortCode?: string;
   platformLinks: Record<string, { trackUrl?: string }>;
+  cover_image_url: string;
+  audio_file_url: string;
 }
 
 /**
@@ -39,6 +41,8 @@ export function buildCreateSmartLinkPayload(
   return {
     title: data.title.trim(),
     subtitle: data.artist?.trim() || undefined,
+    cover_image_url: data.cover_image_url,
+    audio_file_url: data.audio_file_url,
     short_url: shortUrl,
     platforms: platforms.length > 0 ? platforms : undefined,
   };

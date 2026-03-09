@@ -216,6 +216,7 @@ describe('POST /api/smart-links', () => {
         short_url: 'abc',
         subtitle: 'Sub',
         cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
         copy_label: 'Copy',
       });
 
@@ -258,6 +259,8 @@ describe('POST /api/smart-links', () => {
       .send({
         title: 'My Link',
         short_url: 'abc',
+        cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
         platforms: [
           { platform_name: 'spotify', url: 'https://open.spotify.com/track/x' },
           { platform_name: 'apple_music', url: 'https://music.apple.com/track/y' },
@@ -296,16 +299,25 @@ describe('POST /api/smart-links', () => {
 
     const res = await request(app)
       .post('/api/smart-links')
-      .send({ title: 'Min', short_url: 'min' });
+      .send({
+        title: 'Min',
+        short_url: 'min',
+        cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
+      });
 
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject(created);
     expect(res.body.platforms).toEqual([]);
-    expect(mockCreate).toHaveBeenCalledWith({
-      user_id: 'user-1',
-      title: 'Min',
-      short_url: 'min',
-    });
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: 'user-1',
+        title: 'Min',
+        short_url: 'min',
+        cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
+      })
+    );
   });
 });
 

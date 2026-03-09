@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, Controller, type UseFormRegister } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useCreateSmartLink } from "../../network/smartLinks/createSmartLink";
+import { useAuth } from "@clerk/clerk-react";
+import { createSmartLink } from "../../network/smartLinks/createSmartLink";
+import { uploadCoverArt, uploadAudio } from "../../network/media/uploadMedia";
 import { buildCreateSmartLinkPayload } from "./newSmartLinkUtils";
 import ToggleMenuItem from "../../components/ToggleMenuItem/ToggleMenuItem";
 import CoverArtDropzone from "../../components/CoverArtDropzone/CoverArtDropzone";
@@ -75,10 +77,10 @@ const defaultValues: NewSmartLinkFormValues = {
 };
 
 export default function NewSmartLink() {
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openStep, setOpenStep] = useState(1);
-  const { createSmartLink, status, data, error } = useCreateSmartLink();
 
   const {
     register,
@@ -96,24 +98,41 @@ export default function NewSmartLink() {
   const watchedTitle = watch("title");
   const watchedGenre = watch("genre");
   const watchedPlatformLinks = watch("platformLinks");
+  const watchedCoverFile = watch("coverFile");
+  const watchedAudioFile = watch("audioFile");
 
-  useEffect(() => {
-    if (status === "success" && data) {
-      setIsSubmitting(false);
-      navigate("/dashboard", { state: { createdSmartLinkId: data.link_id } });
+  async function onSubmit(data: NewSmartLinkFormValues) {
+    const coverFile = data.coverFile?.[0];
+    const audioFile = data.audioFile?.[0];
+    if (!coverFile) {
+      setError("root", { type: "submit", message: "Please upload cover art in the Design step." });
+      return;
     }
-  }, [status, data, navigate]);
-
-  useEffect(() => {
-    if (status === "error" && error) {
-      setIsSubmitting(false);
-      setError("root", { type: "submit", message: error.message });
+    if (!audioFile) {
+      setError("root", { type: "submit", message: "Please upload an audio file in the Audio preview step." });
+      return;
     }
-  }, [status, error, setError]);
-
-  function onSubmit(data: NewSmartLinkFormValues) {
     setIsSubmitting(true);
-    createSmartLink(buildCreateSmartLinkPayload(data));
+    try {
+      const uploadOpts = { getToken };
+      const [coverResult, audioResult] = await Promise.all([
+        uploadCoverArt(coverFile, uploadOpts),
+        uploadAudio(audioFile, uploadOpts),
+      ]);
+      const payload = buildCreateSmartLinkPayload({
+        ...data,
+        cover_image_url: coverResult.url,
+        audio_file_url: audioResult.url,
+      });
+      const link = await createSmartLink(payload, { getToken });
+      navigate("/dashboard", { state: { createdSmartLinkId: link.link_id } });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create smart link";
+      setError("root", { type: "submit", message });
+      console.error("Create smart link failed:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -122,7 +141,17 @@ export default function NewSmartLink() {
 
       <form
         className="new-smart-link__form"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit, (formErrors) => {
+          // Expand the first step that has a validation error so the user sees what to fix
+          if (formErrors.sourceUrl) setOpenStep(1);
+          else if (formErrors.genre) setOpenStep(2);
+          else if (formErrors.artist || formErrors.title) setOpenStep(3);
+          else if (formErrors.coverFile) setOpenStep(4);
+          else if (formErrors.platformLinks) setOpenStep(5);
+          else if (formErrors.shortCode) setOpenStep(6);
+          else if (formErrors.audioFile) setOpenStep(7);
+          else if (formErrors.facebookPixelId || formErrors.conversionApiToken) setOpenStep(8);
+        })}
         noValidate
       >
         {/* Step 1: Source */}
@@ -268,12 +297,12 @@ export default function NewSmartLink() {
         <ToggleMenuItem
           stepNumber={4}
           title="Design"
-          completed
+          completed={Boolean(watchedCoverFile?.[0])}
           expanded={openStep === 4}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 4 : 0)}
         >
           <p className="new-smart-link__instruction">
-            Upload cover art and customize how your smart link looks.
+            Upload cover art and customize how your smart link looks. Cover art is required.
           </p>
           {/* <div className="new-smart-link__preview">
             <div className="new-smart-link__preview-cover">
@@ -395,11 +424,12 @@ export default function NewSmartLink() {
         <ToggleMenuItem
           stepNumber={7}
           title="Audio preview"
+          completed={Boolean(watchedAudioFile?.[0])}
           expanded={openStep === 7}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 7 : 0)}
         >
           <p className="new-smart-link__instruction">
-            Upload an audio file and choose where playback should start.
+            Upload an audio file and choose where playback should start. Audio is required.
           </p>
           <Controller
             name="audioFile"

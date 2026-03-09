@@ -81,7 +81,8 @@ export interface CreateSmartLinkPlatformRequest {
 export interface CreateSmartLinkRequest {
   title: string;
   subtitle?: string;
-  cover_image_url?: string;
+  cover_image_url: string;
+  audio_file_url: string;
   short_url: string;
   copy_label?: string;
   platforms?: CreateSmartLinkPlatformRequest[];

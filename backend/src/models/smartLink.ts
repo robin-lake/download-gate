@@ -16,6 +16,7 @@ export interface SmartLink {
   title: string;
   subtitle?: string;
   cover_image_url?: string;
+  audio_file_url?: string;
   short_url: string;
   total_visits: number;
   total_clicks: number;
@@ -29,6 +30,7 @@ export interface CreateSmartLinkInput {
   title: string;
   subtitle?: string;
   cover_image_url?: string;
+  audio_file_url?: string;
   short_url: string;
   copy_label?: string;
   link_id?: string;
@@ -64,6 +66,7 @@ class SmartLinkModel {
       title: input.title,
       subtitle: input.subtitle,
       cover_image_url: input.cover_image_url,
+      audio_file_url: input.audio_file_url,
       short_url: input.short_url,
       total_visits: 0,
       total_clicks: 0,
