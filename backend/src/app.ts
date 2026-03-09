@@ -8,6 +8,7 @@ import downloadGateRoutes from './routes/downloadGates.js';
 import publicGateRoutes from './routes/publicGates.js';
 import soundcloudRoutes from './routes/integrations/soundCloud.js';
 import spotifyRoutes from './routes/integrations/spotify.js';
+import instagramRoutes from './routes/integrations/instagram.js';
 import mediaRoutes, { serveLocalUploads } from './routes/media.js';
 import errorHandler from './middleware/errorHandler.js';
 import swaggerSpec from './swagger.js';
@@ -79,6 +80,7 @@ app.use('/api/media', mediaRoutes);
 app.get('/api/uploads/*key', serveLocalUploads);
 app.use('/api/integrations', soundcloudRoutes);
 app.use('/api/integrations', spotifyRoutes);
+app.use('/api/integrations', instagramRoutes);
 
 // Error handling (must be last)
 app.use(errorHandler);

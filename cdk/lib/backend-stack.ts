@@ -56,6 +56,15 @@ interface BackendStackProps extends cdk.StackProps {
     /** Where to send the user after successful OAuth (e.g. frontend /oauth/spotify/success). */
     successRedirectUri: string;
   };
+  /** Optional: Instagram OAuth (client ID, secret, redirect URIs). If set, Connect Instagram works on the gate. */
+  instagram?: {
+    clientId: string;
+    clientSecret: string;
+    /** Backend callback URL (Instagram redirects here with ?code=). Must match Instagram app redirect URI. */
+    redirectUri: string;
+    /** Where to send the user after successful OAuth (e.g. frontend /oauth/instagram/success). */
+    successRedirectUri: string;
+  };
 }
 
 export class BackendStack extends cdk.Stack {
@@ -74,6 +83,7 @@ export class BackendStack extends cdk.Stack {
       grafanaCloudOtlp,
       soundcloud,
       spotify,
+      instagram,
     } = props;
     const frontendOrigin = `https://${siteSubDomain}.${domainName}`;
     const apexOrigin = `https://${domainName}`;
@@ -186,6 +196,14 @@ export class BackendStack extends cdk.Stack {
               SPOTIFY_CLIENT_SECRET: spotify.clientSecret,
               SPOTIFY_REDIRECT_URI: spotify.redirectUri,
               SPOTIFY_SUCCESS_REDIRECT_URI: spotify.successRedirectUri,
+            }
+          : {}),
+        ...(instagram
+          ? {
+              INSTAGRAM_CLIENT_ID: instagram.clientId,
+              INSTAGRAM_CLIENT_SECRET: instagram.clientSecret,
+              INSTAGRAM_REDIRECT_URI: instagram.redirectUri,
+              INSTAGRAM_SUCCESS_REDIRECT_URI: instagram.successRedirectUri,
             }
           : {}),
       },

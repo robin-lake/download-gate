@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { useDeleteDownloadGate } from '@/network/downloadGates/deleteDownloadGate';
+import { Button } from '@/components/ui/button';
 import './DownloadGateCard.scss';
 
 export interface DownloadGate {
@@ -12,9 +15,22 @@ export interface DownloadGate {
   publicPath: string;
 }
 
-function ActionIcon({ label, children }: { label: string; children: React.ReactNode }) {
+function ActionIcon({
+  label,
+  children,
+  onClick,
+}: {
+  label: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
   return (
-    <button type="button" className="download-gate-card__action-icon" aria-label={label}>
+    <button
+      type="button"
+      className="download-gate-card__action-icon"
+      aria-label={label}
+      onClick={onClick}
+    >
       {children}
     </button>
   );
@@ -22,10 +38,25 @@ function ActionIcon({ label, children }: { label: string; children: React.ReactN
 
 interface DownloadGateCardProps {
   downloadGate: DownloadGate;
+  /** Called after the gate is successfully deleted (e.g. to refetch the list). */
+  onDeleted?: () => void;
 }
 
-export default function DownloadGateCard({ downloadGate }: DownloadGateCardProps) {
+export default function DownloadGateCard({ downloadGate, onDeleted }: DownloadGateCardProps) {
   const { title, subtitle, thumbnailUrl, visits, downloads, emailsCaptured } = downloadGate;
+  const { deleteGate, status } = useDeleteDownloadGate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  useEffect(() => {
+    if (status === 'success') {
+      setShowDeleteConfirm(false);
+      onDeleted?.();
+    }
+  }, [status, onDeleted]);
+
+  const handleConfirmDelete = () => {
+    deleteGate(downloadGate.id);
+  };
 
   return (
     <div className="download-gate-card">
@@ -73,7 +104,10 @@ export default function DownloadGateCard({ downloadGate }: DownloadGateCardProps
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </ActionIcon>
-          <ActionIcon label="Folder">
+          <ActionIcon
+            label="Delete gate"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
             </svg>
@@ -91,6 +125,44 @@ export default function DownloadGateCard({ downloadGate }: DownloadGateCardProps
         </div>
       </div>
 
+      {showDeleteConfirm && (
+        <div
+          className="download-gate-card__confirm-backdrop"
+          onClick={() => setShowDeleteConfirm(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-gate-confirm-title"
+        >
+          <div
+            className="download-gate-card__confirm-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="delete-gate-confirm-title" className="download-gate-card__confirm-title">
+              Delete download gate?
+            </h2>
+            <p className="download-gate-card__confirm-message">
+              &ldquo;{title}&rdquo; by {subtitle} will be permanently deleted. This cannot be undone.
+            </p>
+            <div className="download-gate-card__confirm-actions">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={status === 'loading'}
+              >
+                {status === 'loading' ? 'Deleting…' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

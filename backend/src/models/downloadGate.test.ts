@@ -26,7 +26,9 @@ describe('DownloadGateModel', () => {
       });
 
       expect(mockSend).toHaveBeenCalledTimes(2);
-      const [command] = mockSend.mock.calls[1]; // second call is PutCommand
+      const secondCall = mockSend.mock.calls[1];
+      expect(secondCall).toBeDefined();
+      const [command] = secondCall!;
       expect(command.input.TableName).toBeDefined();
       expect(command.input.Item).toMatchObject({
         user_id: 'user-1',
@@ -61,7 +63,9 @@ describe('DownloadGateModel', () => {
       });
 
       expect(result.gate_id).toBe('my-gate-123');
-      expect(mockSend.mock.calls[1][0].input.Item.gate_id).toBe('my-gate-123');
+      const putCall = mockSend.mock.calls[1];
+      expect(putCall).toBeDefined();
+      expect(putCall![0].input.Item.gate_id).toBe('my-gate-123');
     });
   });
 
@@ -82,7 +86,9 @@ describe('DownloadGateModel', () => {
       const result = await DownloadGateModel.findByUserAndGateId('user-1', 'gate-1');
 
       expect(mockSend).toHaveBeenCalledTimes(1);
-      expect(mockSend.mock.calls[0][0].input.Key).toEqual({
+      const getCall = mockSend.mock.calls[0];
+      expect(getCall).toBeDefined();
+      expect(getCall![0].input.Key).toEqual({
         user_id: 'user-1',
         gate_id: 'gate-1',
       });
@@ -115,8 +121,10 @@ describe('DownloadGateModel', () => {
       const result = await DownloadGateModel.findByGateId('gate-1');
 
       expect(mockSend).toHaveBeenCalledTimes(1);
-      expect(mockSend.mock.calls[0][0].input.IndexName).toBe('gate_id-index');
-      expect(mockSend.mock.calls[0][0].input.KeyConditionExpression).toContain('gate_id');
+      const queryCall = mockSend.mock.calls[0];
+      expect(queryCall).toBeDefined();
+      expect(queryCall![0].input.IndexName).toBe('gate_id-index');
+      expect(queryCall![0].input.KeyConditionExpression).toContain('gate_id');
       expect(result).toEqual(mockItem);
     });
 
@@ -149,7 +157,9 @@ describe('DownloadGateModel', () => {
       const result = await DownloadGateModel.listByUserId('user-1');
 
       expect(mockSend).toHaveBeenCalledTimes(1);
-      const [command] = mockSend.mock.calls[0];
+      const listCall = mockSend.mock.calls[0];
+      expect(listCall).toBeDefined();
+      const [command] = listCall!;
       expect(command.input.KeyConditionExpression).toContain('user_id');
       expect(command.input.ExpressionAttributeValues).toEqual({ ':user_id': 'user-1' });
       expect(command.input.Limit).toBe(50);
@@ -166,7 +176,9 @@ describe('DownloadGateModel', () => {
       });
 
       expect(mockSend).toHaveBeenCalledTimes(1);
-      const [command] = mockSend.mock.calls[0];
+      const listCall = mockSend.mock.calls[0];
+      expect(listCall).toBeDefined();
+      const [command] = listCall!;
       expect(command.input.Limit).toBe(10);
       expect(command.input.ExclusiveStartKey).toEqual({ user_id: 'user-1', gate_id: 'prev-gate' });
     });
@@ -188,10 +200,12 @@ describe('DownloadGateModel', () => {
       const result = await DownloadGateModel.getStatsByUserId('user-1');
 
       expect(mockSend).toHaveBeenCalledTimes(1);
-      expect(mockSend.mock.calls[0][0].input.KeyConditionExpression).toContain('user_id');
-      expect(mockSend.mock.calls[0][0].input.ProjectionExpression).toContain('visits');
-      expect(mockSend.mock.calls[0][0].input.ProjectionExpression).toContain('downloads');
-      expect(mockSend.mock.calls[0][0].input.ProjectionExpression).toContain('emails_captured');
+      const statsCall = mockSend.mock.calls[0];
+      expect(statsCall).toBeDefined();
+      expect(statsCall![0].input.KeyConditionExpression).toContain('user_id');
+      expect(statsCall![0].input.ProjectionExpression).toContain('visits');
+      expect(statsCall![0].input.ProjectionExpression).toContain('downloads');
+      expect(statsCall![0].input.ProjectionExpression).toContain('emails_captured');
       expect(result).toEqual({
         total_visits: 0,
         total_downloads: 0,
@@ -269,7 +283,9 @@ describe('DownloadGateModel', () => {
       const result = await DownloadGateModel.incrementCount('user-1', 'gate-1', 'visits');
 
       expect(mockSend).toHaveBeenCalledTimes(1);
-      const [command] = mockSend.mock.calls[0];
+      const incrementCall = mockSend.mock.calls[0];
+      expect(incrementCall).toBeDefined();
+      const [command] = incrementCall!;
       expect(command.input.Key).toEqual({ user_id: 'user-1', gate_id: 'gate-1' });
       expect(command.input.UpdateExpression).toContain('#field');
       expect(command.input.ExpressionAttributeNames).toMatchObject({
@@ -296,7 +312,9 @@ describe('DownloadGateModel', () => {
 
       await DownloadGateModel.incrementCount('user-1', 'gate-1', 'downloads');
 
-      expect(mockSend.mock.calls[0][0].input.ExpressionAttributeNames['#field']).toBe('downloads');
+      const incrementCall = mockSend.mock.calls[0];
+      expect(incrementCall).toBeDefined();
+      expect(incrementCall![0].input.ExpressionAttributeNames['#field']).toBe('downloads');
     });
 
     it('increments emails_captured when field is emails_captured', async () => {
@@ -311,9 +329,45 @@ describe('DownloadGateModel', () => {
 
       await DownloadGateModel.incrementCount('user-1', 'gate-1', 'emails_captured');
 
-      expect(mockSend.mock.calls[0][0].input.ExpressionAttributeNames['#field']).toBe(
+      const incrementCall = mockSend.mock.calls[0];
+      expect(incrementCall).toBeDefined();
+      expect(incrementCall![0].input.ExpressionAttributeNames['#field']).toBe(
         'emails_captured'
       );
+    });
+  });
+
+  describe('delete', () => {
+    it('sends DeleteCommand with user_id and gate_id and returns deleted item', async () => {
+      const deleted = {
+        user_id: 'user-1',
+        gate_id: 'gate-1',
+        artist_name: 'Artist',
+        title: 'Track',
+        audio_file_url: 'https://example.com/audio.mp3',
+        visits: 0,
+        downloads: 0,
+        emails_captured: 0,
+      };
+      mockSend.mockResolvedValueOnce({ Attributes: deleted });
+
+      const result = await DownloadGateModel.delete('user-1', 'gate-1');
+
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      const deleteCall = mockSend.mock.calls[0];
+      expect(deleteCall).toBeDefined();
+      const [command] = deleteCall!;
+      expect(command.input.Key).toEqual({ user_id: 'user-1', gate_id: 'gate-1' });
+      expect(command.input.ReturnValues).toBe('ALL_OLD');
+      expect(result).toEqual(deleted);
+    });
+
+    it('returns null when gate does not exist', async () => {
+      mockSend.mockResolvedValueOnce({});
+
+      const result = await DownloadGateModel.delete('user-1', 'gate-missing');
+
+      expect(result).toBeNull();
     });
   });
 });

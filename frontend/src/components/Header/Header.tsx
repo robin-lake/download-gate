@@ -30,13 +30,16 @@ export default function Header() {
             </Link>
           </SignedOut>
           <SignedIn>
-            <Link to="/users" className="header-btn header-btn--secondary">
+            {/* <Link to="/users" className="header-btn header-btn--secondary">
               Users
-            </Link>
-            <Link to="/me" className="header-btn header-btn--secondary">
+            </Link> */}
+            {/* <Link to="/me" className="header-btn header-btn--secondary">
               Me
-            <UserButton afterSignOutUrl="/" />
+            </Link> */}
+            <Link to="/dashboard" className="header-btn header-btn--secondary">
+              Dashboard
             </Link>
+            <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>
       </nav>

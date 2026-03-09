@@ -1,7 +1,48 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import crypto from 'node:crypto';
+import DownloadGateModel from '../../models/downloadGate.js';
+import GateStepModel from '../../models/gateStep.js';
 
 const router = Router();
+
+async function resolveGate(idOrSlug: string) {
+  let gate = await DownloadGateModel.findByShortCode(idOrSlug);
+  if (!gate) {
+    gate = await DownloadGateModel.findByGateId(idOrSlug);
+  }
+  return gate;
+}
+
+/** SoundCloud step config (from gate step). Uses keys from frontend (GateStep.tsx / SoundCloudStepConfigPopup). */
+interface SoundCloudStepConfig {
+  follow_profile?: boolean;
+  like_track?: boolean;
+  repost_track?: boolean;
+  comment_on_track?: boolean;
+  profile_url?: string;
+  track_url?: string;
+}
+
+const SOUNDCLOUD_API = 'https://api.soundcloud.com';
+
+function authHeader(accessToken: string): Record<string, string> {
+  return { Authorization: `OAuth ${accessToken}` };
+}
+
+/** Resolve a SoundCloud URL to the resource (user, track, etc.) and return its id. */
+async function resolveSoundCloudUrl(
+  url: string,
+  accessToken: string
+): Promise<{ id: number; kind?: string } | null> {
+  const res = await fetch(
+    `${SOUNDCLOUD_API}/resolve?url=${encodeURIComponent(url.trim())}`,
+    { headers: { Accept: 'application/json; charset=utf-8', ...authHeader(accessToken) } }
+  );
+  if (!res.ok) return null;
+  const data = (await res.json()) as { id?: number; kind?: string };
+  if (data.id == null) return null;
+  return { id: data.id, ...(data.kind !== undefined && data.kind !== '' ? { kind: data.kind } : {}) };
+}
 
 function generateState(): string {
   return crypto.randomBytes(24).toString('base64url');
@@ -167,6 +208,149 @@ router.get(
       const successRedirect =
         process.env.SOUNDCLOUD_SUCCESS_REDIRECT_URI ?? '/';
       res.redirect(successRedirect);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/**
+ * POST /soundcloud/execute
+ * Executes SoundCloud actions (follow, like, repost, comment) for the gate's SoundCloud steps.
+ * Requires soundcloud_access_token cookie (set after OAuth). Body: { gateIdOrSlug: string, comment?: string }.
+ * Full path: /api/integrations/soundcloud/execute
+ */
+router.post(
+  '/soundcloud/execute',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const accessToken = req.cookies?.['soundcloud_access_token'];
+      if (!accessToken) {
+        res.status(401).json({
+          error: 'Not connected to SoundCloud. Complete the connection first.',
+        });
+        return;
+      }
+
+      const { gateIdOrSlug, comment: commentBody } = req.body as {
+        gateIdOrSlug?: string;
+        comment?: string;
+      };
+      const idOrSlug = typeof gateIdOrSlug === 'string' ? gateIdOrSlug.trim() : '';
+      if (!idOrSlug) {
+        res.status(400).json({ error: 'gateIdOrSlug is required' });
+        return;
+      }
+
+      const gate = await resolveGate(idOrSlug);
+      if (!gate) {
+        res.status(404).json({ error: 'Download gate not found' });
+        return;
+      }
+
+      const steps = await GateStepModel.listByGateId(gate.gate_id);
+      const soundcloudSteps = steps.filter((s) => s.service_type === 'soundcloud');
+      const headers = {
+        Accept: 'application/json; charset=utf-8',
+        'Content-Type': 'application/json',
+        ...authHeader(accessToken),
+      };
+
+      for (const step of soundcloudSteps) {
+        const config = (step.config ?? {}) as SoundCloudStepConfig;
+
+        if (config.follow_profile && config.profile_url?.trim()) {
+          const resolved = await resolveSoundCloudUrl(
+            config.profile_url.trim(),
+            accessToken
+          );
+          if (resolved?.id != null) {
+            const followRes = await fetch(
+              `${SOUNDCLOUD_API}/me/followings/${resolved.id}`,
+              { method: 'PUT', headers }
+            );
+            if (!followRes.ok) {
+              const errBody = await followRes.text();
+              console.error(
+                'SoundCloud follow failed',
+                followRes.status,
+                errBody
+              );
+            }
+          }
+        }
+
+        if (config.like_track && config.track_url?.trim()) {
+          const resolved = await resolveSoundCloudUrl(
+            config.track_url.trim(),
+            accessToken
+          );
+          if (resolved?.id != null) {
+            const likeRes = await fetch(
+              `${SOUNDCLOUD_API}/likes/tracks/${resolved.id}`,
+              { method: 'POST', headers }
+            );
+            if (!likeRes.ok) {
+              const errBody = await likeRes.text();
+              console.error('SoundCloud like failed', likeRes.status, errBody);
+            }
+          }
+        }
+
+        if (config.repost_track && config.track_url?.trim()) {
+          const resolved = await resolveSoundCloudUrl(
+            config.track_url.trim(),
+            accessToken
+          );
+          if (resolved?.id != null) {
+            const repostRes = await fetch(
+              `${SOUNDCLOUD_API}/reposts/tracks/${resolved.id}`,
+              { method: 'POST', headers }
+            );
+            if (!repostRes.ok) {
+              const errBody = await repostRes.text();
+              console.error(
+                'SoundCloud repost failed',
+                repostRes.status,
+                errBody
+              );
+            }
+          }
+        }
+
+        if (config.comment_on_track && config.track_url?.trim()) {
+          const body =
+            typeof commentBody === 'string' && commentBody.trim()
+              ? commentBody.trim()
+              : undefined;
+          if (body) {
+            const resolved = await resolveSoundCloudUrl(
+              config.track_url.trim(),
+              accessToken
+            );
+            if (resolved?.id != null) {
+              const commentRes = await fetch(
+                `${SOUNDCLOUD_API}/tracks/${resolved.id}/comments`,
+                {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify({ comment: { body } }),
+                }
+              );
+              if (!commentRes.ok) {
+                const errBody = await commentRes.text();
+                console.error(
+                  'SoundCloud comment failed',
+                  commentRes.status,
+                  errBody
+                );
+              }
+            }
+          }
+        }
+      }
+
+      res.status(204).send();
     } catch (err) {
       next(err);
     }

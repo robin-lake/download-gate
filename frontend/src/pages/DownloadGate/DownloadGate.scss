@@ -1,3 +1,7 @@
+:root {
+  --button-cta: rgb(55, 176, 131);
+  --accent: rgb(115, 41, 189);
+}
 .download-gate-view {
   position: relative;
   min-height: 100vh;
@@ -106,7 +110,7 @@
   transition: transform 0.15s ease, background-color 0.15s ease;
 
   &:hover {
-    background: #c62828;
+    background:var(--button-cta);
     transform: scale(1.05);
   }
 
@@ -171,7 +175,7 @@
   transition: background-color 0.15s ease, transform 0.15s ease;
 
   &:hover {
-    background: #c62828;
+    background: var(--button-cta); 
     transform: translateY(-1px);
   }
 }
@@ -233,7 +237,7 @@
   height: 24px;
   border-radius: 50%;
   background: rgba(229, 57, 53, 0.2);
-  color: #e53935;
+  color: var(--button-cta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -259,14 +263,14 @@
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
-  background: #e53935;
+  background: var(--button-cta); 
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 
   &:hover {
-    background: #c62828;
+    background: var(--button-cta); 
   }
 }
 
@@ -303,6 +307,62 @@
   line-height: 1.4;
 }
 
+.download-gate-modal__soundcloud-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+
+  li {
+    padding: 0.25rem 0;
+    padding-left: 1.25rem;
+    position: relative;
+
+    &::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent); 
+    }
+  }
+}
+
+.download-gate-modal__soundcloud-comment {
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__soundcloud-comment-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+.download-gate-modal__soundcloud-comment-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
 .download-gate-modal__soundcloud-connect {
   display: inline-flex;
   align-items: center;
@@ -323,8 +383,20 @@
 }
 
 .download-gate-modal__soundcloud-connect:hover {
-  background: #e64a00;
+  background: var(--accent);
   transform: translateY(-1px);
+}
+
+.download-gate-modal__soundcloud-connect--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.download-gate-modal__soundcloud-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .download-gate-modal__soundcloud-icon {
@@ -338,6 +410,10 @@
   color: #0bcca9;
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+.download-gate-modal__soundcloud-done--pending {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* Spotify Connect section */
@@ -411,6 +487,77 @@
   color: #1db954;
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+/* Instagram Connect section */
+.download-gate-modal__instagram {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.download-gate-modal__instagram-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+.download-gate-modal__instagram-connect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__instagram-connect:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.download-gate-modal__instagram-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__instagram-desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.download-gate-modal__instagram-desc strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.download-gate-modal__instagram-done {
+  display: inline-block;
+  color: var(--button-cta);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.download-gate-modal__instagram-done--pending {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .download-gate-modal__unlock-btn:disabled {

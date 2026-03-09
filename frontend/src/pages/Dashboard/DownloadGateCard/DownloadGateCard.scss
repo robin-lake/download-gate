@@ -146,3 +146,43 @@
     }
   }
 }
+
+.download-gate-card__confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.download-gate-card__confirm-box {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+  padding: 1.25rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+}
+
+.download-gate-card__confirm-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.download-gate-card__confirm-message {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.download-gate-card__confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

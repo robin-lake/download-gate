@@ -1,0 +1,155 @@
+.bandcamp-config-popup__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.bandcamp-config-popup__box {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+}
+
+.bandcamp-config-popup__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.bandcamp-config-popup__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.bandcamp-config-popup__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 22px;
+  background: #a3a3a3;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.bandcamp-config-popup__header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bandcamp-config-popup__icon-btn {
+  color: #6b7280;
+}
+
+.bandcamp-config-popup__body {
+  padding: 1.25rem;
+}
+
+.bandcamp-config-popup__checkbox-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.bandcamp-config-popup__checkbox-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.bandcamp-config-popup__checkbox-label {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.bandcamp-config-popup__info-icon {
+  flex-shrink: 0;
+  color: #9ca3af;
+}
+
+.bandcamp-config-popup__field {
+  margin-bottom: 0;
+}
+
+.bandcamp-config-popup__label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.bandcamp-config-popup__section-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.bandcamp-config-popup__add-btn {
+  margin-top: 0.5rem;
+}
+
+.bandcamp-config-popup__url-list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bandcamp-config-popup__url-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e5e5;
+  gap: 0.5rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.bandcamp-config-popup__url-text {
+  font-size: 0.8125rem;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bandcamp-config-popup__error {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+
+.bandcamp-config-popup__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e5e5e5;
+}
