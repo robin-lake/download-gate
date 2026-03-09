@@ -24,10 +24,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { GENRE_GROUPS } from "@/constants/genres";
+import { DESIGN_OPTIONS } from "@/constants/designOptions";
+import {
+  SHORT_CODE_PATTERN,
+  SHORT_CODE_VALIDATION_MESSAGE,
+} from "@/constants/shortCode";
 import "./NewDownloadGate.scss";
-
-/** Short code: 3–32 chars, letters, numbers, hyphens, underscores only. */
-export const SHORT_CODE_PATTERN = /^[a-zA-Z0-9_-]{3,32}$/;
 
 /** One gate step in the form (selection order = step_order). */
 export interface GateStepFormItem {
@@ -52,13 +55,6 @@ export interface NewDownloadGateFormValues {
   customNotes: string;
 }
 
-const DESIGN_OPTIONS = [
-  { value: "impact-light", label: "Impact - Light" },
-  { value: "impact-dark", label: "Impact - Dark" },
-  { value: "minimal-light", label: "Minimal - Light" },
-  { value: "minimal-dark", label: "Minimal - Dark" },
-] as const;
-
 /** Gate step options: label (UI) and service_type (API / DATA_MODEL). */
 // const GATE_STEP_OPTIONS: { label: string; service_type: string }[] = [
 const GATE_STEP_OPTIONS: { label: string; service_type: string }[] = [
@@ -76,78 +72,6 @@ const GATE_STEP_OPTIONS: { label: string; service_type: string }[] = [
   // { label: "TikTok", service_type: "tiktok" },
   // { label: "Bandcamp", service_type: "bandcamp" },
   { label: "Donation", service_type: "donation" },
-];
-
-/** Genre options with category subheadings, in display order. */
-const GENRE_GROUPS: { heading: string; genres: string[] }[] = [
-  {
-    heading: "DANCE / ELECTRONIC",
-    genres: [
-      "Afro House",
-      "Bass",
-      "Bass House",
-      "Breaks",
-      "Chill Out",
-      "Deep House",
-      "Drum & Bass",
-      "Dubstep",
-      "Electro House",
-      "Electronica",
-      "Future House",
-      "Glitch Hop",
-      "Hard Dance",
-      "Hardcore / Hard Techno",
-      "House",
-      "Indie Dance / Nu Disco",
-      "Progressive House",
-      "Psy Trance",
-      "Tech House",
-      "Techno",
-      "Trance",
-      "Trap",
-      "Trip-Hop",
-    ],
-  },
-  {
-    heading: "HIP-HOP / R&B",
-    genres: ["R&B", "Disco", "Funk", "Hip-Hop", "Soul"],
-  },
-  {
-    heading: "POP / ROCK",
-    genres: [
-      "Acoustic",
-      "Alternative",
-      "Pop",
-      "Country",
-      "Folk",
-      "Indie",
-      "K-Pop",
-      "Metal",
-      "Punk",
-      "Rock",
-      "Singer Songwriter",
-    ],
-  },
-  {
-    heading: "",
-    genres: ["World"],
-  },
-  {
-    heading: "OTHER",
-    genres: [
-      "Blues",
-      "Christian",
-      "Classical",
-      "Dancehall",
-      "Dub",
-      "Gospel",
-      "Jazz",
-      "Latin",
-      "Reggae",
-      "Reggaeton",
-      "Other",
-    ],
-  },
 ];
 
 const defaultValues: NewDownloadGateFormValues = {
@@ -578,7 +502,7 @@ export default function NewDownloadGate() {
                   validate: (v) =>
                     !v?.trim() ||
                     SHORT_CODE_PATTERN.test(v.trim()) ||
-                    "Use 3–32 characters: letters, numbers, hyphens and underscores only",
+                    SHORT_CODE_VALIDATION_MESSAGE,
                 })}
               />
             </div>

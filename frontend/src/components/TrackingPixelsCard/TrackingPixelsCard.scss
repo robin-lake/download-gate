@@ -1,0 +1,37 @@
+.tracking-pixels-card {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+.tracking-pixels-card__header {
+  padding-bottom: 12px;
+}
+
+.tracking-pixels-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+}
+
+.tracking-pixels-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tracking-pixels-card__field {
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+  }
+}
+
+.tracking-pixels-card__input {
+  width: 100%;
+}
