@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
+import Footer from './components/Footer/Footer';
+import Home from './pages/Home/Home';
 import Dashboard from './pages/Dashboard/Dashboard';
 import NewDownloadGate from './pages/NewDownloadGate/NewDownloadGate';
 import Users from './pages/Users';
@@ -16,9 +18,9 @@ function App() {
   return (
     <BrowserRouter>
       <Header />
-      <main className="app-main">
+      <main className="app-main app-main--flex">
         <Routes>
-          <Route path="/" element={<div className="app-home">Welcome to Download Gate</div>} />
+          <Route path="/" element={<Home />} />
           <Route path="/download-gates" element={<DownloadGate />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-download-gate" element={<NewDownloadGate />} />
@@ -33,6 +35,7 @@ function App() {
           <Route path="/:gateIdOrSlug" element={<DownloadGate />} />
         </Routes>
       </main>
+      <Footer />
     </BrowserRouter>
   );
 }

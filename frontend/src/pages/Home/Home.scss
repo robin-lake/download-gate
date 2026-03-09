@@ -1,0 +1,242 @@
+@use "sass:color";
+
+// Underground electronic aesthetic: deep purples, muted violets, dark backgrounds, no gradients
+$bg-dark: #0c0a0e;
+$bg-card: #131018;
+$bg-card-hover: #18141f;
+$text: #dcd2eb;
+$text-muted: rgba(220, 210, 235, 0.65);
+$accent: #b8a0e8;
+$accent-dim: rgba(184, 160, 232, 0.6);
+$border: rgba(161, 138, 189, 0.2);
+$border-subtle: rgba(161, 138, 189, 0.1);
+
+.home {
+  background: $bg-dark;
+  color: $text;
+  min-height: 100vh;
+}
+
+.home__hero {
+  text-align: center;
+  padding: 4rem 1.5rem 5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.home__hero-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: $text;
+}
+
+.home__hero-subtitle {
+  font-size: 1.15rem;
+  color: $text-muted;
+  margin-bottom: 0.5rem;
+}
+
+.home__hero-tagline {
+  font-size: 0.95rem;
+  color: $accent-dim;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.home__cta {
+  display: inline-block;
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $bg-dark;
+  background: $accent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.home__cta:hover {
+  background: color.adjust($accent, $lightness: 6%);
+  transform: translateY(-1px);
+}
+
+.home__section-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.home__section-text {
+  max-width: 640px;
+  margin: 0 auto 1rem;
+  line-height: 1.65;
+  color: $text-muted;
+  text-align: center;
+}
+
+.home__section-text--muted {
+  font-size: 0.95rem;
+  color: rgba(220, 210, 235, 0.5);
+}
+
+.home__intro,
+.home__benefits,
+.home__how,
+.home__smart-links,
+.home__free,
+.home__opensource,
+.home__donate,
+.home__final-cta {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.home__benefits-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 2rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.home__benefit-card {
+  background: $bg-card;
+  border: 1px solid $border-subtle;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: $border;
+    background: $bg-card-hover;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: $accent;
+  }
+
+  p {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+.home__how-steps {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.home__how-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  text-align: left;
+
+  p {
+    margin: 0;
+    line-height: 1.6;
+    color: $text-muted;
+  }
+}
+
+.home__how-num {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $accent-dim;
+  color: $bg-dark;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.home__github-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: $accent;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.home__github-link:hover {
+  color: color.adjust($accent, $lightness: 10%);
+}
+
+.home__free-text {
+  font-size: 1.05rem;
+}
+
+.home__donate {
+  background: $bg-card;
+  border: 1px solid $border-subtle;
+  border-radius: 12px;
+  margin: 2rem auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.home__donate-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.home__donate-btn {
+  display: inline-block;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.15s;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+}
+
+.home__donate-btn--kofi {
+  color: #fff;
+  background: #ff5e5b;
+}
+
+.home__donate-btn--stripe {
+  color: #fff;
+  background: #635bff;
+}
+
+.home__donate-note {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: rgba(220, 210, 235, 0.45);
+}
+
+.home__final-cta {
+  text-align: center;
+  padding-bottom: 4rem;
+}

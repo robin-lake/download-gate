@@ -60,7 +60,7 @@ const MOCK_SMART_LINKS = [
       { name: 'Apple Music', clicks: 0, percent: 0 },
       { name: 'Deezer', clicks: 0, percent: 0 },
     ],
-    url: 'hypeddit.com/xgbmuf',
+    url: 'example.com/xgbmuf',
     copyLabel: 'COPY ARTIST LINK',
   },
   {
@@ -76,7 +76,7 @@ const MOCK_SMART_LINKS = [
       { name: 'Apple Music', clicks: 2, percent: 50 },
       { name: 'Deezer', clicks: 0, percent: 0 },
     ],
-    url: 'hypeddit.com/abc123',
+    url: 'example.com/abc123',
     copyLabel: 'COPY LINK',
   },
   {
@@ -92,7 +92,7 @@ const MOCK_SMART_LINKS = [
       { name: 'Apple Music', clicks: 2, percent: 25 },
       { name: 'Bandcamp', clicks: 1, percent: 13 },
     ],
-    url: 'hypeddit.com/xyz789',
+    url: 'example.com/xyz789',
     copyLabel: 'COPY LINK',
   },
 ];
