@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
@@ -14,14 +14,24 @@ import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
 import './App.scss'
 
-function App() {
+const NON_LANDING_PAGES = ['dashboard', 'new-download-gate', 'login', 'signup', 'me', 'oauth'];
+
+function useIsLandingPage(): boolean {
+  const location = useLocation();
+  const segments = location.pathname.split('/').filter(Boolean);
+  return segments.length === 1 && !NON_LANDING_PAGES.includes(segments[0]);
+}
+
+function AppContent() {
+  const showFooter = !useIsLandingPage();
+  const showHeader = !useIsLandingPage();
+
   return (
-    <BrowserRouter>
-      <Header />
+    <>
+     {showHeader && <Header />}
       <main className="app-main app-main--flex">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/download-gates" element={<DownloadGate />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-download-gate" element={<NewDownloadGate />} />
           <Route path="/login" element={<div className="app-page"><SignIn /></div>} />
@@ -36,7 +46,15 @@ function App() {
           <Route path="/:gateIdOrSlug" element={<DownloadGate />} />
         </Routes>
       </main>
-      <Footer />
+      {showFooter && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }
