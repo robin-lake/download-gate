@@ -11,7 +11,8 @@ export default function Header() {
     <header className="header">
       <nav className="header-nav">
         <SignedIn>
-          <Link to="/dashboard" className="header-logo">
+          {/* <Link to="/dashboard" className="header-logo"> */}
+          <Link to="/" className="header-logo">
             download gate
           </Link>          
         </SignedIn>

@@ -1,6 +1,8 @@
 .dashboard {
   min-height: 100vh;
+  width: min(800px, 95vw);
   background-color: #f3f4f6;
+  margin: 2rem 0;
 }
 
 .dashboard__inner {
@@ -114,6 +116,7 @@
 
 .dashboard__tab {
   padding: 1rem 1.5rem;
+  border-radius: 0;
   font-size: 0.875rem;
   font-weight: 500;
   background: white;

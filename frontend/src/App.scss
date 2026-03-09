@@ -3,7 +3,6 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
   min-height: 100vh;
   display: flex;
@@ -49,13 +48,7 @@
 }
 
 .app-main {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-
-.app-main--flex {
-  flex: 1;
 }
 
 .app-home,

@@ -1,7 +1,7 @@
 @use "sass:color";
 
 // Underground electronic aesthetic: deep purples, muted violets, dark backgrounds, no gradients
-$bg-dark: #0c0a0e;
+$bg-dark: #1b181e;
 $bg-card: #131018;
 $bg-card-hover: #18141f;
 $text: #dcd2eb;
@@ -14,6 +14,7 @@ $border-subtle: rgba(161, 138, 189, 0.1);
 .home {
   background: $bg-dark;
   color: $text;
+  width: 100vw;
   min-height: 100vh;
 }
 
