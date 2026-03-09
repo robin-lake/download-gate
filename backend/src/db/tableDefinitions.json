@@ -1,0 +1,37 @@
+[
+  {
+    "tableName": "Users",
+    "envKey": "USERS_TABLE",
+    "partitionKey": { "name": "user_id", "type": "S" },
+    "gsis": [{ "indexName": "status-index", "partitionKey": { "name": "status", "type": "S" } }]
+  },
+  {
+    "tableName": "DownloadGates",
+    "envKey": "DOWNLOAD_GATES_TABLE",
+    "partitionKey": { "name": "user_id", "type": "S" },
+    "sortKey": { "name": "gate_id", "type": "S" },
+    "gsis": [
+      { "indexName": "gate_id-index", "partitionKey": { "name": "gate_id", "type": "S" } },
+      { "indexName": "short_code-index", "partitionKey": { "name": "short_code", "type": "S" } }
+    ]
+  },
+  {
+    "tableName": "GateSteps",
+    "envKey": "GATE_STEPS_TABLE",
+    "partitionKey": { "name": "gate_id", "type": "S" },
+    "sortKey": { "name": "step_id", "type": "S" }
+  },
+  {
+    "tableName": "SmartLinks",
+    "envKey": "SMART_LINKS_TABLE",
+    "partitionKey": { "name": "user_id", "type": "S" },
+    "sortKey": { "name": "link_id", "type": "S" },
+    "gsis": [{ "indexName": "short_url-index", "partitionKey": { "name": "short_url", "type": "S" } }]
+  },
+  {
+    "tableName": "SmartLinkDestinations",
+    "envKey": "SMART_LINK_DESTINATIONS_TABLE",
+    "partitionKey": { "name": "smart_link_id", "type": "S" },
+    "sortKey": { "name": "id", "type": "S" }
+  }
+]

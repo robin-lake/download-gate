@@ -1,0 +1,566 @@
+:root {
+  --button-cta: rgb(55, 176, 131);
+  --accent: rgb(115, 41, 189);
+}
+.download-gate-view {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: calc(-2rem - 1.5rem) -1.5rem -2rem;
+  margin-top: 0;
+  text-align: left;
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    min-height: calc(100vh - 60px);
+  }
+}
+
+.download-gate-view__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #0f1929;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--download-gate-bg-image) center center / cover no-repeat;
+    filter: blur(80px) saturate(1.2);
+    transform: scale(1.15);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.download-gate-view__left {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  min-height: 280px;
+
+  @media (min-width: 768px) {
+    min-height: auto;
+    padding: 3rem;
+  }
+}
+
+.download-gate-view__cover-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+
+  @media (min-width: 768px) {
+    max-width: 320px;
+  }
+}
+
+.download-gate-view__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #1a1a2e;
+}
+
+.download-gate-view__cover-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 3rem;
+}
+
+.download-gate-view__play {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #4b88e3;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    background:var(--button-cta);
+    transform: scale(1.05);
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.download-gate-view__right {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: rgba(15, 25, 45, 0.92);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    width: 380px;
+    flex-shrink: 0;
+    padding: 3rem 2rem;
+  }
+}
+
+.download-gate-view__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+
+  @media (min-width: 768px) {
+    font-size: 2rem;
+  }
+}
+
+.download-gate-view__artist {
+  margin: 0 0 2rem;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.download-gate-view__download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 260px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: #0bcca9;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    background: var(--button-cta); 
+    transform: translateY(-1px);
+  }
+}
+
+/* Gate steps modal */
+.download-gate-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.download-gate-modal__box {
+  background: #1a1a2e;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+.download-gate-modal__header {
+  padding: 1.5rem 1.5rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.download-gate-modal__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.download-gate-modal__body {
+  padding: 1.5rem;
+}
+
+.download-gate-modal__step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.download-gate-modal__step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(229, 57, 53, 0.2);
+  color: var(--button-cta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__step-label {
+  flex: 1;
+}
+
+.download-gate-modal__footer {
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.download-gate-modal__unlock-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--button-cta); 
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--button-cta); 
+  }
+}
+
+.download-gate-modal__close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.download-gate-modal__empty {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  padding: 0.5rem 0;
+}
+
+.download-gate-modal__soundcloud {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.download-gate-modal__soundcloud-desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+.download-gate-modal__soundcloud-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+
+  li {
+    padding: 0.25rem 0;
+    padding-left: 1.25rem;
+    position: relative;
+
+    &::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent); 
+    }
+  }
+}
+
+.download-gate-modal__soundcloud-comment {
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__soundcloud-comment-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+.download-gate-modal__soundcloud-comment-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
+.download-gate-modal__soundcloud-connect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #ff5500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.download-gate-modal__soundcloud-connect:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+.download-gate-modal__soundcloud-connect--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.download-gate-modal__soundcloud-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.download-gate-modal__soundcloud-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__soundcloud-done {
+  display: inline-block;
+  color: #0bcca9;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.download-gate-modal__soundcloud-done--pending {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Spotify Connect section */
+.download-gate-modal__spotify {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.download-gate-modal__spotify-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+.download-gate-modal__spotify-connect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #1db954;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__spotify-connect:hover {
+  background: #1ed760;
+  transform: translateY(-1px);
+}
+
+.download-gate-modal__spotify-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__spotify-desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.download-gate-modal__spotify-desc strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.download-gate-modal__spotify-optout {
+  text-decoration: underline;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.download-gate-modal__spotify-done {
+  display: inline-block;
+  color: #1db954;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Instagram Connect section */
+.download-gate-modal__instagram {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.download-gate-modal__instagram-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+.download-gate-modal__instagram-connect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  margin-bottom: 1rem;
+}
+
+.download-gate-modal__instagram-connect:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.download-gate-modal__instagram-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.download-gate-modal__instagram-desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.download-gate-modal__instagram-desc strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.download-gate-modal__instagram-done {
+  display: inline-block;
+  color: var(--button-cta);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.download-gate-modal__instagram-done--pending {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.download-gate-modal__unlock-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

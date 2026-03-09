@@ -15,14 +15,20 @@ export class CiIamStack extends cdk.Stack {
     const provider = new iam.OpenIdConnectProvider(this, 'GitHubProvider', {
       url: 'https://token.actions.githubusercontent.com',
       clientIds: ['sts.amazonaws.com'],
+      thumbprints: [
+        '1c58a3a8518e8759bf075b76b750d4f2df264fcd',
+        '6938fd4d98bab03faadb97b34396831e3780aea1',
+        '7560d6f40fa55195f740ee2b1b7c0b4836cbe103',
+      ],
     });
 
-    // const repoOwner = 'your-github-username-or-org';
-    // const repoName = 'download-gate';
 
+    // Single wildcard allows main and staging (and any branch); avoids IAM array condition issues
     const githubPrincipal = new iam.WebIdentityPrincipal(provider.openIdConnectProviderArn, {
       StringLike: {
-        'token.actions.githubusercontent.com:sub': `repo:${repoOwner}/${repoName}:ref:refs/heads/main`,
+        'token.actions.githubusercontent.com:sub': [
+            `repo:${repoOwner}/${repoName}:*`,
+            `repo:${repoOwner}/${repoName}:environment:*`,],
       },
       StringEquals: {
         'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',

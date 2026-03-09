@@ -32,7 +32,7 @@ const API_BASE = import.meta.env.VITE_API_URL ?? '';
  */
 // export function useGetCurrentUser(params: UseGetUsersParams = {}) {
 export function useGetCurrentUser() {
-  const url = `${API_BASE}/api/users/me}`;
+  const url = `${API_BASE}/api/users/me`;
 
   return useRequest<ListUsersResponse>(url, {
     method: 'GET',

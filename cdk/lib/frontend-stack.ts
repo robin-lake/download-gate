@@ -21,8 +21,6 @@ export class FrontendStack extends cdk.Stack {
     const {domainName, siteSubDomain} = props;
     const siteDomain = `${siteSubDomain}.${domainName}`;
 
-    // The code that defines your stack goes here
-
     const bucket = new s3.Bucket(this, 'DownloadGateFrontendBucket', {
       bucketName: siteDomain,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -50,6 +48,12 @@ export class FrontendStack extends cdk.Stack {
       defaultRootObject: 'index.html',
       sslSupportMethod: cloudfront.SSLMethod.SNI,
       errorResponses: [
+        // S3 returns 403 (not 404) for missing paths when using OAC; both must fall back to index.html for SPA routing
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
         {
           httpStatus: 404,
           responseHttpStatus: 200,

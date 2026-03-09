@@ -4,14 +4,19 @@ import {
   CreateTableCommand,
   DescribeTableCommand,
   ListTablesCommand,
+  UpdateTableCommand,
+  type CreateTableCommandInput,
+  type TableDescription,
 } from '@aws-sdk/client-dynamodb';
+import {
+  tableDefinitions,
+  tableEnvKeys,
+  type TableDefinition,
+} from '../db/tableDefinitions.js';
+import { buildCreateTableInput } from '../db/buildCreateTableInput.js';
 
-const TABLE_NAME = process.env['USERS_TABLE'] ?? 'Users';
-// const REGION = process.env['AWS_REGION'] ?? 'us-east-1';
 const REGION = process.env['AWS_REGION'] ?? 'local-env';
-// Use same env as app; default to DynamoDB Local so "npm run db:create" works after Docker restart
-const ENDPOINT =
-  process.env['DYNAMODB_ENDPOINT'] ?? 'http://localhost:8000';
+const ENDPOINT = process.env['DYNAMODB_ENDPOINT'] ?? 'http://localhost:8000';
 
 const client = new DynamoDBClient({
   region: REGION,
@@ -24,76 +29,127 @@ const client = new DynamoDBClient({
   }),
 });
 
-async function tableExists(tableName: string): Promise<boolean> {
+const useOnDemand = ENDPOINT.includes('localhost');
+
+/** Poll until table status is ACTIVE (or timeout). */
+async function waitForTableActive(
+  tableName: string,
+  timeoutMs = 60_000,
+  pollIntervalMs = 2000
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const out = await client.send(new DescribeTableCommand({ TableName: tableName }));
+    const status = out.Table?.TableStatus;
+    if (status === 'ACTIVE') return;
+    if (status !== 'UPDATING' && status !== 'CREATING') {
+      throw new Error(`Table "${tableName}" in unexpected status: ${status}`);
+    }
+    await new Promise((r) => setTimeout(r, pollIntervalMs));
+  }
+  throw new Error(`Table "${tableName}" did not become ACTIVE within ${timeoutMs}ms`);
+}
+
+function getTableName(def: TableDefinition): string {
+  const envKey = def.envKey ?? tableEnvKeys[def.tableName];
+  const fromEnv = envKey ? process.env[envKey] : undefined;
+  return fromEnv ?? def.tableName;
+}
+
+async function describeTable(tableName: string): Promise<TableDescription | null> {
   try {
-    // console.log('client: ', client)
-    await client.send(new DescribeTableCommand({ TableName: tableName }));
-    return true;
+    const out = await client.send(new DescribeTableCommand({ TableName: tableName }));
+    return out.Table ?? null;
   } catch {
-    return false;
+    return null;
   }
 }
 
-async function createUsersTable(): Promise<void> {
-  console.log(`DynamoDB endpoint: ${ENDPOINT}`);
-  if (await tableExists(TABLE_NAME)) {
-    console.log(`Table "${TABLE_NAME}" already exists, skipping creation.`);
+/** Add any missing GSIs to an existing table. One GSI per UpdateTable call; waits for ACTIVE between calls. */
+async function updateTableIfNeeded(
+  def: TableDefinition,
+  tableName: string
+): Promise<void> {
+  const table = await describeTable(tableName);
+  if (!table) return;
+
+  const existingIndexNames = new Set(
+    (table.GlobalSecondaryIndexes ?? []).map((g) => g.IndexName)
+  );
+  const desiredGSIs = def.gsis ?? [];
+  const missing = desiredGSIs.filter((g) => !existingIndexNames.has(g.indexName));
+  if (missing.length === 0) {
+    console.log(`Table "${tableName}" already has all GSIs, skipping update.`);
     return;
   }
 
-  const useOnDemand = ENDPOINT.includes('localhost');
+  console.log(`Table "${tableName}": adding ${missing.length} GSI(s): ${missing.map((g) => g.indexName).join(', ')}`);
 
-  await client.send(
-    new CreateTableCommand({
-      TableName: TABLE_NAME,
-      AttributeDefinitions: [
-        { AttributeName: 'user_id', AttributeType: 'S' },
-        { AttributeName: 'status', AttributeType: 'S' },
-      ],
-      KeySchema: [{ AttributeName: 'user_id', KeyType: 'HASH' }],
-      GlobalSecondaryIndexes: [
-        {
-          IndexName: 'status-index',
-          KeySchema: [{ AttributeName: 'status', KeyType: 'HASH' }],
-          Projection: { ProjectionType: 'ALL' },
-          ...(useOnDemand
-            ? {}
-            : {
-                ProvisionedThroughput: {
-                  ReadCapacityUnits: 5,
-                  WriteCapacityUnits: 5,
-                },
-              }),
-        },
-      ],
-      BillingMode: useOnDemand ? 'PAY_PER_REQUEST' : 'PROVISIONED',
-      ...(useOnDemand
-        ? {}
-        : {
-            ProvisionedThroughput: {
-              ReadCapacityUnits: 5,
-              WriteCapacityUnits: 5,
+  for (const gsi of missing) {
+    const keySchema = [
+      { AttributeName: gsi.partitionKey.name, KeyType: 'HASH' as const },
+      ...(gsi.sortKey
+        ? [{ AttributeName: gsi.sortKey.name, KeyType: 'RANGE' as const }]
+        : []),
+    ];
+    const attributeDefinitions = [
+      { AttributeName: gsi.partitionKey.name, AttributeType: 'S' as const },
+      ...(gsi.sortKey
+        ? [{ AttributeName: gsi.sortKey.name, AttributeType: 'S' as const }]
+        : []),
+    ];
+
+    await client.send(
+      new UpdateTableCommand({
+        TableName: tableName,
+        AttributeDefinitions: attributeDefinitions,
+        GlobalSecondaryIndexUpdates: [
+          {
+            Create: {
+              IndexName: gsi.indexName,
+              KeySchema: keySchema,
+              Projection: { ProjectionType: 'ALL' },
+              ...(useOnDemand ? {} : { ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 } }),
             },
-          }),
-    })
-  );
-
-  console.log(`Table "${TABLE_NAME}" created successfully.`);
-}
-
-createUsersTable().catch((err) => {
-  console.error('Failed to create tables:', err);
-  process.exit(1);
-});
-
-async function listTables(){
-  try{
-    const command = new ListTablesCommand({});
-    const data = await client.send(command)
-    console.log('Current tables: ', data.TableNames)
-  } catch(err) {
-    console.error("Error listing tables: ", err)
+          },
+        ],
+      })
+    );
+    console.log(`  Added GSI "${gsi.indexName}".`);
+    await waitForTableActive(tableName);
   }
 }
 
-listTables()
+async function createOrUpdateTable(
+  params: CreateTableCommandInput,
+  def: TableDefinition,
+  tableName: string
+): Promise<void> {
+  const existing = await describeTable(tableName);
+  if (!existing) {
+    await client.send(new CreateTableCommand(params));
+    console.log(`Table "${tableName}" created.`);
+    return;
+  }
+
+  await updateTableIfNeeded(def, tableName);
+}
+
+async function main(): Promise<void> {
+  console.log(`DynamoDB endpoint: ${ENDPOINT}`);
+  for (const def of tableDefinitions) {
+    const tableName = getTableName(def);
+    await createOrUpdateTable(
+      buildCreateTableInput(def, tableName, { useOnDemand }),
+      def,
+      tableName
+    );
+  }
+  const list = await client.send(new ListTablesCommand({}));
+  console.log('Tables:', list.TableNames ?? []);
+}
+
+main().catch((err) => {
+  console.error('Failed to create tables:', err);
+  process.exit(1);
+});
