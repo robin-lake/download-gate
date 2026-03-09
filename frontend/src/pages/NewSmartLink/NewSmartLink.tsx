@@ -22,7 +22,13 @@ import { GENRE_GROUPS } from "@/constants/genres";
 import { DESIGN_OPTIONS } from "@/constants/designOptions";
 import { SHORT_CODE_PATTERN, SHORT_CODE_VALIDATION_MESSAGE } from "@/constants/shortCode";
 import { SMART_LINK_PLATFORMS, type SmartLinkPlatformId } from "@/constants/platforms";
+import type { SmartLinkPlatform } from "@/types/smartLink";
+import SmartLinkPlatformComponent, {
+  DEFAULT_PLATFORM_VALUE,
+} from "@/components/SmartLinkPlatform/SmartLinkPlatform";
 import "./NewSmartLink.scss";
+
+export type { SmartLinkPlatform } from "@/types/smartLink";
 
 export interface NewSmartLinkFormValues {
   sourceUrl: string;
@@ -31,7 +37,7 @@ export interface NewSmartLinkFormValues {
   title: string;
   design: string;
   coverFile: FileList | null;
-  platformIds: SmartLinkPlatformId[];
+  platformLinks: Record<SmartLinkPlatformId, SmartLinkPlatform>;
   shortCode: string;
   audioFile: FileList | null;
   audioStartSeconds: number;
@@ -41,6 +47,14 @@ export interface NewSmartLinkFormValues {
   customNotes: string;
 }
 
+const defaultPlatformLinks = SMART_LINK_PLATFORMS.reduce(
+  (acc, { id }) => {
+    acc[id] = { ...DEFAULT_PLATFORM_VALUE };
+    return acc;
+  },
+  {} as Record<SmartLinkPlatformId, SmartLinkPlatform>
+);
+
 const defaultValues: NewSmartLinkFormValues = {
   sourceUrl: "",
   genre: "",
@@ -48,7 +62,7 @@ const defaultValues: NewSmartLinkFormValues = {
   title: "",
   design: "impact-dark",
   coverFile: null,
-  platformIds: [],
+  platformLinks: defaultPlatformLinks,
   shortCode: "",
   audioFile: null,
   audioStartSeconds: 0,
@@ -78,7 +92,7 @@ export default function NewSmartLink() {
   const watchedArtist = watch("artist");
   const watchedTitle = watch("title");
   const watchedGenre = watch("genre");
-  const watchedPlatformIds = watch("platformIds");
+  const watchedPlatformLinks = watch("platformLinks");
 
   async function onSubmit(data: NewSmartLinkFormValues) {
     setIsSubmitting(true);
@@ -255,7 +269,7 @@ export default function NewSmartLink() {
           <p className="new-smart-link__instruction">
             Upload cover art and customize how your smart link looks.
           </p>
-          <div className="new-smart-link__preview">
+          {/* <div className="new-smart-link__preview">
             <div className="new-smart-link__preview-cover">
               Cover art
             </div>
@@ -265,7 +279,7 @@ export default function NewSmartLink() {
             <div className="new-smart-link__preview-artist">
               {watchedArtist || "Artist Name"}
             </div>
-          </div>
+          </div> */}
           <CoverArtDropzone<NewSmartLinkFormValues>
             name="coverFile"
             control={control}
@@ -314,29 +328,21 @@ export default function NewSmartLink() {
             Add links to your music on any store and platform.
           </p>
           <Controller
-            name="platformIds"
+            name="platformLinks"
             control={control}
             render={({ field: { value, onChange } }) => (
               <div className="new-smart-link__platform-grid">
-                {SMART_LINK_PLATFORMS.map(({ id, label }) => {
-                  const isAdded = value.includes(id);
-                  return (
-                    <Button
-                      key={id}
-                      type="button"
-                      variant="outline"
-                      className="new-smart-link__platform-btn"
-                      onClick={() =>
-                        onChange(
-                          isAdded ? value.filter((p) => p !== id) : [...value, id]
-                        )
-                      }
-                    >
-                      <span>{label}</span>
-                      <span className="new-smart-link__platform-btn-icon">+</span>
-                    </Button>
-                  );
-                })}
+                {SMART_LINK_PLATFORMS.map(({ id, label }) => (
+                  <SmartLinkPlatformComponent
+                    key={id}
+                    platformId={id}
+                    label={label}
+                    value={value[id] ?? DEFAULT_PLATFORM_VALUE}
+                    onChange={(next) =>
+                      onChange({ ...value, [id]: next })
+                    }
+                  />
+                ))}
               </div>
             )}
           />
@@ -512,14 +518,17 @@ export default function NewSmartLink() {
                 readOnly
                 className="new-smart-link__input"
                 value={
-                  watchedPlatformIds.length === 0
+                  !watchedPlatformLinks
                     ? "None"
-                    : watchedPlatformIds
-                        .map(
-                          (id) =>
-                            SMART_LINK_PLATFORMS.find((p) => p.id === id)?.label ?? id
-                        )
-                        .join(", ")
+                    : (() => {
+                        const labels = Object.entries(watchedPlatformLinks)
+                          .filter(([, data]) => data?.trackUrl?.trim())
+                          .map(
+                            ([id]) =>
+                              SMART_LINK_PLATFORMS.find((p) => p.id === id)?.label ?? id
+                          );
+                        return labels.length === 0 ? "None" : labels.join(", ");
+                      })()
                 }
               />
             </div>
