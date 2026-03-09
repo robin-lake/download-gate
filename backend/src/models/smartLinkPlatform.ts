@@ -8,9 +8,9 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { docClient } from '../config/dynamodb.js';
 
-const TABLE_NAME = process.env['SMART_LINK_DESTINATIONS_TABLE'] ?? 'SmartLinkDestinations';
+const TABLE_NAME = process.env['SMART_LINK_DESTINATIONS_TABLE'] ?? 'SmartLinkPlatforms';
 
-export interface SmartLinkDestination {
+export interface SmartLinkPlatform {
   smart_link_id: string;
   id: string;
   platform_name: string;
@@ -21,7 +21,7 @@ export interface SmartLinkDestination {
   updated_at?: string;
 }
 
-export interface CreateSmartLinkDestinationInput {
+export interface CreateSmartLinkPlatformInput {
   smart_link_id: string;
   platform_name: string;
   url: string;
@@ -29,24 +29,24 @@ export interface CreateSmartLinkDestinationInput {
   id?: string;
 }
 
-export interface UpdateSmartLinkDestinationInput {
+export interface UpdateSmartLinkPlatformInput {
   platform_name?: string;
   url?: string;
   click_count?: number;
   action_label?: string;
 }
 
-class SmartLinkDestinationModel {
-  static async create(input: CreateSmartLinkDestinationInput): Promise<SmartLinkDestination> {
+class SmartLinkPlatformModel {
+  static async create(input: CreateSmartLinkPlatformInput): Promise<SmartLinkPlatform> {
     const now = new Date().toISOString();
     const id = input.id ?? uuidv4();
-    const item: SmartLinkDestination = {
+    const item: SmartLinkPlatform = {
       smart_link_id: input.smart_link_id,
       id,
       platform_name: input.platform_name,
       url: input.url,
       click_count: 0,
-      action_label: input.action_label,
+      ...(input.action_label !== undefined && { action_label: input.action_label }),
       created_at: now,
       updated_at: now,
     };
@@ -66,18 +66,18 @@ class SmartLinkDestinationModel {
   static async findBySmartLinkAndId(
     smartLinkId: string,
     destinationId: string
-  ): Promise<SmartLinkDestination | null> {
+  ): Promise<SmartLinkPlatform | null> {
     const response = await docClient.send(
       new GetCommand({
         TableName: TABLE_NAME,
         Key: { smart_link_id: smartLinkId, id: destinationId },
       })
     );
-    return (response.Item as SmartLinkDestination) ?? null;
+    return (response.Item as SmartLinkPlatform) ?? null;
   }
 
   /** List all destinations for a smart link. */
-  static async listBySmartLinkId(smartLinkId: string): Promise<SmartLinkDestination[]> {
+  static async listBySmartLinkId(smartLinkId: string): Promise<SmartLinkPlatform[]> {
     const response = await docClient.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -85,14 +85,14 @@ class SmartLinkDestinationModel {
         ExpressionAttributeValues: { ':smart_link_id': smartLinkId },
       })
     );
-    return (response.Items as SmartLinkDestination[]) ?? [];
+    return (response.Items as SmartLinkPlatform[]) ?? [];
   }
 
   static async update(
     smartLinkId: string,
     destinationId: string,
-    updates: UpdateSmartLinkDestinationInput
-  ): Promise<SmartLinkDestination> {
+    updates: UpdateSmartLinkPlatformInput
+  ): Promise<SmartLinkPlatform> {
     const now = new Date().toISOString();
     const expressionParts: string[] = [];
     const expressionNames: Record<string, string> = {};
@@ -122,14 +122,14 @@ class SmartLinkDestinationModel {
         ReturnValues: 'ALL_NEW',
       })
     );
-    return response.Attributes as SmartLinkDestination;
+    return response.Attributes as SmartLinkPlatform;
   }
 
   /** Increment click_count by 1 for a destination. */
   static async incrementClicks(
     smartLinkId: string,
     destinationId: string
-  ): Promise<SmartLinkDestination> {
+  ): Promise<SmartLinkPlatform> {
     const response = await docClient.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
@@ -147,13 +147,13 @@ class SmartLinkDestinationModel {
         ReturnValues: 'ALL_NEW',
       })
     );
-    return response.Attributes as SmartLinkDestination;
+    return response.Attributes as SmartLinkPlatform;
   }
 
   static async delete(
     smartLinkId: string,
     destinationId: string
-  ): Promise<SmartLinkDestination | null> {
+  ): Promise<SmartLinkPlatform | null> {
     const response = await docClient.send(
       new DeleteCommand({
         TableName: TABLE_NAME,
@@ -161,8 +161,8 @@ class SmartLinkDestinationModel {
         ReturnValues: 'ALL_OLD',
       })
     );
-    return (response.Attributes as SmartLinkDestination) ?? null;
+    return (response.Attributes as SmartLinkPlatform) ?? null;
   }
 }
 
-export default SmartLinkDestinationModel;
+export default SmartLinkPlatformModel;

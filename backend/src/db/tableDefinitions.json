@@ -29,7 +29,7 @@
     "gsis": [{ "indexName": "short_url-index", "partitionKey": { "name": "short_url", "type": "S" } }]
   },
   {
-    "tableName": "SmartLinkDestinations",
+    "tableName": "SmartLinkPlatforms",
     "envKey": "SMART_LINK_DESTINATIONS_TABLE",
     "partitionKey": { "name": "smart_link_id", "type": "S" },
     "sortKey": { "name": "id", "type": "S" }

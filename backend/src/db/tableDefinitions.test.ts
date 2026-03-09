@@ -7,7 +7,7 @@ describe('tableDefinitions', () => {
     'DownloadGates',
     'GateSteps',
     'SmartLinks',
-    'SmartLinkDestinations',
+    'SmartLinkPlatforms',
   ];
 
   it('loads all expected tables from JSON', () => {
@@ -46,7 +46,7 @@ describe('tableDefinitions', () => {
       'DownloadGates',
       'GateSteps',
       'SmartLinks',
-      'SmartLinkDestinations',
+      'SmartLinkPlatforms',
     ]);
     for (const def of composite) {
       expect(def.sortKey?.name).toBeDefined();

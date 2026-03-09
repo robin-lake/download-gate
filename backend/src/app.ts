@@ -10,6 +10,7 @@ import soundcloudRoutes from './routes/integrations/soundCloud.js';
 import spotifyRoutes from './routes/integrations/spotify.js';
 import instagramRoutes from './routes/integrations/instagram.js';
 import mediaRoutes, { serveLocalUploads } from './routes/media.js';
+import smartLinkRoutes from './routes/smartLinks.js';
 import errorHandler from './middleware/errorHandler.js';
 import swaggerSpec from './swagger.js';
 
@@ -74,6 +75,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteT
 // Mount routes
 app.use('/api/users', userRoutes);
 app.use('/api/download-gates', downloadGateRoutes);
+app.use('/api/smart-links', smartLinkRoutes);
 app.use('/api/gates', publicGateRoutes);
 app.use('/api/media', mediaRoutes);
 // Local dev: serve uploaded files from disk when MEDIA_BUCKET is not set

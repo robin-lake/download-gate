@@ -9,7 +9,7 @@ How to keep the data layer and CDK/deploy path reliable. All tests live in the *
 **File:** `backend/src/db/tableDefinitions.test.ts`
 
 - `tableDefinitions.json` loads and parses.
-- Expected tables exist (Users, DownloadGates, GateSteps, SmartLinks, SmartLinkDestinations).
+- Expected tables exist (Users, DownloadGates, GateSteps, SmartLinks, SmartLinkPlatforms).
 - Each definition has required fields: `tableName`, `partitionKey`, `envKey`.
 - `tableEnvKeys` has one entry per table and correct naming.
 - Composite-key tables have `sortKey`; tables with GSIs have valid GSI shape.
@@ -37,7 +37,7 @@ How to keep the data layer and CDK/deploy path reliable. All tests live in the *
 - **findByUserAndGateId:** GetCommand is called with the correct Key; returns item or null.
 - **findByGateId:** QueryCommand uses `gate_id-index` and returns first item or null.
 
-`docClient` is mocked via `vi.mock('../config/dynamodb.js')`; no real DynamoDB. Same pattern can be used for `gateStep`, `smartLink`, `smartLinkDestination`, and `user`.
+`docClient` is mocked via `vi.mock('../config/dynamodb.js')`; no real DynamoDB. Same pattern can be used for `gateStep`, `smartLink`, `SmartLinkPlatform`, and `user`.
 
 **Why:** Protects CRUD and key usage. Refactors (e.g. renaming attributes) stay safe if you update tests with the new shape.
 

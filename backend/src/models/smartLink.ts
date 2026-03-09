@@ -30,6 +30,7 @@ export interface CreateSmartLinkInput {
   subtitle?: string;
   cover_image_url?: string;
   short_url: string;
+  copy_label?: string;
   link_id?: string;
 }
 

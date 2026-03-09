@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller, type UseFormRegister } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useCreateSmartLink } from "../../network/smartLinks/createSmartLink";
 import ToggleMenuItem from "../../components/ToggleMenuItem/ToggleMenuItem";
 import CoverArtDropzone from "../../components/CoverArtDropzone/CoverArtDropzone";
 import LinkUrlField from "../../components/LinkUrlField/LinkUrlField";
@@ -72,10 +73,22 @@ const defaultValues: NewSmartLinkFormValues = {
   customNotes: "",
 };
 
+/** Build short_url slug from title when shortCode is empty. */
+function slugFromTitle(title: string): string {
+  const slug = title
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-_]/g, "")
+    .slice(0, 32);
+  return slug || "link";
+}
+
 export default function NewSmartLink() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openStep, setOpenStep] = useState(1);
+  const { createSmartLink, status, data, error } = useCreateSmartLink();
 
   const {
     register,
@@ -94,20 +107,38 @@ export default function NewSmartLink() {
   const watchedGenre = watch("genre");
   const watchedPlatformLinks = watch("platformLinks");
 
-  async function onSubmit(data: NewSmartLinkFormValues) {
-    setIsSubmitting(true);
-    try {
-      // Placeholder: create smart link in database (to be implemented later)
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      console.log("Smart link form data (placeholder):", data);
-      navigate("/dashboard", { state: { createdSmartLinkId: "placeholder" } });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to create smart link";
-      setError("root", { type: "submit", message });
-      console.error("Create smart link failed:", err);
-    } finally {
+  useEffect(() => {
+    if (status === "success" && data) {
       setIsSubmitting(false);
+      navigate("/dashboard", { state: { createdSmartLinkId: data.link_id } });
     }
+  }, [status, data, navigate]);
+
+  useEffect(() => {
+    if (status === "error" && error) {
+      setIsSubmitting(false);
+      setError("root", { type: "submit", message: error.message });
+    }
+  }, [status, error, setError]);
+
+  function onSubmit(data: NewSmartLinkFormValues) {
+    setIsSubmitting(true);
+    const shortUrl =
+      (data.shortCode && data.shortCode.trim()) !== ""
+        ? data.shortCode.trim()
+        : slugFromTitle(data.title);
+    const platforms = SMART_LINK_PLATFORMS.filter(
+      (p) => data.platformLinks[p.id]?.trackUrl?.trim()
+    ).map((p) => ({
+      platform_name: p.id,
+      url: data.platformLinks[p.id].trackUrl.trim(),
+    }));
+    createSmartLink({
+      title: data.title.trim(),
+      subtitle: data.artist?.trim() || undefined,
+      short_url: shortUrl,
+      platforms: platforms.length > 0 ? platforms : undefined,
+    });
   }
 
   return (

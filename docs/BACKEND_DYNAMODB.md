@@ -10,7 +10,7 @@ How tables and data access are organized for maintainability. Aligns with `docs/
 | **DownloadGates** | `user_id` | `gate_id` | `gate_id-index` (PK: gate_id) | List gates by user; get gate by (user_id, gate_id); get by gate_id only (public page). |
 | **GateSteps** | `gate_id` | `step_id` | — | List steps by gate; get step by (gate_id, step_id). |
 | **SmartLinks** | `user_id` | `link_id` | `short_url-index` (PK: short_url) | List links by user; get by (user_id, link_id); get by short_url (public page). |
-| **SmartLinkDestinations** | `smart_link_id` | `id` | — | List destinations by smart link. |
+| **SmartLinkPlatforms** | `smart_link_id` | `id` | — | List destinations by smart link. |
 
 - **One model file per table** under `backend/src/models/` (e.g. `downloadGate.ts`, `gateStep.ts`).
 - Each model exports: entity interface, input types, and a default-export class with static methods (e.g. `create`, `findById`, `listByUserId`, `update`, `delete`).
