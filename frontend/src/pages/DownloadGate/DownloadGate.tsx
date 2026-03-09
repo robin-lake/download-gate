@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGetDownloadGateById } from '../../network/downloadGates/getDownloadGateById';
 import { useGetGateSteps } from '../../network/downloadGates/getGateSteps';
@@ -10,6 +10,8 @@ import type { GateStepResponse } from '../../network/downloadGates/types';
 import { MESSAGE_TYPE as SOUNDCLOUD_MESSAGE_TYPE } from '../../pages/OAuthSoundCloudSuccess';
 import { MESSAGE_TYPE as SPOTIFY_MESSAGE_TYPE } from '../../pages/OAuthSpotifySuccess';
 import { MESSAGE_TYPE as INSTAGRAM_MESSAGE_TYPE } from '../../pages/OAuthInstagramSuccess';
+import BlurredBackground from '../../components/BlurredBackground/BlurredBackground';
+import MediaPlayerCover from '../../components/MediaPlayerCover/MediaPlayerCover';
 import './DownloadGate.scss';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -55,8 +57,6 @@ export default function DownloadGate() {
   const [instagramConnected, setInstagramConnected] = useState(false);
   const [instagramExecuteTrigger, setInstagramExecuteTrigger] = useState(false);
   const [instagramExecuted, setInstagramExecuted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const visitRecordedRef = useRef(false);
 
   const { status: spotifyExecuteStatus } = useExecuteSpotifyActions({
@@ -104,29 +104,6 @@ export default function DownloadGate() {
     (!hasSoundCloudStep || soundcloudExecuted) &&
     (!hasSpotifyStep || spotifyConnected) &&
     (!hasInstagramStep || instagramExecuted);
-  const handlePlayPause = useCallback(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    if (el.paused) {
-      el.play().then(() => setIsPlaying(true)).catch(() => {});
-    } else {
-      el.pause();
-      setIsPlaying(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    const onEnded = () => setIsPlaying(false);
-    const onPause = () => setIsPlaying(false);
-    el.addEventListener('ended', onEnded);
-    el.addEventListener('pause', onPause);
-    return () => {
-      el.removeEventListener('ended', onEnded);
-      el.removeEventListener('pause', onPause);
-    };
-  }, [gate?.audio_file_url]);
 
   const handleDownloadClick = useCallback(() => {
     setModalOpen(true);
@@ -224,54 +201,18 @@ export default function DownloadGate() {
     );
   }
 
-  const bgImage = gate.thumbnail_url ? `url(${gate.thumbnail_url})` : 'none';
-
   return (
     <>
-      <div
-        className="download-gate-view"
-        style={{ '--download-gate-bg-image': bgImage } as React.CSSProperties}
-      >
-        <div className="download-gate-view__bg" aria-hidden />
-        <div className="download-gate-view__left">
-          <div
-            className="download-gate-view__cover-wrap"
-            onClick={handlePlayPause}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handlePlayPause();
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            aria-label={gate.audio_file_url ? 'Play or pause track' : 'Cover art'}
-          >
-            {gate.thumbnail_url ? (
-              <img
-                src={gate.thumbnail_url}
-                alt=""
-                className="download-gate-view__cover"
-              />
-            ) : (
-              <div className="download-gate-view__cover-placeholder">♪</div>
-            )}
-            {gate.audio_file_url && (
-              <button
-                type="button"
-                className="download-gate-view__play"
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePlayPause();
-                }}
-              >
-                {isPlaying ? <PauseIcon /> : <PlayIcon />}
-              </button>
-            )}
+      <BlurredBackground imageUrl={gate.thumbnail_url} className="download-gate-view">
+        <div className="download-gate-view__inner">
+          <div className="download-gate-view__left">
+            <MediaPlayerCover
+              imageUrl={gate.thumbnail_url}
+              audioUrl={gate.audio_file_url}
+              playButtonPosition="bottom-right"
+            />
           </div>
-        </div>
-        <div className="download-gate-view__right">
+          <div className="download-gate-view__right">
           <h1 className="download-gate-view__title">{gate.title}</h1>
           <p className="download-gate-view__artist">{gate.artist_name}</p>
           <button
@@ -281,17 +222,9 @@ export default function DownloadGate() {
           >
             Download
           </button>
+          </div>
         </div>
-      </div>
-
-      {gate.audio_file_url && (
-        <audio
-          ref={audioRef}
-          src={gate.audio_file_url}
-          preload="metadata"
-          aria-hidden
-        />
-      )}
+      </BlurredBackground>
 
       {modalOpen && (
         <div
@@ -536,22 +469,6 @@ export default function DownloadGate() {
         </div>
       )}
     </>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  );
-}
-
-function PauseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-    </svg>
   );
 }
 

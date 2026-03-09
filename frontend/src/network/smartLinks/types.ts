@@ -38,6 +38,7 @@ export interface SmartLinkResponse {
   title: string;
   subtitle?: string;
   cover_image_url?: string;
+  audio_file_url?: string;
   short_url: string;
   total_visits: number;
   total_clicks: number;
@@ -59,6 +60,7 @@ export function isSmartLinkResponse(d: unknown): d is SmartLinkResponse {
     typeof o['total_clicks'] === 'number' &&
     (o['subtitle'] === undefined || typeof o['subtitle'] === 'string') &&
     (o['cover_image_url'] === undefined || typeof o['cover_image_url'] === 'string') &&
+    (o['audio_file_url'] === undefined || typeof o['audio_file_url'] === 'string') &&
     (o['copy_label'] === undefined || typeof o['copy_label'] === 'string') &&
     (o['created_at'] === undefined || typeof o['created_at'] === 'string') &&
     (o['updated_at'] === undefined || typeof o['updated_at'] === 'string');

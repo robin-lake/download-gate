@@ -16,12 +16,20 @@ import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
 import './App.scss'
 
-const NON_LANDING_PAGES = ['dashboard', 'new-download-gate', 'login', 'signup', 'me', 'oauth'];
+const NON_LANDING_PAGES = ['dashboard', 'new-download-gate', 'new-smart-link', 'login', 'signup', 'me', 'oauth'];
 
 function useIsLandingPage(): boolean {
   const location = useLocation();
   const segments = location.pathname.split('/').filter(Boolean);
-  return segments.length === 1 && !NON_LANDING_PAGES.includes(segments[0]);
+  // Single-segment path (e.g. /abc123 for download gate) and not an app page
+  if (segments.length === 1 && !NON_LANDING_PAGES.includes(segments[0])) {
+    return true;
+  }
+  // /link/:slug for public smart link page - full-bleed, no header/footer
+  if (segments.length === 2 && segments[0] === 'link') {
+    return true;
+  }
+  return false;
 }
 
 function AppContent() {

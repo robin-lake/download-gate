@@ -2,6 +2,7 @@
   --button-cta: rgb(55, 176, 131);
   --accent: rgb(115, 41, 189);
 }
+
 .download-gate-view {
   position: relative;
   min-height: 100vh;
@@ -18,26 +19,15 @@
   }
 }
 
-.download-gate-view__bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: #0f1929;
+.download-gate-view__inner {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--download-gate-bg-image) center center / cover no-repeat;
-    filter: blur(80px) saturate(1.2);
-    transform: scale(1.15);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+  @media (min-width: 768px) {
+    flex-direction: row;
   }
 }
 
@@ -54,68 +44,6 @@
   @media (min-width: 768px) {
     min-height: auto;
     padding: 3rem;
-  }
-}
-
-.download-gate-view__cover-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 280px;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-
-  @media (min-width: 768px) {
-    max-width: 320px;
-  }
-}
-
-.download-gate-view__cover {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  background: #1a1a2e;
-}
-
-.download-gate-view__cover-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 3rem;
-}
-
-.download-gate-view__play {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #4b88e3;
-  color: #fff;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.15s ease, background-color 0.15s ease;
-
-  &:hover {
-    background:var(--button-cta);
-    transform: scale(1.05);
-  }
-
-  svg {
-    width: 24px;
-    height: 24px;
   }
 }
 

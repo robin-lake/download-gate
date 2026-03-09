@@ -1,0 +1,27 @@
+.blurred-background {
+  position: relative;
+  overflow: hidden;
+
+  .blurred-background__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: #0f1929;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--blurred-bg-image) center center / cover no-repeat;
+      filter: blur(80px) saturate(1.2);
+      transform: scale(1.15);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+    }
+  }
+}
