@@ -107,14 +107,19 @@ export default function Dashboard() {
               )}
             </div>
 
-            {activeTab === 'smart-links' && (
+            {activeTab === 'smart-links' ? smartLinks.length ? (
               <div className="dashboard__list">
                 {smartLinks.map((entry) => (
                   <SmartLinkCard key={entry.id} entry={entry} />
                 ))}
               </div>
-            )}
-            {activeTab === 'download-gates' && downloadGates.length ? (
+            ): (
+              <div className="dashboard__empty">
+                <p>No smart links yet.</p>
+                <p>Create one with the button above.</p>
+              </div>
+            ) : (<></>)}
+            {activeTab === 'download-gates' ? downloadGates.length ? (
               <div className="download-gates">
                 {downloadGates.map((gate) => (
                   <DownloadGateCard
@@ -129,7 +134,7 @@ export default function Dashboard() {
                 <p>No download gates yet.</p>
                 <p>Create one with the button above.</p>
               </div>
-            )}
+            ):(<></>)}
           </div>
         </div>
       </div>

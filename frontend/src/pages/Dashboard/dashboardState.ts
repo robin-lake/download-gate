@@ -70,6 +70,7 @@ function mapSmartLinkResponseToSmartLink(link: SmartLinkResponse): SmartLink {
     platforms,
     url: link.short_url,
     copyLabel: link.copy_label ?? 'COPY LINK',
+    coverImageUrl: link.cover_image_url,
   };
 }
 
