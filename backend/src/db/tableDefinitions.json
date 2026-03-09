@@ -30,7 +30,7 @@
   },
   {
     "tableName": "SmartLinkPlatforms",
-    "envKey": "SMART_LINK_DESTINATIONS_TABLE",
+    "envKey": "SMART_LINK_PLATFORMS_TABLE",
     "partitionKey": { "name": "smart_link_id", "type": "S" },
     "sortKey": { "name": "id", "type": "S" }
   }

@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { docClient } from '../config/dynamodb.js';
 
-const TABLE_NAME = process.env['SMART_LINK_DESTINATIONS_TABLE'] ?? 'SmartLinkPlatforms';
+const TABLE_NAME = process.env['SMART_LINK_PLATFORMS_TABLE'] ?? 'SmartLinkPlatforms';
 
 export interface SmartLinkPlatform {
   smart_link_id: string;
@@ -62,7 +62,7 @@ class SmartLinkPlatformModel {
     return item;
   }
 
-  /** Get a single destination by smart_link_id and id. */
+  /** Get a single platform by smart_link_id and id. */
   static async findBySmartLinkAndId(
     smartLinkId: string,
     destinationId: string
@@ -76,7 +76,7 @@ class SmartLinkPlatformModel {
     return (response.Item as SmartLinkPlatform) ?? null;
   }
 
-  /** List all destinations for a smart link. */
+  /** List all platforms for a smart link. */
   static async listBySmartLinkId(smartLinkId: string): Promise<SmartLinkPlatform[]> {
     const response = await docClient.send(
       new QueryCommand({

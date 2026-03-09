@@ -8,7 +8,7 @@ Backend entities, attributes, keys, and relationships. Keep this in sync with Dy
 
 ## Overview
 
-The system stores **users** (auth/identity), **download gates** (gate a download behind fan actions), **gate steps** (per-gate requirements: follow/save on Spotify, SoundCloud, Instagram, etc., or email capture), and **smart links** (multi-platform links with visits/clicks). Download gates and smart links are owned by users. Each download gate has an ordered list of **gate steps**; each step is one service type (e.g. Spotify, Email capture) with its own configurable options and targets (URLs, profiles, etc.). Each smart link has many **smart link destinations** (one per platform link shown on the page); each destination has a URL and a per-link click count.
+The system stores **users** (auth/identity), **download gates** (gate a download behind fan actions), **gate steps** (per-gate requirements: follow/save on Spotify, SoundCloud, Instagram, etc., or email capture), and **smart links** (multi-platform links with visits/clicks). Download gates and smart links are owned by users. Each download gate has an ordered list of **gate steps**; each step is one service type (e.g. Spotify, Email capture) with its own configurable options and targets (URLs, profiles, etc.). Each smart link has many **smart link platforms** (one per platform link shown on the page); each destination has a URL and a per-link click count.
 
 ---
 
@@ -95,7 +95,7 @@ A multi-platform landing page: fans visit the smart link URL and can click throu
 | `cover_image_url` | string | optional  | Thumbnail/art for the page. |
 | `short_url`     | string | required    | Public URL for the smart link (e.g. downloadgate.com/xyz). |
 | `total_visits`  | number | required    | Number of times the smart link page was visited. |
-| `total_clicks`  | number | required    | Total clicks across all destinations (can be derived from **SmartLinkPlatform** click counts). |
+| `total_clicks`  | number | required    | Total clicks across all platforms (can be derived from **SmartLinkPlatform** click counts). |
 | `copy_label`    | string | optional    | UI label (e.g. "COPY LINK"). |
 
 - **Storage**: Not yet implemented (frontend mocks in `dashboardState.ts` and `SmartLinkCard.tsx`).
@@ -118,7 +118,7 @@ A single platform link listed on a smart link page (e.g. “Play on Spotify”, 
 | `action_label`   | string | optional    | Button label (e.g. `Play`, `Buy`); can be derived from platform in business logic. |
 
 - **Storage**: TBD (e.g. DynamoDB: partition key `smart_link_id`, sort key `id`; or separate table with `smart_link_id` as partition key).
-- **Keys**: Must support “all destinations for a smart link” (e.g. query by `smart_link_id`).
+- **Keys**: Must support “all platforms for a smart link” (e.g. query by `smart_link_id`).
 - **Relationships**: Belongs to one SmartLink. No direct link to User; access via smart link.
 
 ---
