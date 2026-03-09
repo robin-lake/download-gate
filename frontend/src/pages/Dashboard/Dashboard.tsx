@@ -73,7 +73,10 @@ export default function Dashboard() {
 
           <div className="dashboard__content">
             <div className="dashboard__action-bar">
-              <div className="dashboard__sort-wrap">
+
+               <div className="dashboard__sort-wrap">
+               </div>
+              {/* <div className="dashboard__sort-wrap">
                 <span className="dashboard__sort-label">Sort:</span>
                 <button type="button" className="dashboard__sort-btn">
                   Newest
@@ -81,7 +84,7 @@ export default function Dashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </button>
-              </div>
+              </div> */}
               {activeTab === 'smart-links' && (
                 <button type="button" className="dashboard__new-btn">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

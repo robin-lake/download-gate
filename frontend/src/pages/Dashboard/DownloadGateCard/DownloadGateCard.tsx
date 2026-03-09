@@ -30,6 +30,7 @@ function ActionIcon({
       className="download-gate-card__action-icon"
       aria-label={label}
       onClick={onClick}
+      title={label}
     >
       {children}
     </button>
@@ -73,17 +74,13 @@ export default function DownloadGateCard({ downloadGate, onDeleted }: DownloadGa
           )}
         </div>
         <div className="download-gate-card__actions">
-          <ActionIcon label="Status">
-            <svg fill="currentColor" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="8" />
-            </svg>
-          </ActionIcon>
           <a
             href={downloadGate.publicPath}
             target="_blank"
             rel="noopener noreferrer"
             className="download-gate-card__action-icon"
             aria-label="Open external link"
+            title="visit"
           >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -94,16 +91,16 @@ export default function DownloadGateCard({ downloadGate, onDeleted }: DownloadGa
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
           </ActionIcon>
-          <ActionIcon label="Analytics">
+          {/* <ActionIcon label="Analytics">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-          </ActionIcon>
-          <ActionIcon label="Document">
+          </ActionIcon> */}
+          {/* <ActionIcon label="Duplicate">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-          </ActionIcon>
+          </ActionIcon> */}
           <ActionIcon
             label="Delete gate"
             onClick={() => setShowDeleteConfirm(true)}
