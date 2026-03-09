@@ -4,8 +4,10 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import Dashboard from './pages/Dashboard/Dashboard';
 import NewDownloadGate from './pages/NewDownloadGate/NewDownloadGate';
+import NewSmartLink from './pages/NewSmartLink/NewSmartLink';
 // import Users from './pages/Users';
-import DownloadGate from './pages/DownloadGate';
+import DownloadGate from './pages/DownloadGate/DownloadGate';
+import SmartLink from './pages/SmartLink/SmartLink';
 import OAuthSoundCloudSuccess from './pages/OAuthSoundCloudSuccess';
 import OAuthSpotifySuccess from './pages/OAuthSpotifySuccess';
 import OAuthInstagramSuccess from './pages/OAuthInstagramSuccess';
@@ -34,6 +36,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-download-gate" element={<NewDownloadGate />} />
+          <Route path="/new-smart-link" element={<NewSmartLink />} />
           <Route path="/login" element={<div className="app-page"><SignIn /></div>} />
           <Route path="/signup" element={<div className="app-page"><SignUp /></div>} />
           <Route path="/me" element={<div className="app-page"><Me /></div>} />
@@ -44,6 +47,7 @@ function AppContent() {
           {/* <Route path="/admin/users" element={<div className="app-page"><Users /></div>} /> */}
           {/* Short URL for a single download gate (e.g. /abc123). Must be last so other paths match first. */}
           <Route path="/:gateIdOrSlug" element={<DownloadGate />} />
+          <Route path="/link/:gateIdOrSlug" element={<SmartLink />} />
         </Routes>
       </main>
       {showFooter && <Footer />}

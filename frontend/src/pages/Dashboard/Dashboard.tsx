@@ -90,7 +90,9 @@ export default function Dashboard() {
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  New Smart Link
+                  <Link to="/new-smart-link">
+                    New Smart Link
+                  </Link>
                 </button>
               )}
               {activeTab === 'download-gates' && (
