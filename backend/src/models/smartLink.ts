@@ -14,15 +14,15 @@ export interface SmartLink {
   user_id: string;
   link_id: string;
   title: string;
-  subtitle?: string;
-  cover_image_url?: string;
-  audio_file_url?: string;
+  subtitle?: string | undefined;
+  cover_image_url?: string | undefined;
+  audio_file_url?: string | undefined;
   short_url: string;
   total_visits: number;
   total_clicks: number;
-  copy_label?: string;
-  created_at?: string;
-  updated_at?: string;
+  copy_label?: string | undefined;
+  created_at?: string | undefined;
+  updated_at?: string | undefined;
 }
 
 export interface CreateSmartLinkInput {
@@ -53,7 +53,7 @@ export interface ListByUserOptions {
 
 export interface ListByUserResult {
   items: SmartLink[];
-  lastEvaluatedKey?: Record<string, unknown>;
+  lastEvaluatedKey?: Record<string, unknown> | undefined;
 }
 
 /** Aggregated stats for all smart links belonging to a user. */
