@@ -103,3 +103,22 @@ export function isListSmartLinksResponse(d: unknown): d is ListSmartLinksRespons
   if (o['nextToken'] !== null && typeof o['nextToken'] !== 'string') return false;
   return true;
 }
+
+/** Response shape of GET /api/smart-links/stats (summed across all user smart links). */
+export interface SmartLinkStatsResponse {
+  total_visits: number;
+  total_clicks: number;
+}
+
+export function isSmartLinkStatsResponse(d: unknown): d is SmartLinkStatsResponse {
+  if (typeof d !== 'object' || d === null) return false;
+  const o = d as Record<string, unknown>;
+  return (
+    typeof o['total_visits'] === 'number' &&
+    typeof o['total_clicks'] === 'number' &&
+    Number.isInteger(o['total_visits']) &&
+    Number.isInteger(o['total_clicks']) &&
+    (o['total_visits'] as number) >= 0 &&
+    (o['total_clicks'] as number) >= 0
+  );
+}

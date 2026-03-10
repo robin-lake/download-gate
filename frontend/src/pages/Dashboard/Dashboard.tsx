@@ -15,8 +15,8 @@ export default function Dashboard() {
     setActiveTab,
     downloadGates,
     smartLinks,
-    dashboardStats,
     downloadGatesStats,
+    smartLinksStats,
     refetchDownloadGates,
   } = useGetDashboardState();
 
@@ -35,7 +35,7 @@ export default function Dashboard() {
         <div className="dashboard__stats">
           {activeTab === "smart-links" && (
             <>
-              {dashboardStats['smart-links'].map((card, index) => (
+              {smartLinksStats.map((card, index) => (
                 <StatCard
                   key={index}
                   title={card.title}

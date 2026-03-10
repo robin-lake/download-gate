@@ -48,6 +48,24 @@ export interface CreateSmartLinkBody {
 router.use(requireAuth);
 
 /**
+ * GET /api/smart-links/stats
+ * Return summed total_visits and total_clicks for all smart links owned by the authenticated user.
+ */
+router.get('/stats', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = getClerkUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+    const stats = await SmartLinkModel.getStatsByUserId(userId);
+    res.status(200).json(stats);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/smart-links
  * Return display info for all smart links for the authenticated user. Paginated.
  */

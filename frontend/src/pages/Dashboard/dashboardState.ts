@@ -6,6 +6,7 @@ import type { DashboardCardStat } from './StatCard';
 import { useGetDownloadGates, mapDownloadGateResponseToCard } from '@/network/downloadGates/getDownloadGates';
 import { useGetDownloadGatesStats } from '@/network/downloadGates/getDownloadGateStats';
 import { useGetSmartLinks } from '@/network/smartLinks/getSmartLinks';
+import { useGetSmartLinksStats } from '@/network/smartLinks/getSmartLinkStats';
 import type { SmartLinkResponse } from '@/network/smartLinks/types';
 type TabId = 'smart-links' | 'download-gates';
 export type DashboardStats = Record<'smart-links' | 'download-gates', DashboardCardStat[]> 
@@ -14,19 +15,14 @@ const MOCK_STATS:DashboardStats = {
   'smart-links':[
    {
     title: 'Visits',
-    value: 10402,
+    value: 0,
     subtitle: '+0 in last 7 Days',
   },
    {
     title: 'Clicks',
-    value: 3000,
+    value: 0,
     subtitle: '+0 in last 7 Days',
     showInfo: true,
-  },
-   {
-    title: 'Fans',
-    value: 10,
-    subtitle: '+0 in last 7 Days',
   },
   ],
   'download-gates': [
@@ -89,6 +85,7 @@ export function useGetDashboardState() {
   );
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>(MOCK_STATS);
   const downloadGatesStats = useGetDownloadGatesStats();
+  const smartLinksStats = useGetSmartLinksStats();
 
   return {
     activeTab,
@@ -100,5 +97,6 @@ export function useGetDashboardState() {
     dashboardStats,
     setDashboardStats,
     downloadGatesStats,
+    smartLinksStats,
   };
 }

@@ -3,12 +3,14 @@ import request from 'supertest';
 import type { Express } from 'express';
 
 const mockListByUserId = vi.fn();
+const mockGetStatsByUserId = vi.fn();
 const mockCreate = vi.fn();
 const mockFindByUserAndLinkId = vi.fn();
 
 vi.mock('../models/smartLink.js', () => ({
   default: {
     listByUserId: (...args: unknown[]) => mockListByUserId(...args),
+    getStatsByUserId: (...args: unknown[]) => mockGetStatsByUserId(...args),
     create: (...args: unknown[]) => mockCreate(...args),
     findByUserAndLinkId: (...args: unknown[]) => mockFindByUserAndLinkId(...args),
   },
@@ -152,6 +154,52 @@ describe('GET /api/smart-links', () => {
     expect(mockListByUserId).toHaveBeenCalledWith('user-1', {
       limit: 50,
       exclusiveStartKey: lastKey,
+    });
+  });
+});
+
+describe('GET /api/smart-links/stats', () => {
+  it('returns 401 when not authenticated', async () => {
+    mockGetAuth.mockReturnValue({ isAuthenticated: false, userId: null });
+
+    const res = await request(app).get('/api/smart-links/stats');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: 'Authentication required' });
+    expect(mockGetStatsByUserId).not.toHaveBeenCalled();
+  });
+
+  it('returns 200 and summed stats for authenticated user', async () => {
+    mockGetAuth.mockReturnValue({ isAuthenticated: true, userId: 'user-123' });
+    mockGetStatsByUserId.mockResolvedValueOnce({
+      total_visits: 500,
+      total_clicks: 120,
+    });
+
+    const res = await request(app).get('/api/smart-links/stats');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      total_visits: 500,
+      total_clicks: 120,
+    });
+    expect(mockGetStatsByUserId).toHaveBeenCalledTimes(1);
+    expect(mockGetStatsByUserId).toHaveBeenCalledWith('user-123');
+  });
+
+  it('returns zeros when user has no smart links', async () => {
+    mockGetAuth.mockReturnValue({ isAuthenticated: true, userId: 'user-empty' });
+    mockGetStatsByUserId.mockResolvedValueOnce({
+      total_visits: 0,
+      total_clicks: 0,
+    });
+
+    const res = await request(app).get('/api/smart-links/stats');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      total_visits: 0,
+      total_clicks: 0,
     });
   });
 });

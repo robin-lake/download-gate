@@ -56,6 +56,12 @@ export interface ListByUserResult {
   lastEvaluatedKey?: Record<string, unknown>;
 }
 
+/** Aggregated stats for all smart links belonging to a user. */
+export interface UserSmartLinkStats {
+  total_visits: number;
+  total_clicks: number;
+}
+
 class SmartLinkModel {
   static async create(input: CreateSmartLinkInput): Promise<SmartLink> {
     const now = new Date().toISOString();
@@ -134,6 +140,45 @@ class SmartLinkModel {
       items: (response.Items as SmartLink[]) ?? [],
       lastEvaluatedKey: response.LastEvaluatedKey,
     };
+  }
+
+  /**
+   * Get summed total_visits and total_clicks for all smart links owned by a user.
+   * Uses a single Query with ProjectionExpression, then paginates and sums in memory.
+   */
+  static async getStatsByUserId(userId: string): Promise<UserSmartLinkStats> {
+    const result: UserSmartLinkStats = {
+      total_visits: 0,
+      total_clicks: 0,
+    };
+    let exclusiveStartKey: Record<string, unknown> | undefined;
+
+    do {
+      const response = await docClient.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'user_id = :user_id',
+          ExpressionAttributeValues: { ':user_id': userId },
+          ProjectionExpression: 'total_visits, total_clicks',
+          ExclusiveStartKey: exclusiveStartKey,
+          Limit: 100,
+        })
+      );
+      const items = (response.Items ?? []) as Pick<
+        SmartLink,
+        'total_visits' | 'total_clicks'
+      >[];
+      for (const item of items) {
+        result.total_visits += Number(item.total_visits) || 0;
+        result.total_clicks += Number(item.total_clicks) || 0;
+      }
+      exclusiveStartKey =
+        response.LastEvaluatedKey != null
+          ? (response.LastEvaluatedKey as Record<string, unknown>)
+          : undefined;
+    } while (exclusiveStartKey != null);
+
+    return result;
   }
 
   static async update(
