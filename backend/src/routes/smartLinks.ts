@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { getAuth } from '@clerk/express';
 import SmartLinkModel from '../models/smartLink.js';
 import SmartLinkPlatformModel from '../models/smartLinkPlatform.js';
+import { withServerTiming, setServerTiming } from '../middleware/serverTiming.js';
 
 const router = Router();
 
@@ -58,7 +59,12 @@ router.get('/stats', async (req: Request, res: Response, next: NextFunction): Pr
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
-    const stats = await SmartLinkModel.getStatsByUserId(userId);
+    const stats = await withServerTiming(
+      res,
+      'getStatsByUserId',
+      () => SmartLinkModel.getStatsByUserId(userId),
+      'DynamoDB query + sum for all smart links'
+    );
     res.status(200).json(stats);
   } catch (err) {
     next(err);
@@ -97,17 +103,25 @@ router.get(
         }
       }
 
+      const listStart = performance.now();
       const result = await SmartLinkModel.listByUserId(userId, {
         limit: effectiveLimit,
         ...(exclusiveStartKey !== undefined && { exclusiveStartKey }),
       });
+      const listDur = Math.round(performance.now() - listStart);
 
+      const platformsStart = performance.now();
       const itemsWithPlatforms = await Promise.all(
         result.items.map(async (link) => {
           const platforms = await SmartLinkPlatformModel.listBySmartLinkId(link.link_id);
           return { ...link, platforms };
         })
       );
+      const platformsDur = Math.round(performance.now() - platformsStart);
+      setServerTiming(res, [
+        { name: 'listByUserId', dur: listDur, desc: 'DynamoDB query for user links' },
+        { name: 'platforms', dur: platformsDur, desc: 'Fetch platforms per link' },
+      ]);
 
       const nextToken =
         result.lastEvaluatedKey != null

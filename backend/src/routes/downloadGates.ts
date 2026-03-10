@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { getAuth } from '@clerk/express';
 import DownloadGateModel from '../models/downloadGate.js';
 import GateStepModel from '../models/gateStep.js';
+import { withServerTiming } from '../middleware/serverTiming.js';
 
 const router = Router();
 
@@ -58,7 +59,12 @@ router.get('/stats', async (req: Request, res: Response, next: NextFunction): Pr
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
-    const stats = await DownloadGateModel.getStatsByUserId(userId);
+    const stats = await withServerTiming(
+      res,
+      'getStatsByUserId',
+      () => DownloadGateModel.getStatsByUserId(userId),
+      'DynamoDB query + sum for all gates'
+    );
     res.status(200).json(stats);
   } catch (err) {
     next(err);
@@ -94,10 +100,16 @@ router.get(
         }
       }
 
-      const result = await DownloadGateModel.listByUserId(userId, {
-        limit: effectiveLimit,
-        ...(exclusiveStartKey !== undefined && { exclusiveStartKey }),
-      });
+      const result = await withServerTiming(
+        res,
+        'listByUserId',
+        () =>
+          DownloadGateModel.listByUserId(userId, {
+            limit: effectiveLimit,
+            ...(exclusiveStartKey !== undefined && { exclusiveStartKey }),
+          }),
+        'DynamoDB query for user gates'
+      );
 
       const nextToken =
         result.lastEvaluatedKey != null
