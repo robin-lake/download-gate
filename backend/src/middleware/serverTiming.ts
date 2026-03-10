@@ -21,9 +21,11 @@ export interface ServerTimingEntry {
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Server-Timing
  */
 export function setServerTiming(res: Response, entries: ServerTimingEntry[]): void {
-  const enabled =
-    process.env.NODE_ENV !== 'production' ||
-    process.env.SERVER_TIMING === 'true';
+  // const enabled =
+  //   process.env.NODE_ENV !== 'production' ||
+  //   process.env.SERVER_TIMING === 'true';
+  // temporarily enable in production, remove this later
+  const enabled = true
   if (!enabled || entries.length === 0) return;
 
   const parts = entries.map((e) => {
@@ -49,6 +51,6 @@ export async function withServerTiming<T>(
     return await fn();
   } finally {
     const dur = Math.round(performance.now() - start);
-    setServerTiming(res, [{ name: metricName, dur, desc }]);
+    setServerTiming(res, [{ name: metricName, dur, ...(desc !== undefined && { desc }) }]);
   }
 }
