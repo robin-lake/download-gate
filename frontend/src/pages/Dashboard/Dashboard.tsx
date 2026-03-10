@@ -1,4 +1,5 @@
-import {Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 import './Dashboard.scss';
 import SmartLinkCard from './SmartLinkCard/SmartLinkCard';
@@ -8,6 +9,7 @@ import { useGetDashboardState } from './dashboardState';
 
 
 export default function Dashboard() {
+  const location = useLocation();
   const {
     activeTab,
     setActiveTab,
@@ -17,6 +19,13 @@ export default function Dashboard() {
     downloadGatesStats,
     refetchDownloadGates,
   } = useGetDashboardState();
+
+  useEffect(() => {
+    const state = location.state as { activeTab?: 'smart-links' | 'download-gates' } | null;
+    if (state?.activeTab) {
+      setActiveTab(state.activeTab);
+    }
+  }, [location.state, setActiveTab]);
 
   return (
     <div className="dashboard">

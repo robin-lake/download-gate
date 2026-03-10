@@ -125,7 +125,7 @@ export default function NewSmartLink() {
         audio_file_url: audioResult.url,
       });
       const link = await createSmartLink(payload, { getToken });
-      navigate("/dashboard", { state: { createdSmartLinkId: link.link_id } });
+      navigate("/dashboard", { state: { createdSmartLinkId: link.link_id, activeTab: 'smart-links' } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create smart link";
       setError("root", { type: "submit", message });
