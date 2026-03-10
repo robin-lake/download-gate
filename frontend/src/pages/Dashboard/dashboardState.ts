@@ -22,7 +22,7 @@ const MOCK_STATS:DashboardStats = {
     title: 'Clicks',
     value: 0,
     subtitle: '+0 in last 7 Days',
-    showInfo: true,
+    // showInfo: true,
   },
   ],
   'download-gates': [

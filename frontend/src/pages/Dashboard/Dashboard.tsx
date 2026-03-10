@@ -42,7 +42,7 @@ export default function Dashboard() {
                   key={index}
                   title={card.title}
                   value={card.value}
-                  subtitle={card.subtitle}
+                  // subtitle={card.subtitle}
                   showInfo={card.showInfo}
                 />
               ))}
@@ -55,7 +55,7 @@ export default function Dashboard() {
                   key={index}
                   title={card.title}
                   value={card.value}
-                  subtitle={card.subtitle}
+                  // subtitle={card.subtitle}
                   showInfo={card.showInfo}
                 />
               ))}
