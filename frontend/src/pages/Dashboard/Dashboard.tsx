@@ -18,6 +18,8 @@ export default function Dashboard() {
     downloadGatesStats,
     smartLinksStats,
     refetchDownloadGates,
+    isLoadingDownloadGates,
+    isLoadingSmartLinks,
   } = useGetDashboardState();
 
   useEffect(() => {
@@ -116,34 +118,48 @@ export default function Dashboard() {
               )}
             </div>
 
-            {activeTab === 'smart-links' ? smartLinks.length ? (
-              <div className="dashboard__list">
-                {smartLinks.map((entry) => (
-                  <SmartLinkCard key={entry.id} entry={entry} />
-                ))}
-              </div>
-            ): (
-              <div className="dashboard__empty">
-                <p>No smart links yet.</p>
-                <p>Create one with the button above.</p>
-              </div>
-            ) : (<></>)}
-            {activeTab === 'download-gates' ? downloadGates.length ? (
-              <div className="download-gates">
-                {downloadGates.map((gate) => (
-                  <DownloadGateCard
-                    key={gate.id}
-                    downloadGate={gate}
-                    onDeleted={refetchDownloadGates}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="dashboard__empty">
-                <p>No download gates yet.</p>
-                <p>Create one with the button above.</p>
-              </div>
-            ):(<></>)}
+            {activeTab === 'smart-links' ? (
+              isLoadingSmartLinks ? (
+                <div className="dashboard__loading">
+                  <div className="dashboard__spinner" aria-hidden />
+                  <p>Loading smart links…</p>
+                </div>
+              ) : smartLinks.length ? (
+                <div className="dashboard__list">
+                  {smartLinks.map((entry) => (
+                    <SmartLinkCard key={entry.id} entry={entry} />
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard__empty">
+                  <p>No smart links yet.</p>
+                  <p>Create one with the button above.</p>
+                </div>
+              )
+            ) : null}
+            {activeTab === 'download-gates' ? (
+              isLoadingDownloadGates ? (
+                <div className="dashboard__loading">
+                  <div className="dashboard__spinner" aria-hidden />
+                  <p>Loading download gates…</p>
+                </div>
+              ) : downloadGates.length ? (
+                <div className="download-gates">
+                  {downloadGates.map((gate) => (
+                    <DownloadGateCard
+                      key={gate.id}
+                      downloadGate={gate}
+                      onDeleted={refetchDownloadGates}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard__empty">
+                  <p>No download gates yet.</p>
+                  <p>Create one with the button above.</p>
+                </div>
+              )
+            ) : null}
           </div>
         </div>
       </div>

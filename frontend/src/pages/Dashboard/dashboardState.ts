@@ -73,12 +73,12 @@ function mapSmartLinkResponseToSmartLink(link: SmartLinkResponse): SmartLink {
 
 export function useGetDashboardState() {
   const [activeTab, setActiveTab] = useState<TabId>('download-gates');
-  const { data: downloadGatesData, refetch: refetchDownloadGates } = useGetDownloadGates();
+  const { data: downloadGatesData, isLoading: isLoadingDownloadGates, refetch: refetchDownloadGates } = useGetDownloadGates();
   const downloadGates: DownloadGate[] = useMemo(
     () => (downloadGatesData?.items ?? []).map(mapDownloadGateResponseToCard),
     [downloadGatesData]
   );
-  const { data: smartLinksData, refetch: refetchSmartLinks } = useGetSmartLinks();
+  const { data: smartLinksData, isLoading: isLoadingSmartLinks, refetch: refetchSmartLinks } = useGetSmartLinks();
   const smartLinks: SmartLink[] = useMemo(
     () => (smartLinksData?.items ?? []).map(mapSmartLinkResponseToSmartLink),
     [smartLinksData]
@@ -91,8 +91,10 @@ export function useGetDashboardState() {
     activeTab,
     setActiveTab,
     downloadGates,
+    isLoadingDownloadGates,
     refetchDownloadGates,
     smartLinks,
+    isLoadingSmartLinks,
     refetchSmartLinks,
     dashboardStats,
     setDashboardStats,
