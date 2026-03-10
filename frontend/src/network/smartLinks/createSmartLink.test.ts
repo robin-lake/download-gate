@@ -63,6 +63,8 @@ describe('useCreateSmartLink', () => {
         title: 'My Link',
         short_url: 'abc',
         subtitle: 'Sub',
+        cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
       });
     });
 
@@ -78,6 +80,8 @@ describe('useCreateSmartLink', () => {
           title: 'My Link',
           short_url: 'abc',
           subtitle: 'Sub',
+          cover_image_url: 'https://example.com/cover.jpg',
+          audio_file_url: 'https://example.com/audio.mp3',
         }),
       })
     );
@@ -100,7 +104,12 @@ describe('useCreateSmartLink', () => {
     const { result } = renderHook(() => useCreateSmartLink());
 
     await act(() => {
-      result.current.createSmartLink({ title: 'T', short_url: 'x' });
+      result.current.createSmartLink({
+        title: 'T',
+        short_url: 'x',
+        cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
+      });
     });
 
     await waitFor(() => {
@@ -124,7 +133,12 @@ describe('useCreateSmartLink', () => {
     const { result } = renderHook(() => useCreateSmartLink());
 
     await act(() => {
-      result.current.createSmartLink({ title: 'T', short_url: 'x' });
+      result.current.createSmartLink({
+        title: 'T',
+        short_url: 'x',
+        cover_image_url: 'https://example.com/cover.jpg',
+        audio_file_url: 'https://example.com/audio.mp3',
+      });
     });
 
     await waitFor(() => {
