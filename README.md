@@ -1,5 +1,9 @@
 # Download Gate #
 
+### Overview ###
+
+This repository contains a backend API (`backend/`), a React frontend (`frontend/`), and AWS CDK infrastructure (`cdk/`). The frontend is built with React, TypeScript, and Vite; UI styling uses **Tailwind CSS** and **shadcn/ui** (see `frontend/components.json` and `frontend/src/components/ui/`).
+
 ### Deploying via AWS CDK ###
 To configure the app for deployment via the AWS CDK, first add the following lines to your environment variables file in `cdk/.env`:
 ```

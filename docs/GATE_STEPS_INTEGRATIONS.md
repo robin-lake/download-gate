@@ -187,6 +187,8 @@ backend/src/
 
 ### Frontend
 
+The app uses **Tailwind CSS** and **shadcn/ui** for styling and UI primitives (`frontend/components.json`, `frontend/src/components/ui/`).
+
 ```
 frontend/src/
   pages/DownloadGate/

@@ -1,6 +1,8 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend uses **Tailwind CSS** for styling and **shadcn/ui** for UI primitives (configured via `components.json`; components live under `src/components/ui/`).
+
+This project started from the Vite React + TypeScript template and keeps a minimal setup with HMR and ESLint.
 
 Currently, two official plugins are available:
 
