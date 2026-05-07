@@ -11,7 +11,7 @@ const IMG = {
 
 const CREDITS = [
   { label: "Alexey Demidov", href: "https://www.pexels.com/photo/12409937/" },
-  { label: "Ali Pazani", href: "https://www.pexels.com/photo/4407688/" },
+  { label: "TStudio", href: "https://www.pexels.com/photo/8042662/" },
   { label: "Pixabay", href: "https://www.pexels.com/photo/164745/" },
   { label: "Dmitry Demidov", href: "https://www.pexels.com/photo/3784221/" },
 ] as const;
@@ -150,10 +150,10 @@ export default function Home() {
           <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30">
             <img
               src={IMG.studio}
-              alt="Artist in a dressing room with a synthesizer, creative performance setting"
+              alt="Several synthesizers and mixers arranged on a wooden table in a studio"
               className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105"
               width={1200}
-              height={1500}
+              height={2133}
               loading="lazy"
               decoding="async"
               sizes="(max-width: 768px) 100vw, 33vw"
