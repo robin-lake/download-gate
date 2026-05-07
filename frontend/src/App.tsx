@@ -38,7 +38,7 @@ function AppContent() {
   return (
     <>
      {showHeader && <Header />}
-      <main className="mx-auto flex w-full flex-1 flex-col">
+      <main className="mx-auto flex min-h-[calc(100vh-1px)] w-full flex-1 flex-col bg-[var(--app-canvas)] text-zinc-800">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />

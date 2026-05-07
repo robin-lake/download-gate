@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDeleteDownloadGate } from '@/network/downloadGates/deleteDownloadGate';
 import { Button } from '@/components/ui/button';
 const actionIconClass =
-  "rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 [&_svg]:block [&_svg]:size-4";
+  "rounded p-1.5 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 [&_svg]:block [&_svg]:size-4";
 
 export interface DownloadGate {
   id: string;
@@ -61,14 +61,14 @@ export default function DownloadGateCard({ downloadGate, onDeleted }: DownloadGa
   };
 
   return (
-    <div className="flex flex-col gap-4 border-b border-gray-200 py-4 last:border-b-0 sm:flex-row sm:items-start">
-      <div className="flex flex-col items-start gap-2 shrink-0">
-        <div className="size-20 overflow-hidden rounded-md bg-gray-200">
+    <div className="flex flex-col gap-4 rounded-xl border border-zinc-200/90 bg-zinc-50/80 p-4 sm:flex-row sm:items-start">
+      <div className="flex shrink-0 flex-col items-start gap-2">
+        <div className="size-20 overflow-hidden rounded-md bg-zinc-200/80">
           {thumbnailUrl ? (
             <img src={thumbnailUrl} alt="" className="size-full object-cover" />
           ) : (
             <div className="flex size-full items-center justify-center">
-              <svg className="size-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="size-10 text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
               </svg>
             </div>
@@ -117,9 +117,9 @@ export default function DownloadGateCard({ downloadGate, onDeleted }: DownloadGa
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className="m-0 cursor-pointer text-base font-semibold text-gray-900 hover:text-green-600">{title}</h3>
-        <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 [&_strong]:font-semibold [&_strong]:text-gray-900">
+        <h3 className="m-0 cursor-pointer text-base font-semibold text-zinc-900 transition hover:text-violet-600">{title}</h3>
+        <p className="mt-1 text-sm text-zinc-600">{subtitle}</p>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-600 [&_strong]:font-semibold [&_strong]:text-zinc-900">
           <span>Visits: <strong>{visits}</strong></span>
           <span>Downloads: <strong>{downloads}</strong></span>
           <span>Emails captured: <strong>{emailsCaptured}</strong></span>
@@ -128,20 +128,20 @@ export default function DownloadGateCard({ downloadGate, onDeleted }: DownloadGa
 
       {showDeleteConfirm && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/40 p-4"
           onClick={() => setShowDeleteConfirm(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-gate-confirm-title"
         >
           <div
-            className="w-full max-w-[400px] rounded-lg bg-white p-5 shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
+            className="w-full max-w-[400px] rounded-xl border border-zinc-200 bg-white p-5 shadow-xl shadow-zinc-900/15"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="delete-gate-confirm-title" className="m-0 mb-2 text-lg font-semibold text-gray-900">
+            <h2 id="delete-gate-confirm-title" className="m-0 mb-2 text-lg font-semibold text-zinc-900">
               Delete download gate?
             </h2>
-            <p className="mb-5 text-sm leading-relaxed text-gray-500">
+            <p className="mb-5 text-sm leading-relaxed text-zinc-600">
               &ldquo;{title}&rdquo; by {subtitle} will be permanently deleted. This cannot be undone.
             </p>
             <div className="flex justify-end gap-2">

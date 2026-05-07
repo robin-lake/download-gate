@@ -30,6 +30,9 @@
 }
 
 :root {
+  /* Shared app shell / marketing canvas (Home below hero, dashboard, header area) */
+  --app-canvas: #f4f3f8;
+
   /* Public gate / smart-link CTAs (used with Tailwind arbitrary values and modal copy) */
   --button-cta: rgb(55, 176, 131);
   --accent-brand: rgb(115, 41, 189);

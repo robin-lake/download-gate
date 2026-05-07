@@ -17,8 +17,8 @@ describe('Header', () => {
       </MemoryRouter>
     );
     expect(screen.getByRole('link', { name: /download gate/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /log in/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /sign up/i })).toBeInTheDocument();
   });
 
   it('does not show Users link when signed out (Users is inside SignedIn)', () => {

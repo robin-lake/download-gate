@@ -18,7 +18,7 @@ const CREDITS = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full bg-[#0c0a0f] text-zinc-200">
+    <div className="min-h-screen w-full bg-[var(--app-canvas)] text-zinc-800">
       {/* Hero */}
       <section
         className="relative flex min-h-[85vh] items-center md:min-h-[90vh]"
@@ -66,7 +66,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-4">
             <Link
               to="/signup"
-              className="inline-flex rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-950/40 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+              className="inline-flex rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
             >
               Get started free
             </Link>
@@ -83,13 +83,13 @@ export default function Home() {
       </section>
 
       {/* Intro */}
-      <section className="relative border-t border-white/5 bg-[#0c0a0f] px-6 py-16 md:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(139,92,246,0.04),transparent)]" aria-hidden />
+      <section className="relative border-t border-zinc-200/80 bg-[var(--app-canvas)] px-6 py-16 md:py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(139,92,246,0.06),transparent)]" aria-hidden />
         <div className="relative mx-auto max-w-3xl text-center">
-          <h2 className="font-display mb-4 text-2xl font-bold tracking-tight text-white md:text-3xl">
+          <h2 className="font-display mb-4 text-2xl font-bold tracking-tight text-zinc-900 md:text-3xl">
             From the studio to the crowd
           </h2>
-          <p className="text-base leading-relaxed text-zinc-400 md:text-lg">
+          <p className="text-base leading-relaxed text-zinc-600 md:text-lg">
             You&apos;re not just chasing streams—you&apos;re building a list of people
             who care about your next release. Download gates turn one listen into a
             follow, a save, or a mailing list signup. Works for techno, house, DnB,
@@ -99,40 +99,40 @@ export default function Home() {
       </section>
 
       {/* Benefits */}
-      <section className="px-6 py-16 md:py-20" aria-labelledby="why-gates">
+      <section className="bg-white px-6 py-16 md:py-20" aria-labelledby="why-gates">
         <div className="mx-auto max-w-6xl">
           <h2
             id="why-gates"
-            className="font-display mb-10 text-center text-2xl font-bold text-white md:text-3xl"
+            className="font-display mb-10 text-center text-2xl font-bold text-zinc-900 md:text-3xl"
           >
             Why download gates?
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <article className="rounded-2xl border border-violet-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-zinc-900/70">
-              <h3 className="font-display mb-3 text-lg font-semibold text-cyan-200">
+            <article className="rounded-2xl border border-violet-200/90 bg-zinc-50/80 p-6 shadow-sm shadow-zinc-900/5 transition hover:border-cyan-300/80 hover:shadow-md">
+              <h3 className="font-display mb-3 text-lg font-semibold text-violet-700">
                 Grow where you already are
               </h3>
-              <p className="m-0 text-sm leading-relaxed text-zinc-400">
+              <p className="m-0 text-sm leading-relaxed text-zinc-600">
                 Point fans to SoundCloud, Bandcamp, Spotify, or Instagram—wherever
                 your catalog and community live. New listeners become followers who
                 see your next drop.
               </p>
             </article>
-            <article className="rounded-2xl border border-violet-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-zinc-900/70">
-              <h3 className="font-display mb-3 text-lg font-semibold text-cyan-200">
+            <article className="rounded-2xl border border-violet-200/90 bg-zinc-50/80 p-6 shadow-sm shadow-zinc-900/5 transition hover:border-cyan-300/80 hover:shadow-md">
+              <h3 className="font-display mb-3 text-lg font-semibold text-violet-700">
                 Better engagement
               </h3>
-              <p className="m-0 text-sm leading-relaxed text-zinc-400">
+              <p className="m-0 text-sm leading-relaxed text-zinc-600">
                 People who follow or save to unlock a track are more likely to come
                 back for EPs, remixes, and club edits. You build a habit, not a
                 one-off click.
               </p>
             </article>
-            <article className="rounded-2xl border border-violet-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-zinc-900/70 sm:col-span-2 lg:col-span-1">
-              <h3 className="font-display mb-3 text-lg font-semibold text-cyan-200">
+            <article className="rounded-2xl border border-violet-200/90 bg-zinc-50/80 p-6 shadow-sm shadow-zinc-900/5 transition hover:border-cyan-300/80 hover:shadow-md sm:col-span-2 lg:col-span-1">
+              <h3 className="font-display mb-3 text-lg font-semibold text-violet-700">
                 Real fans
               </h3>
-              <p className="m-0 text-sm leading-relaxed text-zinc-400">
+              <p className="m-0 text-sm leading-relaxed text-zinc-600">
                 The fans who jump through a small hoop for your audio are the ones
                 who buy on Bandcamp, share your links, and show up when you tour.
               </p>
@@ -143,11 +143,11 @@ export default function Home() {
 
       {/* Gear strip */}
       <section
-        className="border-y border-white/5 bg-black/40 px-6 py-12 md:py-16"
+        className="border-y border-zinc-200/80 bg-zinc-100/80 px-6 py-12 md:py-16"
         aria-label="Studio and electronic music production imagery"
       >
         <div className="mx-auto grid max-w-6xl gap-4 md:grid-cols-3">
-          <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30">
+          <figure className="group overflow-hidden rounded-xl border border-zinc-200/90 bg-white shadow-sm">
             <img
               src={IMG.studio}
               alt="Several synthesizers and mixers arranged on a wooden table in a studio"
@@ -159,7 +159,7 @@ export default function Home() {
               sizes="(max-width: 768px) 100vw, 33vw"
             />
           </figure>
-          <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30">
+          <figure className="group overflow-hidden rounded-xl border border-zinc-200/90 bg-white shadow-sm">
             <img
               src={IMG.drums}
               alt="Close-up of an audio mixer with illuminated knobs for music production"
@@ -171,7 +171,7 @@ export default function Home() {
               sizes="(max-width: 768px) 100vw, 33vw"
             />
           </figure>
-          <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30 md:col-span-1">
+          <figure className="group overflow-hidden rounded-xl border border-zinc-200/90 bg-white shadow-sm md:col-span-1">
             <img
               src={IMG.gear}
               alt="Illuminated DJ mixer with colorful LED pads in a dark studio"
@@ -187,11 +187,11 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="px-6 py-16 md:py-20" aria-labelledby="how-it-works">
+      <section className="bg-white px-6 py-16 md:py-20" aria-labelledby="how-it-works">
         <div className="mx-auto max-w-3xl">
           <h2
             id="how-it-works"
-            className="font-display mb-10 text-center text-2xl font-bold text-white md:text-3xl"
+            className="font-display mb-10 text-center text-2xl font-bold text-zinc-900 md:text-3xl"
           >
             How it works
           </h2>
@@ -206,7 +206,7 @@ export default function Home() {
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 text-sm font-bold text-white">
                   {i + 1}
                 </span>
-                <p className="m-0 pt-1 leading-relaxed text-zinc-400">{text}</p>
+                <p className="m-0 pt-1 leading-relaxed text-zinc-600">{text}</p>
               </li>
             ))}
           </ol>
@@ -214,12 +214,12 @@ export default function Home() {
       </section>
 
       {/* Open source */}
-      <section className="px-6 py-16 md:py-20">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-white/10 bg-zinc-900/40 px-8 py-10 text-center backdrop-blur-sm">
-          <h2 className="font-display mb-4 text-xl font-bold text-white md:text-2xl">
+      <section className="bg-[var(--app-canvas)] px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-violet-200/80 bg-white px-8 py-10 text-center shadow-md shadow-zinc-900/5">
+          <h2 className="font-display mb-4 text-xl font-bold text-zinc-900 md:text-2xl">
             Open source
           </h2>
-          <p className="mb-6 text-zinc-400">
+          <p className="mb-6 text-zinc-600">
             Fork it, self-host it, or hack on the UI. The project is on GitHub for
             artists who want control without a middleman.
           </p>
@@ -227,7 +227,7 @@ export default function Home() {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex font-semibold text-violet-300 underline-offset-4 transition hover:text-cyan-300 hover:underline"
+            className="inline-flex font-semibold text-violet-600 underline-offset-4 transition hover:text-cyan-600 hover:underline"
           >
             Fork on GitHub
           </a>
@@ -235,21 +235,21 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="px-6 pb-12 pt-4 text-center md:pb-20">
-        <h2 className="font-display mb-6 text-2xl font-bold text-white">
+      <section className="bg-white px-6 pb-12 pt-4 text-center md:pb-20">
+        <h2 className="font-display mb-6 text-2xl font-bold text-zinc-900">
           Ready for your next release?
         </h2>
         <Link
           to="/signup"
-          className="inline-flex rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-950/40 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+          className="inline-flex rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
         >
           Sign up free
         </Link>
       </section>
 
       {/* Credits */}
-      <footer className="border-t border-white/5 px-6 py-8">
-        <p className="mx-auto max-w-4xl text-center text-xs leading-relaxed text-zinc-600">
+      <footer className="border-t border-zinc-200/80 bg-[var(--app-canvas)] px-6 py-8">
+        <p className="mx-auto max-w-4xl text-center text-xs leading-relaxed text-zinc-500">
           Photos:{" "}
           {CREDITS.map((c, i) => (
             <span key={c.href}>
@@ -258,7 +258,7 @@ export default function Home() {
                 href={c.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+                className="text-zinc-600 underline-offset-2 hover:text-violet-600 hover:underline"
               >
                 {c.label}
               </a>
@@ -269,7 +269,7 @@ export default function Home() {
             href="https://www.pexels.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+            className="text-zinc-600 underline-offset-2 hover:text-violet-600 hover:underline"
           >
             Pexels
           </a>
