@@ -1,7 +1,7 @@
 # Download Gate #
 
 ### Deploying via AWS CDK ###
-To configue the app for deployment via the AWS CDK, first add the following lines to your environment variables file in `cdk/.env`:
+To configure the app for deployment via the AWS CDK, first add the following lines to your environment variables file in `cdk/.env`:
 ```
 DOMAIN_NAME=your-domain
 SITE_SUBDOMAIN=your-subdomain
@@ -50,11 +50,11 @@ You will see an output in the terminal that looks like this:
 DownloadGateCiIamStack.GithubActionsRoleArn = arn:aws:iam::{your-aws-account}:role/DownloadGateCiIamStack-GithubActionsRole{some-string}
 ```
 
-Copy it to your Github secrets. Go to Github --> Settings --> Secrets and variabls --> Actions. Create a secret named ```AWS_GITHUB_ROLE_ARN``` and copy the calue from above.
+Copy it to your GitHub secrets. Go to GitHub → Settings → Secrets and variables → Actions. Create a secret named ```AWS_GITHUB_ROLE_ARN``` and copy the value from above.
 
-After your IAM role is configured, subsequent pushes to main will deploy the full CDK build via Github Actions.
-### Using Github Environment Variables For CI/CD ###
-To keep secrets secure, and still avoid paying for AWS Secrets Manager, try using Github environments. The following can be added as environment variables:
+After your IAM role is configured, subsequent pushes to main will deploy the full CDK build via GitHub Actions.
+### Using GitHub environment variables for CI/CD ###
+To keep secrets secure, and still avoid paying for AWS Secrets Manager, try using GitHub environments. The following can be added as environment variables:
 ```
 API_SUBDOMAIN
 DOMAIN_NAME
@@ -75,7 +75,7 @@ Pushes to the `staging` branch deploy a separate staging environment. Configure 
 
 
 ### Adding Grafana Cloud integration ###
-Optionally, you can add Grafana Cloud to the stack. This is a free alternative to using AWS's managed Grafana service, which is $9/user/month. To do so, add the following to your github environment secrets:
+Optionally, you can add Grafana Cloud to the stack. This is a free alternative to using AWS's managed Grafana service, which is $9/user/month. To do so, add the following to your GitHub environment secrets:
 ```
 GRAFANA_CLOUD_OTLP_AUTH={your-grafana-auth}
 ```
@@ -85,7 +85,7 @@ export GRAFANA_CLOUD_BASIC_AUTH_HEADER="Basic $(echo -n {your-grafana-auth-heade
 ```
 and copying the result.
 
-Then, add the following to your github environment variables:
+Then, add the following to your GitHub environment variables:
 ```
 GRAFANA_CLOUD_OTLP_ENDPOINT={your-grafana-endpoint}
 ```
@@ -118,7 +118,7 @@ Register a new app
 You will need to add the following variables to your environment variables/secrets:
 ```
 SOUNDCLOUD_CLIENT_ID
-SOUNDCLOUD_CLIEND_SECRET
+SOUNDCLOUD_CLIENT_SECRET
 SOUNDCLOUD_REDIRECT_URI
 SOUNDCLOUD_SUCCESS_REDIRECT_URI
 ```
