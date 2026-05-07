@@ -2,6 +2,8 @@
 
 The frontend uses **Tailwind CSS** for styling and **shadcn/ui** for UI primitives (configured via `components.json`; components live under `src/components/ui/`).
 
+**Marketing imagery:** The home page uses stock photos stored under [`public/images/home/`](public/images/home/). Photographer credits and Pexels links are listed in [`public/images/home/CREDITS.txt`](public/images/home/CREDITS.txt).
+
 This project started from the Vite React + TypeScript template and keeps a minimal setup with HMR and ESLint.
 
 Currently, two official plugins are available:

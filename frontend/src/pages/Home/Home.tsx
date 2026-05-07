@@ -1,180 +1,280 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-const GITHUB_URL = 'https://github.com/robin-lake/download-gate';
+const GITHUB_URL = "https://github.com/robin-lake/download-gate";
+
+const IMG = {
+  hero: "/images/home/hero-synth.jpg",
+  studio: "/images/home/feature-studio.jpg",
+  drums: "/images/home/feature-drums.jpg",
+  gear: "/images/home/feature-gear.jpg",
+} as const;
+
+const CREDITS = [
+  { label: "Alexey Demidov", href: "https://www.pexels.com/photo/12409937/" },
+  { label: "Ali Pazani", href: "https://www.pexels.com/photo/4407688/" },
+  { label: "Pixabay", href: "https://www.pexels.com/photo/164745/" },
+  { label: "Dmitry Demidov", href: "https://www.pexels.com/photo/3784221/" },
+] as const;
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-screen bg-[#1b181e] text-[#dcd2eb]">
-      <section className="mx-auto max-w-[720px] px-6 pb-20 pt-16 text-center">
-        <h1 className="mb-4 text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-tight tracking-tight text-[#dcd2eb]">
-          Your music deserves an audience you can reach freely.
-        </h1>
-        <p className="mb-2 text-[1.15rem] text-[rgba(220,210,235,0.65)]">
-          Free download gates to grow your listeners and followers.
-        </p>
-        <p className="mb-8 text-[0.95rem] font-medium text-[rgba(184,160,232,0.6)]">
-          No subscription. No fees. Ever.
-        </p>
-        <Link to="/signup">
-          <button
-            type="button"
-            className="inline-block cursor-pointer rounded-md border-none bg-[#b8a0e8] px-8 py-[0.85rem] text-base font-semibold text-[#1b181e] no-underline transition-all hover:-translate-y-px hover:bg-[#c4b0ef]"
+    <div className="min-h-screen w-full bg-[#0c0a0f] text-zinc-200">
+      {/* Hero */}
+      <section
+        className="relative flex min-h-[85vh] items-center md:min-h-[90vh]"
+        aria-labelledby="home-hero-heading"
+      >
+        <div className="absolute inset-0">
+          <img
+            src={IMG.hero}
+            alt="Synthesizer keyboard and music production workstation seen from above on a wooden surface"
+            className="absolute inset-0 size-full object-cover"
+            width={1920}
+            height={1280}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-[#0c0a0f] via-[#0c0a0f]/90 to-[#0c0a0f]/55"
+            aria-hidden
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-[#0c0a0f]/95 via-transparent to-[#1a1025]/50"
+            aria-hidden
+          />
+        </div>
+
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 py-24 md:py-32">
+          <p className="font-display mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300/90">
+            For producers &amp; electronic artists
+          </p>
+          <h1
+            id="home-hero-heading"
+            className="font-display mb-6 max-w-3xl text-[clamp(2rem,5vw,3.25rem)] font-extrabold leading-[1.08] tracking-tight text-white"
           >
-            Get started free
-          </button>
-        </Link>
-      </section>
-
-      <section className="mx-auto max-w-[880px] px-6 py-12">
-        <h2 className="mb-4 text-center text-[1.35rem] font-semibold tracking-tight">
-          Turn listeners into followers.
-        </h2>
-        <p className="mx-auto mb-4 max-w-[640px] text-center leading-relaxed text-[rgba(220,210,235,0.65)]">
-          Fans get your music, you get new followers. You can ask for a follow on SoundCloud, Bandcamp, or your streaming platform of choice. Your audience grows where you already exist, and new listeners become people who'll see your next release.
-        </p>
-      </section>
-
-      <section className="mx-auto max-w-[880px] px-6 py-12">
-        <h2 className="mb-4 text-center text-[1.35rem] font-semibold tracking-tight">
-          Why download gates?
-        </h2>
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="rounded-lg border border-[rgba(161,138,189,0.1)] bg-[#131018] p-6 text-left transition-colors hover:border-[rgba(161,138,189,0.2)] hover:bg-[#18141f]">
-            <h3 className="mb-2 text-base font-semibold text-[#b8a0e8]">Grow where you already are</h3>
-            <p className="m-0 text-[0.9rem] leading-relaxed text-[rgba(220,210,235,0.65)]">
-              Get follows on SoundCloud, Bandcamp, or streaming—platforms where your catalog lives. New listeners become followers who'll see your next drop instead of one-off visitors.
-            </p>
-          </div>
-          <div className="rounded-lg border border-[rgba(161,138,189,0.1)] bg-[#131018] p-6 text-left transition-colors hover:border-[rgba(161,138,189,0.2)] hover:bg-[#18141f]">
-            <h3 className="mb-2 text-base font-semibold text-[#b8a0e8]">Better engagement</h3>
-            <p className="m-0 text-[0.9rem] leading-relaxed text-[rgba(220,210,235,0.65)]">
-              People who follow to unlock a track are more likely to stream again and share. You're building an audience that shows up for your next release.
-            </p>
-          </div>
-          <div className="rounded-lg border border-[rgba(161,138,189,0.1)] bg-[#131018] p-6 text-left transition-colors hover:border-[rgba(161,138,189,0.2)] hover:bg-[#18141f]">
-            <h3 className="mb-2 text-base font-semibold text-[#b8a0e8]">Real fans</h3>
-            <p className="m-0 text-[0.9rem] leading-relaxed text-[rgba(220,210,235,0.65)]">
-              Listeners who follow or subscribe for a download are your most engaged audience. They stream, buy on Bandcamp, and support what you do next.
-            </p>
+            Gate your drops. Grow your scene.
+          </h1>
+          <p className="mb-4 max-w-xl text-lg leading-relaxed text-zinc-300 md:text-xl">
+            Free download gates for your tracks—whether you live on SoundCloud,
+            Bandcamp, or streaming. Fans unlock a WAV or MP3; you earn follows
+            where your music already lives.
+          </p>
+          <p className="mb-10 max-w-xl text-sm font-medium text-violet-200/80">
+            No subscription. No fees. Built for independent electronic musicians.
+          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              to="/signup"
+              className="inline-flex rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-950/40 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+            >
+              Get started free
+            </Link>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-zinc-400 underline-offset-4 transition hover:text-cyan-300 hover:underline"
+            >
+              View on GitHub
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[880px] px-6 py-12">
-        <h2 className="mb-4 text-center text-[1.35rem] font-semibold tracking-tight">
-          How download gates work
-        </h2>
-        <div className="mt-8 flex flex-col gap-5">
-          <div className="flex items-start gap-4 text-left">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[rgba(184,160,232,0.6)] text-[0.8rem] font-bold text-[#1b181e]">
-              1
-            </span>
-            <p className="m-0 leading-relaxed text-[rgba(220,210,235,0.65)]">
-              Create a gate, upload your track and artwork, and customize the landing page.
-            </p>
-          </div>
-          <div className="flex items-start gap-4 text-left">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[rgba(184,160,232,0.6)] text-[0.8rem] font-bold text-[#1b181e]">
-              2
-            </span>
-            <p className="m-0 leading-relaxed text-[rgba(220,210,235,0.65)]">
-              Share your gate link on socials, Bandcamp, SoundCloud, or anywhere you promote.
-            </p>
-          </div>
-          <div className="flex items-start gap-4 text-left">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[rgba(184,160,232,0.6)] text-[0.8rem] font-bold text-[#1b181e]">
-              3
-            </span>
-            <p className="m-0 leading-relaxed text-[rgba(220,210,235,0.65)]">
-              Fans complete a simple step—like following you on SoundCloud, Bandcamp, or your streaming page—and get the download.
-            </p>
-          </div>
-          <div className="flex items-start gap-4 text-left">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[rgba(184,160,232,0.6)] text-[0.8rem] font-bold text-[#1b181e]">
-              4
-            </span>
-            <p className="m-0 leading-relaxed text-[rgba(220,210,235,0.65)]">
-              You gain new followers on the platforms you care about—no lock-in, no middleman.
-            </p>
+      {/* Intro */}
+      <section className="relative border-t border-white/5 bg-[#0c0a0f] px-6 py-16 md:py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(139,92,246,0.04),transparent)]" aria-hidden />
+        <div className="relative mx-auto max-w-3xl text-center">
+          <h2 className="font-display mb-4 text-2xl font-bold tracking-tight text-white md:text-3xl">
+            From the studio to the crowd
+          </h2>
+          <p className="text-base leading-relaxed text-zinc-400 md:text-lg">
+            You&apos;re not just chasing streams—you&apos;re building a list of people
+            who care about your next release. Download gates turn one listen into a
+            follow, a save, or a mailing list signup. Works for techno, house, DnB,
+            ambient, and everything in between.
+          </p>
+        </div>
+      </section>
+
+      {/* Benefits */}
+      <section className="px-6 py-16 md:py-20" aria-labelledby="why-gates">
+        <div className="mx-auto max-w-6xl">
+          <h2
+            id="why-gates"
+            className="font-display mb-10 text-center text-2xl font-bold text-white md:text-3xl"
+          >
+            Why download gates?
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article className="rounded-2xl border border-violet-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-zinc-900/70">
+              <h3 className="font-display mb-3 text-lg font-semibold text-cyan-200">
+                Grow where you already are
+              </h3>
+              <p className="m-0 text-sm leading-relaxed text-zinc-400">
+                Point fans to SoundCloud, Bandcamp, Spotify, or Instagram—wherever
+                your catalog and community live. New listeners become followers who
+                see your next drop.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-violet-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-zinc-900/70">
+              <h3 className="font-display mb-3 text-lg font-semibold text-cyan-200">
+                Better engagement
+              </h3>
+              <p className="m-0 text-sm leading-relaxed text-zinc-400">
+                People who follow or save to unlock a track are more likely to come
+                back for EPs, remixes, and club edits. You build a habit, not a
+                one-off click.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-violet-500/20 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-400/30 hover:bg-zinc-900/70 sm:col-span-2 lg:col-span-1">
+              <h3 className="font-display mb-3 text-lg font-semibold text-cyan-200">
+                Real fans
+              </h3>
+              <p className="m-0 text-sm leading-relaxed text-zinc-400">
+                The fans who jump through a small hoop for your audio are the ones
+                who buy on Bandcamp, share your links, and show up when you tour.
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      {/* <section className="home__smart-links">
-        <h2 className="home__section-title">How smart links work</h2>
-        <p className="home__section-text">
-          Smart links are one URL that sends fans to their preferred platform. Instead of listing Spotify, Apple Music, Bandcamp, YouTube, and others separately, you share a single link. Fans click, pick their service, and land exactly where they want to listen. You get analytics in one place instead of scattered across platforms.
-        </p>
-        <p className="home__section-text home__section-text--muted">
-          This service combines download gates with smart links—one link for both gated downloads and streaming.
-        </p>
-      </section> */}
-
-      {/* <section className="home__free">
-        <h2 className="home__section-title">100% free</h2>
-        <p className="home__section-text home__free-text">
-          No plans, no trials, no upsells. Built for artists who want to grow without paying a subscription.
-        </p>
-      </section> */}
-
-      <section className="mx-auto max-w-[880px] px-6 py-12">
-        <h2 className="mb-4 text-center text-[1.35rem] font-semibold tracking-tight">
-          Open source
-        </h2>
-        <p className="mx-auto mb-4 max-w-[640px] text-center leading-relaxed text-[rgba(220,210,235,0.65)]">
-          This project is open source. You can run it yourself, fork it, and customize it
-        </p>
-        <a
-          href={GITHUB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-block font-semibold text-[#b8a0e8] no-underline transition-colors hover:text-[#d4c4f5]"
-        >
-          Fork on GitHub
-        </a>
+      {/* Gear strip */}
+      <section
+        className="border-y border-white/5 bg-black/40 px-6 py-12 md:py-16"
+        aria-label="Studio and electronic music production imagery"
+      >
+        <div className="mx-auto grid max-w-6xl gap-4 md:grid-cols-3">
+          <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30">
+            <img
+              src={IMG.studio}
+              alt="Artist in a dressing room with a synthesizer, creative performance setting"
+              className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105"
+              width={1200}
+              height={1500}
+              loading="lazy"
+              decoding="async"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+          </figure>
+          <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30">
+            <img
+              src={IMG.drums}
+              alt="Close-up of an audio mixer with illuminated knobs for music production"
+              className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105"
+              width={1200}
+              height={800}
+              loading="lazy"
+              decoding="async"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+          </figure>
+          <figure className="group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30 md:col-span-1">
+            <img
+              src={IMG.gear}
+              alt="Illuminated DJ mixer with colorful LED pads in a dark studio"
+              className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105"
+              width={1200}
+              height={900}
+              loading="lazy"
+              decoding="async"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+          </figure>
+        </div>
       </section>
 
-      {/* <section className="home__donate">
-        <h2 className="home__section-title">Support the project</h2>
-        <p className="home__section-text">
-          This service is free to use. If it helps you, consider leaving a tip to support development and hosting.
-        </p>
-        <div className="home__donate-buttons"> */}
-          {/* Ko-fi: replace YOUR_USERNAME with your actual Ko-fi username. No API key needed. */}
-          {/* <a
-            href="https://ko-fi.com/YOUR_USERNAME"
+      {/* How it works */}
+      <section className="px-6 py-16 md:py-20" aria-labelledby="how-it-works">
+        <div className="mx-auto max-w-3xl">
+          <h2
+            id="how-it-works"
+            className="font-display mb-10 text-center text-2xl font-bold text-white md:text-3xl"
+          >
+            How it works
+          </h2>
+          <ol className="m-0 list-none space-y-6 p-0">
+            {[
+              "Create a gate: upload your track and artwork, pick your steps (follow, save, email, etc.).",
+              "Share your link—Bio, Discord, release post, or QR at the booth.",
+              "Fans complete a quick action and get the download. You keep the relationship on your terms.",
+              "Repeat for every single, remix pack, or stem drop—same workflow, bigger list.",
+            ].map((text, i) => (
+              <li key={i} className="flex gap-4">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 text-sm font-bold text-white">
+                  {i + 1}
+                </span>
+                <p className="m-0 pt-1 leading-relaxed text-zinc-400">{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Open source */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-white/10 bg-zinc-900/40 px-8 py-10 text-center backdrop-blur-sm">
+          <h2 className="font-display mb-4 text-xl font-bold text-white md:text-2xl">
+            Open source
+          </h2>
+          <p className="mb-6 text-zinc-400">
+            Fork it, self-host it, or hack on the UI. The project is on GitHub for
+            artists who want control without a middleman.
+          </p>
+          <a
+            href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="home__donate-btn home__donate-btn--kofi"
+            className="inline-flex font-semibold text-violet-300 underline-offset-4 transition hover:text-cyan-300 hover:underline"
           >
-            Buy me a coffee (Ko-fi)
-          </a> */}
-          {/* Alternative: Stripe one-time payment link. Replace with your Stripe Payment Link. */}
-          {/* <a
-            href="https://donate.stripe.com/YOUR_STRIPE_LINK"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="home__donate-btn home__donate-btn--stripe"
-          >
-            Donate (Stripe)
+            Fork on GitHub
           </a>
         </div>
-        <p className="home__donate-note">
-          Set up Ko-fi at ko-fi.com or a Stripe Payment Link at dashboard.stripe.com and replace the URLs above.
-        </p>
-      </section> */}
+      </section>
 
-      <section className="mx-auto max-w-[880px] px-6 pb-16 pt-12 text-center">
-        <h2 className="mb-4 text-[1.35rem] font-semibold tracking-tight">Want to try?</h2>
-        <Link to="/signup">
-          <button
-            type="button"
-            className="inline-block cursor-pointer rounded-md border-none bg-[#b8a0e8] px-8 py-[0.85rem] text-base font-semibold text-[#1b181e] no-underline transition-all hover:-translate-y-px hover:bg-[#c4b0ef]"
-          >
-            Sign up free
-          </button>
+      {/* Final CTA */}
+      <section className="px-6 pb-12 pt-4 text-center md:pb-20">
+        <h2 className="font-display mb-6 text-2xl font-bold text-white">
+          Ready for your next release?
+        </h2>
+        <Link
+          to="/signup"
+          className="inline-flex rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-950/40 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+        >
+          Sign up free
         </Link>
       </section>
+
+      {/* Credits */}
+      <footer className="border-t border-white/5 px-6 py-8">
+        <p className="mx-auto max-w-4xl text-center text-xs leading-relaxed text-zinc-600">
+          Photos:{" "}
+          {CREDITS.map((c, i) => (
+            <span key={c.href}>
+              {i > 0 ? " · " : null}
+              <a
+                href={c.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+              >
+                {c.label}
+              </a>
+            </span>
+          ))}{" "}
+          on{" "}
+          <a
+            href="https://www.pexels.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-500 underline-offset-2 hover:text-zinc-400 hover:underline"
+          >
+            Pexels
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
