@@ -25,6 +25,8 @@ import {
 import { GENRE_GROUPS } from "@/constants/genres";
 import { DESIGN_OPTIONS } from "@/constants/designOptions";
 import { SHORT_CODE_PATTERN, SHORT_CODE_VALIDATION_MESSAGE } from "@/constants/shortCode";
+import { GENRE_SELECT_TRIGGER_CLASS } from "@/constants/genreSelectTrigger";
+import { cn } from "@/lib/utils";
 import { SMART_LINK_PLATFORMS, type SmartLinkPlatformId } from "@/constants/platforms";
 import type { SmartLinkPlatform } from "@/types/smartLink";
 import SmartLinkPlatformComponent, {
@@ -218,17 +220,19 @@ export default function NewSmartLink() {
               <div className="new-smart-link__field">
                 <Label htmlFor="genre">Genre</Label>
                 <Select
-                  value={field.value || "__none__"}
-                  onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                  value={field.value || undefined}
+                  onValueChange={field.onChange}
                 >
                   <SelectTrigger
                     id="genre"
-                    className="w-full new-smart-link__select-trigger"
+                    className={cn(
+                      "w-full new-smart-link__select-trigger",
+                      GENRE_SELECT_TRIGGER_CLASS,
+                    )}
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">Select genre</SelectItem>
                     {GENRE_GROUPS.map((group) => (
                       <SelectGroup key={group.heading || group.genres[0]}>
                         {group.heading ? (

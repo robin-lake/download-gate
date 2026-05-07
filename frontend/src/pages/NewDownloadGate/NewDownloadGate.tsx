@@ -30,6 +30,8 @@ import {
   SHORT_CODE_PATTERN,
   SHORT_CODE_VALIDATION_MESSAGE,
 } from "@/constants/shortCode";
+import { GENRE_SELECT_TRIGGER_CLASS } from "@/constants/genreSelectTrigger";
+import { cn } from "@/lib/utils";
 import "./NewDownloadGate.scss";
 
 /** One gate step in the form (selection order = step_order). */
@@ -227,17 +229,19 @@ export default function NewDownloadGate() {
               <div className="new-download-gate__field">
                 <Label htmlFor="genre">Genre</Label>
                 <Select
-                  value={field.value || "__none__"}
-                  onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                  value={field.value || undefined}
+                  onValueChange={field.onChange}
                 >
                   <SelectTrigger
                     id="genre"
-                    className="w-full new-download-gate__select-trigger"
+                    className={cn(
+                      "w-full new-download-gate__select-trigger",
+                      GENRE_SELECT_TRIGGER_CLASS,
+                    )}
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">Select genre</SelectItem>
                     {GENRE_GROUPS.map((group) => (
                       <SelectGroup key={group.heading || group.genres[0]}>
                         {group.heading ? (
