@@ -1,13 +1,49 @@
 import type { Request, Response, NextFunction } from 'express';
 
+type ErrorWithCode = Error & { code?: string; errors?: unknown[] };
+
+function toError(err: unknown): ErrorWithCode {
+  return err instanceof Error ? err : new Error(String(err));
+}
+
+function flattenErrors(error: ErrorWithCode): ErrorWithCode[] {
+  const errors = error instanceof AggregateError
+    ? error.errors
+    : Array.isArray(error.errors)
+      ? error.errors
+      : [];
+
+  return [
+    error,
+    ...errors.map(toError),
+  ];
+}
+
+function isDatabaseConnectionError(error: ErrorWithCode): boolean {
+  return flattenErrors(error).some((cause) => {
+    const code = cause.code;
+    return code === 'ECONNREFUSED' || code === 'ENOTFOUND' || code === 'ETIMEDOUT';
+  });
+}
+
+function logError(error: ErrorWithCode): void {
+  console.error(`Error: ${error.name} - ${error.message}`);
+
+  const causes = flattenErrors(error).slice(1);
+  for (const cause of causes) {
+    const code = cause.code ? ` (${cause.code})` : '';
+    console.error(`  Cause: ${cause.name}${code} - ${cause.message}`);
+  }
+}
+
 function errorHandler(
   err: unknown,
   _req: Request,
   res: Response,
   _next: NextFunction
 ): void {
-  const error = err instanceof Error ? err : new Error(String(err));
-  console.error(`Error: ${error.name} - ${error.message}`);
+  const error = toError(err);
+  logError(error);
 
   // DynamoDB throttling - tell the client to retry
   if (error.name === 'ProvisionedThroughputExceededException') {
@@ -31,6 +67,15 @@ function errorHandler(
     res.status(400).json({
       error: 'Invalid request parameters',
       details: error.message,
+    });
+    return;
+  }
+
+  // Local DynamoDB/AWS endpoint unavailable
+  if (isDatabaseConnectionError(error)) {
+    res.status(503).json({
+      error: 'Database connection failed',
+      details: 'The database endpoint is unavailable. Check that local DynamoDB is running.',
     });
     return;
   }

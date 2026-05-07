@@ -43,6 +43,24 @@ describe('errorHandler', () => {
     );
   });
 
+  it('returns 503 for database connection errors', () => {
+    const res = mockRes();
+    const err = new AggregateError([
+      Object.assign(new Error('connect ECONNREFUSED ::1:8000'), { code: 'ECONNREFUSED' }),
+      Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:8000'), { code: 'ECONNREFUSED' }),
+    ]);
+
+    errorHandler(err, {} as Request, res, {} as NextFunction);
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: 'Database connection failed',
+        details: expect.stringContaining('local DynamoDB'),
+      })
+    );
+  });
+
   it('returns 500 for unknown errors', () => {
     const res = mockRes();
     errorHandler(new Error('boom'), {} as Request, res, {} as NextFunction);

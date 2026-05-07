@@ -18,7 +18,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction): void {
   next();
 }
 
-const MAX_COVER_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_COVER_SIZE = 20 * 1024 * 1024; // 20 MB
 const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100 MB
 const COVER_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'audio/x-flac', 'audio/aac', 'audio/ogg'];
