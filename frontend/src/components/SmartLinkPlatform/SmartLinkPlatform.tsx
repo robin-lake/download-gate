@@ -9,8 +9,6 @@ import {
   type SmartLinkPlatformId,
 } from "@/constants/platforms";
 import type { SmartLinkPlatform as SmartLinkPlatformType } from "@/types/smartLink";
-import "./SmartLinkPlatform.scss";
-
 export interface SmartLinkPlatformProps {
   platformId: SmartLinkPlatformId;
   label: string;
@@ -62,33 +60,40 @@ export default function SmartLinkPlatform({
       <button
         type="button"
         className={cn(
-          "smart-link-platform__trigger",
-          isConfigured && "smart-link-platform__trigger--configured"
+          "flex w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-4 py-3 text-left text-sm text-black transition-colors hover:border-neutral-300 hover:bg-neutral-50",
+          isConfigured && "border-green-500 bg-green-50"
         )}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <span className="smart-link-platform__trigger-label">{label}</span>
-        <span className="smart-link-platform__trigger-icon">{isConfigured ? "✓" : "+"}</span>
+        <span className="font-medium">{label}</span>
+        <span
+          className={cn(
+            "text-lg text-neutral-500",
+            isConfigured && "text-green-600"
+          )}
+        >
+          {isConfigured ? "✓" : "+"}
+        </span>
       </button>
 
       {open && (
         <div
-          className="smart-link-platform__backdrop"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
           onClick={handleCancel}
           role="dialog"
           aria-modal="true"
           aria-labelledby={`smart-link-platform-title-${platformId}`}
         >
           <div
-            className="smart-link-platform__box"
+            className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-lg bg-white shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="smart-link-platform__header">
+            <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
               <h2
                 id={`smart-link-platform-title-${platformId}`}
-                className="smart-link-platform__title"
+                className="m-0 text-lg font-semibold text-black"
               >
                 {label} link
               </h2>
@@ -102,8 +107,8 @@ export default function SmartLinkPlatform({
                 ×
               </Button>
             </div>
-            <div className="smart-link-platform__body">
-              <div className="smart-link-platform__field">
+            <div className="px-5 py-5">
+              <div className="mb-4 last:mb-0 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
                 <Label htmlFor={`track-url-${platformId}`}>Track link URL</Label>
                 <Input
                   id={`track-url-${platformId}`}
@@ -118,13 +123,13 @@ export default function SmartLinkPlatform({
                   aria-invalid={Boolean(trackUrlError)}
                 />
                 {trackUrlError && (
-                  <p className="smart-link-platform__error" role="alert">
+                  <p className="mt-1 text-[0.8125rem] text-red-600" role="alert">
                     {trackUrlError}
                   </p>
                 )}
               </div>
             </div>
-            <div className="smart-link-platform__footer">
+            <div className="flex justify-end gap-2 border-t border-neutral-200 px-5 py-4">
               <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>

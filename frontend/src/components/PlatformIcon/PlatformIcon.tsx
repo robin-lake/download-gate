@@ -1,5 +1,3 @@
-import './PlatformIcon.scss';
-
 /** Platform IDs that match backend platform_name. */
 export type PlatformId =
   | 'spotify'
@@ -48,7 +46,7 @@ export default function PlatformIcon({
 
   return (
     <span
-      className={`platform-icon ${className}`.trim()}
+      className={`inline-flex shrink-0 items-center justify-center rounded-[4px] text-[0.65em] font-bold text-white ${className}`.trim()}
       style={{
         width: size,
         height: size,

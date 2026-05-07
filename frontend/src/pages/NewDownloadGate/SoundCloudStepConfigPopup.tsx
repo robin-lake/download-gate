@@ -5,8 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import "./SoundCloudStepConfigPopup.scss";
-
 export interface SoundCloudStepConfig {
   follow_profile: boolean;
   like_track: boolean;
@@ -115,24 +113,24 @@ export default function SoundCloudStepConfigPopup({
 
   return (
     <div
-      className="soundcloud-config-popup__backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       onClick={onCancel}
       role="dialog"
       aria-modal="true"
       aria-labelledby="soundcloud-config-title"
     >
       <div
-        className="soundcloud-config-popup__box"
+        className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-lg bg-white shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="soundcloud-config-popup__header">
-          <h2 id="soundcloud-config-title" className="soundcloud-config-popup__title">
-            <span className="soundcloud-config-popup__logo" aria-hidden>
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+          <h2 id="soundcloud-config-title" className="m-0 flex items-center gap-2 text-lg font-semibold text-black">
+            <span className="inline-flex h-[22px] w-7 items-center justify-center rounded-sm bg-[#ff5500] text-[0.75rem] font-bold text-white" aria-hidden>
               SC
             </span>
             Step {stepNumber}: SoundCloud
           </h2>
-          <div className="soundcloud-config-popup__header-actions">
+          <div className="flex gap-2">
             {isEditing && onDelete && (
               <Button
                 type="button"
@@ -140,7 +138,7 @@ export default function SoundCloudStepConfigPopup({
                 size="icon"
                 onClick={onDelete}
                 aria-label="Delete step"
-                className="soundcloud-config-popup__icon-btn"
+                className="text-gray-500"
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -151,15 +149,15 @@ export default function SoundCloudStepConfigPopup({
               size="icon"
               onClick={handleSave}
               aria-label="Save"
-              className="soundcloud-config-popup__icon-btn"
+              className="text-gray-500"
             >
               <Check className="size-4" />
             </Button>
           </div>
         </div>
-        <div className="soundcloud-config-popup__body">
-          <div className="soundcloud-config-popup__checkbox-grid">
-            <div className="soundcloud-config-popup__checkbox-box">
+        <div className="px-5 py-5">
+          <div className="mb-5 grid grid-cols-2 gap-4">
+            <div className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="follow-profile"
                 checked={config.follow_profile}
@@ -169,12 +167,12 @@ export default function SoundCloudStepConfigPopup({
               />
               <Label
                 htmlFor="follow-profile"
-                className="soundcloud-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Follow profile(s)
               </Label>
             </div>
-            <div className="soundcloud-config-popup__checkbox-box">
+            <div className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="like-track"
                 checked={config.like_track}
@@ -184,12 +182,12 @@ export default function SoundCloudStepConfigPopup({
               />
               <Label
                 htmlFor="like-track"
-                className="soundcloud-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Like track
               </Label>
             </div>
-            <div className="soundcloud-config-popup__checkbox-box">
+            <div className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="skippable"
                 checked={isSkippable}
@@ -197,12 +195,12 @@ export default function SoundCloudStepConfigPopup({
               />
               <Label
                 htmlFor="skippable"
-                className="soundcloud-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Make step skippable for fans
               </Label>
             </div>
-            <div className="soundcloud-config-popup__checkbox-box">
+            <div className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="comment-track"
                 checked={config.comment_on_track}
@@ -212,12 +210,12 @@ export default function SoundCloudStepConfigPopup({
               />
               <Label
                 htmlFor="comment-track"
-                className="soundcloud-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Comment on track
               </Label>
             </div>
-            <div className="soundcloud-config-popup__checkbox-box">
+            <div className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="repost-track"
                 checked={config.repost_track}
@@ -227,18 +225,18 @@ export default function SoundCloudStepConfigPopup({
               />
               <Label
                 htmlFor="repost-track"
-                className="soundcloud-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Repost track
               </Label>
             </div>
           </div>
 
-          <div className="soundcloud-config-popup__field">
+          <div className="mb-4 [&_label]:mb-2 [&_label]:block [&_label]:text-sm [&_label]:font-medium">
             <Label htmlFor="soundcloud-profile-url">
               SoundCloud profile URL{" "}
               {config.follow_profile && (
-                <span className="soundcloud-config-popup__required">*</span>
+                <span className="text-red-600">*</span>
               )}
             </Label>
             <Input
@@ -253,16 +251,16 @@ export default function SoundCloudStepConfigPopup({
               aria-invalid={Boolean(errors.profile_url)}
             />
             {errors.profile_url && (
-              <p className="soundcloud-config-popup__error">
+              <p className="mt-1 text-[0.8125rem] text-red-600">
                 {errors.profile_url}
               </p>
             )}
           </div>
-          <div className="soundcloud-config-popup__field">
+          <div className="mb-4 [&_label]:mb-2 [&_label]:block [&_label]:text-sm [&_label]:font-medium">
             <Label htmlFor="soundcloud-track-url">
               SoundCloud track URL{" "}
               {needsTrackUrl(config) && (
-                <span className="soundcloud-config-popup__required">*</span>
+                <span className="text-red-600">*</span>
               )}
             </Label>
             <Input
@@ -277,13 +275,13 @@ export default function SoundCloudStepConfigPopup({
               aria-invalid={Boolean(errors.track_url)}
             />
             {errors.track_url && (
-              <p className="soundcloud-config-popup__error">
+              <p className="mt-1 text-[0.8125rem] text-red-600">
                 {errors.track_url}
               </p>
             )}
           </div>
         </div>
-        <div className="soundcloud-config-popup__footer">
+        <div className="flex justify-end gap-2 border-t border-neutral-200 px-5 py-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>

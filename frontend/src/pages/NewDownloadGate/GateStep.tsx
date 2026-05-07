@@ -159,10 +159,12 @@ export default function GateStep(props: GateStepProps) {
       <Button
         key={service_type}
         type="button"
-        variant={isSelected ? "default" : "outline"}
+        variant="outline"
         className={cn(
-          "new-download-gate__gate-step",
-          isSelected && "new-download-gate__gate-step--selected"
+          "flex w-full items-center justify-center rounded-md border px-4 py-3 text-sm shadow-none sm:w-auto",
+          isSelected
+            ? "border-blue-600 bg-blue-50 text-blue-600 hover:bg-blue-100"
+            : "border-neutral-200 bg-white text-black hover:border-neutral-300 hover:bg-neutral-50"
         )}
         onClick={handleClick}
       >

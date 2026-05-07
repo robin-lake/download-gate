@@ -5,8 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import "./InstagramStepConfigPopup.scss";
-
 export interface InstagramStepConfig {
   follow_profile_enabled: boolean;
   profile_urls: string[];
@@ -114,24 +112,24 @@ export default function InstagramStepConfigPopup({
 
   return (
     <div
-      className="instagram-config-popup__backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       onClick={onCancel}
       role="dialog"
       aria-modal="true"
       aria-labelledby="instagram-config-title"
     >
       <div
-        className="instagram-config-popup__box"
+        className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-lg bg-white shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="instagram-config-popup__header">
-          <h2 id="instagram-config-title" className="instagram-config-popup__title">
-            <span className="instagram-config-popup__logo" aria-hidden>
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+          <h2 id="instagram-config-title" className="m-0 flex items-center gap-2 text-lg font-semibold text-black">
+            <span className="inline-flex h-[22px] w-7 items-center justify-center rounded bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888] text-[0.75rem] font-bold text-white" aria-hidden>
               IG
             </span>
             Step {stepNumber}: Instagram
           </h2>
-          <div className="instagram-config-popup__header-actions">
+          <div className="flex gap-2">
             {isEditing && onDelete && (
               <Button
                 type="button"
@@ -139,7 +137,7 @@ export default function InstagramStepConfigPopup({
                 size="icon"
                 onClick={onDelete}
                 aria-label="Delete step"
-                className="instagram-config-popup__icon-btn"
+                className="text-gray-500"
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -150,15 +148,15 @@ export default function InstagramStepConfigPopup({
               size="icon"
               onClick={handleSave}
               aria-label="Save"
-              className="instagram-config-popup__icon-btn"
+              className="text-gray-500"
             >
               <Check className="size-4" />
             </Button>
           </div>
         </div>
-        <div className="instagram-config-popup__body">
-          <div className="instagram-config-popup__checkbox-row">
-            <div className="instagram-config-popup__checkbox-box">
+        <div className="px-5 py-5">
+          <div className="mb-5 flex flex-wrap gap-4">
+            <div className="flex min-w-[160px] flex-1 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="follow-profile"
                 checked={config.follow_profile_enabled}
@@ -171,12 +169,12 @@ export default function InstagramStepConfigPopup({
               />
               <Label
                 htmlFor="follow-profile"
-                className="instagram-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Follow profile(s)
               </Label>
             </div>
-            <div className="instagram-config-popup__checkbox-box">
+            <div className="flex min-w-[160px] flex-1 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="skippable"
                 checked={isSkippable}
@@ -184,21 +182,21 @@ export default function InstagramStepConfigPopup({
               />
               <Label
                 htmlFor="skippable"
-                className="instagram-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Make step skippable for fans
               </Label>
             </div>
           </div>
 
-          <div className="instagram-config-popup__field">
+          <div className="mb-0">
             <Label
               htmlFor="instagram-url-input"
-              className="instagram-config-popup__section-label"
+              className="mb-2 block text-sm font-medium"
             >
               Add Instagram Profile URLs
             </Label>
-            <div className="instagram-config-popup__input-row">
+            <div className="flex items-start gap-2">
               <Input
                 id="instagram-url-input"
                 type="url"
@@ -219,16 +217,16 @@ export default function InstagramStepConfigPopup({
                 variant="outline"
                 size="icon"
                 onClick={handleAddUrl}
-                className="instagram-config-popup__add-btn"
+                className="shrink-0"
                 aria-label="Add URL"
               >
                 <Plus className="size-4" />
               </Button>
             </div>
             {config.profile_urls.length > 0 && (
-              <ul className="instagram-config-popup__url-list">
+              <ul className="mt-3 list-none p-0">
                 {config.profile_urls.map((url, i) => (
-                  <li key={i} className="instagram-config-popup__url-item">
+                  <li key={i} className="flex items-center justify-between gap-2 border-b border-neutral-200 py-2 last:border-b-0">
                     <span className="instagram-config-popup__url-text">{url}</span>
                     <Button
                       type="button"
@@ -244,11 +242,11 @@ export default function InstagramStepConfigPopup({
               </ul>
             )}
             {errors.profile_urls && (
-              <p className="instagram-config-popup__error">{errors.profile_urls}</p>
+              <p className="mt-1 text-[0.8125rem] text-red-600">{errors.profile_urls}</p>
             )}
           </div>
         </div>
-        <div className="instagram-config-popup__footer">
+        <div className="flex justify-end gap-2 border-t border-neutral-200 px-5 py-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>

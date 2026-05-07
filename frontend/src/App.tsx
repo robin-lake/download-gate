@@ -14,7 +14,6 @@ import OAuthInstagramSuccess from './pages/OAuthInstagramSuccess';
 import Me from './pages/Me';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
-import './App.scss'
 
 const NON_LANDING_PAGES = ['dashboard', 'new-download-gate', 'new-smart-link', 'login', 'signup', 'me', 'oauth'];
 
@@ -39,15 +38,15 @@ function AppContent() {
   return (
     <>
      {showHeader && <Header />}
-      <main className="app-main app-main--flex">
+      <main className="mx-auto flex w-full flex-1 flex-col">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-download-gate" element={<NewDownloadGate />} />
           <Route path="/new-smart-link" element={<NewSmartLink />} />
-          <Route path="/login" element={<div className="app-page"><SignIn /></div>} />
-          <Route path="/signup" element={<div className="app-page"><SignUp /></div>} />
-          <Route path="/me" element={<div className="app-page"><Me /></div>} />
+          <Route path="/login" element={<div className="text-center"><SignIn /></div>} />
+          <Route path="/signup" element={<div className="text-center"><SignUp /></div>} />
+          <Route path="/me" element={<div className="text-center"><Me /></div>} />
           <Route path="/oauth/soundcloud/success" element={<OAuthSoundCloudSuccess />} />
           <Route path="/oauth/spotify/success" element={<OAuthSpotifySuccess />} />
           <Route path="/oauth/instagram/success" element={<OAuthInstagramSuccess />} />

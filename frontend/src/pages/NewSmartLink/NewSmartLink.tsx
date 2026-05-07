@@ -32,8 +32,6 @@ import type { SmartLinkPlatform } from "@/types/smartLink";
 import SmartLinkPlatformComponent, {
   DEFAULT_PLATFORM_VALUE,
 } from "@/components/SmartLinkPlatform/SmartLinkPlatform";
-import "./NewSmartLink.scss";
-
 export type { SmartLinkPlatform } from "@/types/smartLink";
 
 export interface NewSmartLinkFormValues {
@@ -138,11 +136,10 @@ export default function NewSmartLink() {
   }
 
   return (
-    <div className="new-smart-link">
-      <h1>Create New Smart Link</h1>
+    <div className="mx-auto max-w-[700px] min-w-[min(100vw,700px)] py-6">
+      <h1 className="mb-6 text-2xl font-semibold text-black">Create New Smart Link</h1>
 
       <form
-        className="new-smart-link__form"
         onSubmit={handleSubmit(onSubmit, (formErrors) => {
           // Expand the first step that has a validation error so the user sees what to fix
           if (formErrors.sourceUrl) setOpenStep(1);
@@ -164,13 +161,13 @@ export default function NewSmartLink() {
           expanded={openStep === 1}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 1 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Enter source/track URL for your title
           </p>
-          <div className="new-smart-link__icons">
+          <div className="mb-3 min-h-5">
             {/* Platform icons: SoundCloud, YouTube, Spotify, Apple Music, etc. */}
           </div>
-          <div className="new-smart-link__field">
+          <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
             <Label htmlFor="source-url" className="sr-only">
               Source URL
             </Label>
@@ -180,18 +177,18 @@ export default function NewSmartLink() {
               placeholder="https://www..."
               aria-label="Source URL"
               aria-invalid={Boolean(errors.sourceUrl)}
-              className="new-smart-link__input"
+              className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
               {...register("sourceUrl", {
                 required: "Please enter a Track URL.",
               })}
             />
             {errors.sourceUrl && (
-              <p className="new-smart-link__error">
+              <p className="-mt-2 mb-3 text-[13px] text-red-600">
                 {errors.sourceUrl.message}
               </p>
             )}
           </div>
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button
               type="button"
               variant="default"
@@ -210,14 +207,14 @@ export default function NewSmartLink() {
           expanded={openStep === 2}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 2 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Select genre of your title.
           </p>
           <Controller
             name="genre"
             control={control}
             render={({ field }) => (
-              <div className="new-smart-link__field">
+              <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
                 <Label htmlFor="genre">Genre</Label>
                 <Select
                   value={field.value || undefined}
@@ -226,7 +223,7 @@ export default function NewSmartLink() {
                   <SelectTrigger
                     id="genre"
                     className={cn(
-                      "w-full new-smart-link__select-trigger",
+                      "mb-4 w-full",
                       GENRE_SELECT_TRIGGER_CLASS,
                     )}
                   >
@@ -252,7 +249,7 @@ export default function NewSmartLink() {
               </div>
             )}
           />
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(3)}>
               Next
             </Button>
@@ -267,30 +264,30 @@ export default function NewSmartLink() {
           expanded={openStep === 3}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 3 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Enter artist and title for your release.
           </p>
-          <div className="new-smart-link__field">
+          <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
             <Label htmlFor="artist-name">Enter artist name</Label>
             <Input
               id="artist-name"
               type="text"
               placeholder="Artist name"
-              className="new-smart-link__input"
+              className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
               {...register("artist")}
             />
           </div>
-          <div className="new-smart-link__field">
+          <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
             <Label htmlFor="title">Enter title</Label>
             <Input
               id="title"
               type="text"
               placeholder="Title"
-              className="new-smart-link__input"
+              className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
               {...register("title")}
             />
           </div>
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(4)}>
               Next
             </Button>
@@ -305,7 +302,7 @@ export default function NewSmartLink() {
           expanded={openStep === 4}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 4 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Upload cover art and customize how your smart link looks. Cover art is required.
           </p>
           {/* <div className="new-smart-link__preview">
@@ -324,7 +321,7 @@ export default function NewSmartLink() {
             control={control}
             label="Upload cover art"
           />
-          <div className="new-smart-link__field">
+          <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
             <Label htmlFor="design">Customize design</Label>
             <Controller
               name="design"
@@ -333,7 +330,7 @@ export default function NewSmartLink() {
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger
                     id="design"
-                    className="w-full new-smart-link__select-trigger"
+                    className="mb-4 w-full"
                   >
                     <SelectValue placeholder="Select design" />
                   </SelectTrigger>
@@ -348,7 +345,7 @@ export default function NewSmartLink() {
               )}
             />
           </div>
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(5)}>
               Next
             </Button>
@@ -363,14 +360,14 @@ export default function NewSmartLink() {
           expanded={openStep === 5}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 5 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Add links to your music on any store and platform.
           </p>
           <Controller
             name="platformLinks"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <div className="new-smart-link__platform-grid">
+              <div className="mb-4 grid grid-cols-2 gap-2.5">
                 {SMART_LINK_PLATFORMS.map(({ id, label }) => (
                   <SmartLinkPlatformComponent
                     key={id}
@@ -385,7 +382,7 @@ export default function NewSmartLink() {
               </div>
             )}
           />
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(6)}>
               Next
             </Button>
@@ -400,7 +397,7 @@ export default function NewSmartLink() {
           expanded={openStep === 6}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 6 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Customize your link URL. Use only letters, numbers, hyphens and
             underscores (3–32 characters). Leave blank to auto-generate.
           </p>
@@ -417,7 +414,7 @@ export default function NewSmartLink() {
             error={errors.shortCode}
             placeholder="e.g. my-track or leave blank"
           />
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(7)}>
               Next
             </Button>
@@ -432,19 +429,19 @@ export default function NewSmartLink() {
           expanded={openStep === 7}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 7 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Upload an audio file and choose where playback should start. Audio is required.
           </p>
           <Controller
             name="audioFile"
             control={control}
             render={({ field: { ref, onChange, onBlur, value } }) => (
-              <div className="new-smart-link__audio-dropzone">
+              <div className="relative mb-4 flex min-h-[120px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 transition-colors hover:border-neutral-300 hover:bg-neutral-100">
                 <input
                   ref={ref}
                   type="file"
                   accept=".mp3,.wav,.flac,.aac,.ogg,audio/mpeg,audio/mp3,audio/wav,audio/flac,audio/x-flac,audio/aac,audio/ogg"
-                  className="new-smart-link__audio-file-input"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                   aria-label="Upload audio file"
                   onChange={(e) => onChange(e.target.files)}
                   onBlur={onBlur}
@@ -455,22 +452,22 @@ export default function NewSmartLink() {
                     ? value[0].name
                     : "Drop your audio file here or browse"}
                 </p>
-                <p className="new-smart-link__instruction">MP3, WAV, FLAC, AAC or OGG</p>
+                <p className="mb-3 text-sm leading-snug text-neutral-500">MP3, WAV, FLAC, AAC or OGG</p>
               </div>
             )}
           />
-          <div className="new-smart-link__field new-smart-link__start-point">
+          <div className="mb-4 mt-3 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
             <Label htmlFor="audio-start">Start playback at (seconds)</Label>
             <Input
               id="audio-start"
               type="number"
               min={0}
               step={1}
-              className="new-smart-link__input"
+              className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
               {...register("audioStartSeconds", { valueAsNumber: true })}
             />
           </div>
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(8)}>
               Next
             </Button>
@@ -484,7 +481,7 @@ export default function NewSmartLink() {
           expanded={openStep === 8}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 8 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Enter pixels for tracking and retargeting fans that visit your smart link.
           </p>
           <TrackingPixelsCard
@@ -492,7 +489,7 @@ export default function NewSmartLink() {
             pixelIdName="facebookPixelId"
             conversionTokenName="conversionApiToken"
           />
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="button" variant="default" onClick={() => setOpenStep(9)}>
               Next
             </Button>
@@ -506,57 +503,57 @@ export default function NewSmartLink() {
           expanded={openStep === 9}
           onExpandedChange={(expanded) => setOpenStep(expanded ? 9 : 0)}
         >
-          <p className="new-smart-link__instruction">
+          <p className="mb-3 text-sm leading-snug text-neutral-500">
             Review and create your smart link.
           </p>
-          <div className="new-smart-link__confirmation-fields">
-            <div className="new-smart-link__field">
+          <div className="mb-4">
+            <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
               <Label htmlFor="conf-source">Source:</Label>
               <Input
                 id="conf-source"
                 type="text"
                 readOnly
-                className="new-smart-link__input"
+                className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
                 value={watchedSourceUrl}
               />
             </div>
-            <div className="new-smart-link__field">
+            <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
               <Label htmlFor="conf-artist">Artist:</Label>
               <Input
                 id="conf-artist"
                 type="text"
                 readOnly
-                className="new-smart-link__input"
+                className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
                 value={watchedArtist}
               />
             </div>
-            <div className="new-smart-link__field">
+            <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
               <Label htmlFor="conf-title">Title:</Label>
               <Input
                 id="conf-title"
                 type="text"
                 readOnly
-                className="new-smart-link__input"
+                className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
                 value={watchedTitle}
               />
             </div>
-            <div className="new-smart-link__field">
+            <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
               <Label htmlFor="conf-genre">Genre:</Label>
               <Input
                 id="conf-genre"
                 type="text"
                 readOnly
-                className="new-smart-link__input"
+                className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
                 value={watchedGenre}
               />
             </div>
-            <div className="new-smart-link__field">
+            <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
               <Label htmlFor="conf-platforms">Platforms:</Label>
               <Input
                 id="conf-platforms"
                 type="text"
                 readOnly
-                className="new-smart-link__input"
+                className="mb-4 w-full rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-neutral-400 focus-visible:border-black focus-visible:ring-0"
                 value={
                   !watchedPlatformLinks
                     ? "None"
@@ -572,7 +569,7 @@ export default function NewSmartLink() {
                 }
               />
             </div>
-            <div className="new-smart-link__field new-smart-link__field--row">
+            <div className="mb-4 flex items-center gap-2.5 [&_label]:mb-0">
               <Label htmlFor="conf-new-releases">Include in New Releases:</Label>
               <Controller
                 name="includeInNewReleases"
@@ -583,27 +580,27 @@ export default function NewSmartLink() {
                     type="checkbox"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
-                    className="new-smart-link__checkbox"
+                    className="m-0 w-auto"
                   />
                 )}
               />
             </div>
-            <div className="new-smart-link__field">
+            <div className="mb-4 space-y-1.5 [&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
               <Label htmlFor="conf-notes">Custom Notes:</Label>
               <Textarea
                 id="conf-notes"
                 rows={3}
-                className="new-smart-link__textarea"
+                className="mt-2 min-h-[80px] w-full resize-y rounded-md border border-neutral-200 px-3 py-2 text-sm focus-visible:border-black focus-visible:ring-0"
                 {...register("customNotes")}
               />
             </div>
           </div>
           {errors.root?.message && (
-            <p className="new-smart-link__error" role="alert">
+            <p className="-mt-2 mb-3 text-[13px] text-red-600" role="alert">
               {errors.root.message}
             </p>
           )}
-          <div className="new-smart-link__actions">
+          <div className="flex flex-wrap gap-2.5">
             <Button type="submit" variant="default" disabled={isSubmitting}>
               {isSubmitting ? "Creating…" : "Create"}
             </Button>

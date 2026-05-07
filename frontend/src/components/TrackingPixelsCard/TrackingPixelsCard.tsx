@@ -7,8 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import "./TrackingPixelsCard.scss";
-
 export interface TrackingPixelsCardProps {
   register: UseFormRegister<Record<string, string>>;
   errors?: FieldErrors<Record<string, string>>;
@@ -27,23 +25,23 @@ export default function TrackingPixelsCard({
   conversionTokenName = DEFAULT_CONVERSION_TOKEN_NAME,
 }: TrackingPixelsCardProps) {
   return (
-    <Card className="tracking-pixels-card">
-      <CardHeader className="tracking-pixels-card__header">
-        <CardTitle className="tracking-pixels-card__title">Facebook</CardTitle>
+    <Card className="mb-4 rounded-lg border border-neutral-200 bg-white p-4">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-black">Facebook</CardTitle>
       </CardHeader>
-      <CardContent className="tracking-pixels-card__content">
-        <div className="tracking-pixels-card__field">
+      <CardContent className="flex flex-col gap-4">
+        <div className="[&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
           <Label htmlFor={pixelIdName}>Facebook Pixel ID</Label>
           <Input
             id={pixelIdName}
             type="text"
             placeholder="Enter Facebook Pixel ID"
             aria-label="Facebook Pixel ID"
-            className="tracking-pixels-card__input"
+            className="w-full"
             {...register(pixelIdName)}
           />
         </div>
-        <div className="tracking-pixels-card__field">
+        <div className="[&_label]:mb-1.5 [&_label]:block [&_label]:text-sm [&_label]:font-medium [&_label]:text-black">
           <Label htmlFor={conversionTokenName}>
             Conversion API access token (optional)
           </Label>
@@ -52,7 +50,7 @@ export default function TrackingPixelsCard({
             type="text"
             placeholder="Enter Conversion API access token"
             aria-label="Conversion API access token"
-            className="tracking-pixels-card__input"
+            className="w-full"
             {...register(conversionTokenName)}
           />
         </div>

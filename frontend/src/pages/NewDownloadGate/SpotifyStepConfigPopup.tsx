@@ -4,8 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import "./SpotifyStepConfigPopup.scss";
-
 export interface SpotifyStepConfig {
   follow_artist: boolean;
   save_track_or_album: boolean;
@@ -85,21 +83,21 @@ export default function SpotifyStepConfigPopup({
 
   return (
     <div
-      className="spotify-config-popup__backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       onClick={onCancel}
       role="dialog"
       aria-modal="true"
       aria-labelledby="spotify-config-title"
     >
       <div
-        className="spotify-config-popup__box"
+        className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-lg bg-white shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="spotify-config-popup__header">
-          <h2 id="spotify-config-title" className="spotify-config-popup__title">
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+          <h2 id="spotify-config-title" className="m-0 text-lg font-semibold text-black">
             Step 1: Spotify
           </h2>
-          <div className="spotify-config-popup__header-actions">
+          <div className="flex gap-2">
             {isEditing && onDelete && (
               <Button
                 type="button"
@@ -122,9 +120,9 @@ export default function SpotifyStepConfigPopup({
             </Button>
           </div>
         </div>
-        <div className="spotify-config-popup__body">
-          <div className="spotify-config-popup__field">
-            <div className="spotify-config-popup__checkbox-row">
+        <div className="px-5 py-5">
+          <div className="mb-4 last:mb-0">
+            <div className="flex items-center gap-2">
               <Checkbox
                 id="follow-artist"
                 checked={config.follow_artist}
@@ -132,13 +130,13 @@ export default function SpotifyStepConfigPopup({
                   setConfig((c) => ({ ...c, follow_artist: checked === true }))
                 }
               />
-              <Label htmlFor="follow-artist" className="spotify-config-popup__checkbox-label">
+              <Label htmlFor="follow-artist" className="m-0 cursor-pointer text-sm font-medium">
                 Follow artist profile (not playlist)
               </Label>
             </div>
           </div>
-          <div className="spotify-config-popup__field">
-            <div className="spotify-config-popup__checkbox-row">
+          <div className="mb-4 last:mb-0">
+            <div className="flex items-center gap-2">
               <Checkbox
                 id="save-track-album"
                 checked={config.save_track_or_album}
@@ -146,14 +144,14 @@ export default function SpotifyStepConfigPopup({
                   setConfig((c) => ({ ...c, save_track_or_album: checked === true }))
                 }
               />
-              <Label htmlFor="save-track-album" className="spotify-config-popup__checkbox-label">
+              <Label htmlFor="save-track-album" className="m-0 cursor-pointer text-sm font-medium">
                 Save track or album to fan&apos;s library
               </Label>
             </div>
           </div>
-          <div className="spotify-config-popup__field">
+          <div className="mb-4 last:mb-0">
             <Label htmlFor="artist-profile-url">
-              Artist profile URL {config.follow_artist && <span className="spotify-config-popup__required">*</span>}
+              Artist profile URL {config.follow_artist && <span className="text-red-600">*</span>}
             </Label>
             <Input
               id="artist-profile-url"
@@ -167,12 +165,12 @@ export default function SpotifyStepConfigPopup({
               aria-invalid={Boolean(errors.artist_profile_url)}
             />
             {errors.artist_profile_url && (
-              <p className="spotify-config-popup__error">{errors.artist_profile_url}</p>
+              <p className="mt-1 text-[0.8125rem] text-red-600">{errors.artist_profile_url}</p>
             )}
           </div>
-          <div className="spotify-config-popup__field">
+          <div className="mb-4 last:mb-0">
             <Label htmlFor="track-album-url">
-              Spotify track or album URL {config.save_track_or_album && <span className="spotify-config-popup__required">*</span>}
+              Spotify track or album URL {config.save_track_or_album && <span className="text-red-600">*</span>}
             </Label>
             <Input
               id="track-album-url"
@@ -186,11 +184,11 @@ export default function SpotifyStepConfigPopup({
               aria-invalid={Boolean(errors.track_or_album_url)}
             />
             {errors.track_or_album_url && (
-              <p className="spotify-config-popup__error">{errors.track_or_album_url}</p>
+              <p className="mt-1 text-[0.8125rem] text-red-600">{errors.track_or_album_url}</p>
             )}
           </div>
         </div>
-        <div className="spotify-config-popup__footer">
+        <div className="flex justify-end gap-2 border-t border-neutral-200 px-5 py-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>

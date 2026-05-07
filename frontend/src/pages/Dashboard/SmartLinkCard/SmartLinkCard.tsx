@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import './SmartLinkCard.scss';
+const actionIconClass =
+  "rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 [&_svg]:block [&_svg]:size-4";
 
 function ActionIcon({
   label,
@@ -17,7 +18,7 @@ function ActionIcon({
   to?: string;
 }) {
   const commonProps = {
-    className: 'smart-link-card__action-icon',
+    className: actionIconClass,
     'aria-label': label,
     title: label,
   };
@@ -73,20 +74,20 @@ export default function SmartLinkCard({ entry }: SmartLinkCardProps) {
   };
 
   return (
-    <div className="smart-link-card">
-      <div className="smart-link-card__media">
-        <div className="smart-link-card__thumb">
+    <div className="flex flex-col gap-4 border-b border-gray-200 bg-white p-4 sm:flex-row sm:items-start">
+      <div className="flex flex-col items-start gap-2 shrink-0">
+        <div className="size-20 overflow-hidden rounded-md bg-gray-200">
           {coverImageUrl ? (
-            <img src={coverImageUrl} alt="" className="smart-link-card__thumb-img" />
+            <img src={coverImageUrl} alt="" className="size-full object-cover" />
           ) : (
-            <div className="smart-link-card__thumb-placeholder">
-              <svg fill="currentColor" viewBox="0 0 24 24">
+            <div className="flex size-full items-center justify-center">
+              <svg className="size-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
               </svg>
             </div>
           )}
         </div>
-        <div className="smart-link-card__actions">
+        <div className="flex gap-px">
           <ActionIcon label="Open link" href={`/link/${url}`}>
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -105,10 +106,12 @@ export default function SmartLinkCard({ entry }: SmartLinkCardProps) {
         </div>
       </div>
 
-      <div className="smart-link-card__body">
-        <h3 className="smart-link-card__title">{title}</h3>
-        <p className="smart-link-card__subtitle">{subtitle}</p>
-        <div className="smart-link-card__metrics">
+      <div className="min-w-0 flex-1">
+        <h3 className="m-0 cursor-pointer text-base font-semibold text-gray-900 hover:text-green-600">
+          {title}
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 [&_strong]:font-semibold [&_strong]:text-gray-900">
           <span>Total Visits: <strong>{totalVisits}</strong></span>
           <span>Clicks: <strong>{clicks}</strong></span>
           <span>Emails captured: <strong>{emailsCaptured}</strong></span>
@@ -117,23 +120,23 @@ export default function SmartLinkCard({ entry }: SmartLinkCardProps) {
 
       {showDeleteConfirm && (
         <div
-          className="smart-link-card__confirm-backdrop"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
           onClick={() => setShowDeleteConfirm(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-link-confirm-title"
         >
           <div
-            className="smart-link-card__confirm-box"
+            className="w-full max-w-[400px] rounded-lg bg-white p-5 shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="delete-link-confirm-title" className="smart-link-card__confirm-title">
+            <h2 id="delete-link-confirm-title" className="m-0 mb-2 text-lg font-semibold text-gray-900">
               Delete smart link?
             </h2>
-            <p className="smart-link-card__confirm-message">
+            <p className="mb-5 text-sm leading-relaxed text-gray-500">
               &ldquo;{title}&rdquo; will be permanently deleted. This cannot be undone.
             </p>
-            <div className="smart-link-card__confirm-actions">
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"

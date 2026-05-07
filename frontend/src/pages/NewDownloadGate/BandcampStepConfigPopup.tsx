@@ -5,8 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Check, Plus, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import "./BandcampStepConfigPopup.scss";
-
 export interface BandcampStepConfig {
   follow_profile_enabled: boolean;
   profile_urls: string[];
@@ -112,22 +110,22 @@ export default function BandcampStepConfigPopup({
 
   return (
     <div
-      className="bandcamp-config-popup__backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       onClick={onCancel}
       role="dialog"
       aria-modal="true"
       aria-labelledby="bandcamp-config-title"
     >
       <div
-        className="bandcamp-config-popup__box"
+        className="max-h-[90vh] w-full max-w-[420px] overflow-y-auto rounded-lg bg-white shadow-[0_24px_48px_rgba(0,0,0,0.2)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bandcamp-config-popup__header">
-          <h2 id="bandcamp-config-title" className="bandcamp-config-popup__title">
-            <span className="bandcamp-config-popup__logo" aria-hidden>bc</span>
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+          <h2 id="bandcamp-config-title" className="m-0 flex items-center gap-2 text-lg font-semibold text-black">
+            <span className="inline-flex h-[22px] w-7 items-center justify-center rounded-sm bg-neutral-400 text-[0.75rem] font-bold text-white" aria-hidden>bc</span>
             Step {stepNumber}: Bandcamp
           </h2>
-          <div className="bandcamp-config-popup__header-actions">
+          <div className="flex gap-2">
             {isEditing && onDelete && (
               <Button
                 type="button"
@@ -135,7 +133,7 @@ export default function BandcampStepConfigPopup({
                 size="icon"
                 onClick={onDelete}
                 aria-label="Delete step"
-                className="bandcamp-config-popup__icon-btn"
+                className="text-gray-500"
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -146,15 +144,15 @@ export default function BandcampStepConfigPopup({
               size="icon"
               onClick={handleSave}
               aria-label="Save"
-              className="bandcamp-config-popup__icon-btn"
+              className="text-gray-500"
             >
               <Check className="size-4" />
             </Button>
           </div>
         </div>
-        <div className="bandcamp-config-popup__body">
-          <div className="bandcamp-config-popup__checkbox-row">
-            <div className="bandcamp-config-popup__checkbox-box">
+        <div className="px-5 py-5">
+          <div className="mb-5 flex flex-wrap gap-4">
+            <div className="flex min-w-[160px] flex-1 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="follow-profile"
                 checked={config.follow_profile_enabled}
@@ -167,17 +165,17 @@ export default function BandcampStepConfigPopup({
               />
               <Label
                 htmlFor="follow-profile"
-                className="bandcamp-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Follow profile
               </Label>
               <Info
-                className="bandcamp-config-popup__info-icon"
+                className="shrink-0 text-gray-400"
                 size={14}
                 aria-hidden
               />
             </div>
-            <div className="bandcamp-config-popup__checkbox-box">
+            <div className="flex min-w-[160px] flex-1 items-center gap-2 rounded-lg bg-gray-50 px-4 py-3">
               <Checkbox
                 id="skippable"
                 checked={isSkippable}
@@ -185,23 +183,23 @@ export default function BandcampStepConfigPopup({
               />
               <Label
                 htmlFor="skippable"
-                className="bandcamp-config-popup__checkbox-label"
+                className="m-0 cursor-pointer text-sm font-medium"
               >
                 Make step skippable for fans
               </Label>
             </div>
           </div>
 
-          <div className="bandcamp-config-popup__field">
-            <div className="bandcamp-config-popup__label-row">
+          <div className="mb-0">
+            <div className="mb-2 flex items-center gap-1.5">
               <Label
                 htmlFor="bandcamp-url-input"
-                className="bandcamp-config-popup__section-label"
+                className="text-sm font-medium"
               >
                 Add Bandcamp Artist Profile URLs
               </Label>
               <Info
-                className="bandcamp-config-popup__info-icon"
+                className="shrink-0 text-gray-400"
                 size={14}
                 aria-hidden
               />
@@ -226,16 +224,16 @@ export default function BandcampStepConfigPopup({
               variant="outline"
               size="icon"
               onClick={handleAddUrl}
-              className="bandcamp-config-popup__add-btn"
+              className="mt-2 shrink-0"
               aria-label="Add URL"
             >
               <Plus className="size-4" />
             </Button>
             {config.profile_urls.length > 0 && (
-              <ul className="bandcamp-config-popup__url-list">
+              <ul className="mt-3 list-none p-0">
                 {config.profile_urls.map((url, i) => (
-                  <li key={i} className="bandcamp-config-popup__url-item">
-                    <span className="bandcamp-config-popup__url-text">{url}</span>
+                  <li key={i} className="flex items-center justify-between gap-2 border-b border-neutral-200 py-2 last:border-b-0">
+                    <span className="truncate text-[0.8125rem] text-gray-700">{url}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -250,11 +248,11 @@ export default function BandcampStepConfigPopup({
               </ul>
             )}
             {errors.profile_urls && (
-              <p className="bandcamp-config-popup__error">{errors.profile_urls}</p>
+              <p className="mt-1 text-[0.8125rem] text-red-600">{errors.profile_urls}</p>
             )}
           </div>
         </div>
-        <div className="bandcamp-config-popup__footer">
+        <div className="flex justify-end gap-2 border-t border-neutral-200 px-5 py-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
