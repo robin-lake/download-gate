@@ -30,7 +30,9 @@ On every `cdk deploy`, a Custom Resource runs and verifies that all DynamoDB tab
 
 `DynamoDB tables were deleted outside CloudFormation: Users, DownloadGates, ... Run "cdk destroy" for this stack, then "cdk deploy" to recreate tables.`
 
-**To fix:** Run `cdk destroy DownloadGateBackendStack` (or your backend stack name), then `cdk deploy` again. That removes the stack state and recreates all resources, including the tables. Do not delete prod tables manually; manage them only via CDK.
+**To fix in production:** restore the missing table from backup/PITR, or import the retained resource back into CloudFormation before deploying again. Do not run `cdk destroy` for production data.
+
+**To fix in disposable environments only:** run `cdk destroy DownloadGateStagingBackendStack` (or your staging stack name), then `cdk deploy` again. That removes the stack state and recreates all resources, including the tables.
 
 ## Where to add code
 

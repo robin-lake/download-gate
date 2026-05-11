@@ -28,7 +28,7 @@ interface CfnContext {
 const dynamo = new DynamoDBClient({});
 
 interface ResourceProperties {
-  TableNames: string[];
+  TableNames?: string[];
 }
 
 async function sendResponse(
@@ -94,7 +94,8 @@ export async function handler(event: CfnEvent, context: CfnContext): Promise<voi
     if (missing.length > 0) {
       const message =
         `DynamoDB tables were deleted outside CloudFormation: ${missing.join(', ')}. ` +
-        'Run "cdk destroy" for this stack, then "cdk deploy" to recreate tables.';
+        'For production, restore the missing tables or import retained resources before deploying. ' +
+        'Only run "cdk destroy" for disposable environments.';
       console.error(message);
       await sendResponse(event, 'FAILED', message);
       return;

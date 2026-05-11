@@ -92,6 +92,7 @@ export class BackendStack extends cdk.Stack {
       (o, i, a) => a.indexOf(o) === i
     );
     const apiDomain = `${apiSubDomain}.${domainName}`;
+    const isProduction = stage === 'production';
 
     const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName });
 
@@ -133,7 +134,8 @@ export class BackendStack extends cdk.Stack {
           ? { name: def.sortKey.name, type: dynamodb.AttributeType.STRING }
           : undefined,
         billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        deletionProtection: isProduction,
+        removalPolicy: isProduction ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
       });
       def.gsis?.forEach((gsi) => {
         table.addGlobalSecondaryIndex({
@@ -157,8 +159,8 @@ export class BackendStack extends cdk.Stack {
     // Media bucket for cover art and audio (download gates). Omit in local dev; Lambda checks MEDIA_BUCKET.
     const mediaBucket = new s3.Bucket(this, 'MediaBucket', {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy: isProduction ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: !isProduction,
       cors: [
         {
           allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.HEAD],
